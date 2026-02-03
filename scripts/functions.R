@@ -1,6 +1,99 @@
 #### Reproduction number ####
 
 
+SCISsrV.reprod_nbrs <- function(param){
+  with(as.list(c(param)), {
+    
+    #vftcr = vftcs
+    #vfir = vfis
+    #vfdr = vfds
+    #vfrr = vfrs
+    
+    lambdaA = prob_bystander_exposure * 1/time_until_decolo_by_bystander_ATB*(1-prob_minority_strain_when_colonised)
+    phiA = prob_bystander_exposure * 1/time_until_decolo_by_bystander_ATB*prob_minority_strain_when_colonised
+    
+    lambdaA_I = prob_bystander_exposure * 1/time_until_decolo_by_bystander_ATB*(1-prob_minority_strain_when_infected)
+    phiA_I = prob_bystander_exposure * 1/time_until_decolo_by_bystander_ATB*prob_minority_strain_when_infected
+    
+    if(!("gammaA_s" %in% names(param))){
+      gammaA_s = prob_specific_exposure * 1/time_until_decolo_by_specific_ATB*(1-prob_minority_strain_when_infected)
+    }
+    if(!("psiA" %in% names(param))){
+      psiA = prob_specific_exposure * 1/time_until_decolo_by_specific_ATB*prob_minority_strain_when_infected
+    }
+    if(!("gammaA_r" %in% names(param))){
+      gammaA_r = prob_specific_exposure_r * 1/time_until_decolo_by_specific_ATB_r
+    }
+    
+    etas = (1-prob_specific_exposure) * 1/time_until_recovery_without_ATB_s
+    etar = (1-prob_specific_exposure_r) * 1/time_until_recovery_without_ATB_r
+    
+    Hcsnv = 1/dps+lambdaA+phiA+as
+    Hcsv = 1/dps*(1+vfds)+lambdaA+phiA+as*(1-vfis)
+    Hisnv = etas+lambdaA_I+gammaA_s+psiA+phiA_I
+    Hisv = etas*(1+vfrs)+lambdaA_I+gammaA_s+psiA+phiA_I
+    Hcrnv = 1/dpr+ar
+    Hcrv = 1/dpr*(1+vfdr)+ar*(1-vfir)
+    Hirnv = etar+gammaA_r
+    Hirv = etar*(1+vfrr)+gammaA_r
+    
+    #Nnv = Snv0+Csnv0+Crnv0+Isnv0 + Irnv0
+    #Nv = Sv0+Csv0+Crv0 + Isv0 + Irv0
+    Pnv = Nnv/(Nnv+Nv)
+    Pv = Nv/(Nnv+Nv)
+    
+    detsnv = Hcsnv*Hisnv-as*(etas+lambdaA_I*(1-eps))
+    detsv = Hcsv*Hisv-as*(1-vfis)*(etas+lambdaA_I*(1-eps))
+    detrnv = Hcrnv*Hirnv-ar*etar
+    detrv = Hcrv*Hirv-ar*(1-vfir)*etar
+    
+    X_1 = matrix(c(Hisnv/detsnv, 0 , (etas+lambdaA_I*(1-eps))/detsnv, 0,
+                   0, Hisv/detsv, 0, (etas+lambdaA_I*(1-eps))/detsv,
+                   as/detsnv, 0, Hcsnv/detsnv, 0,
+                   0, as*(1-vfis)/detsv,0,Hcsv/detsv), nrow=4, byrow = TRUE)
+    
+    Y_1 = matrix(c(Hirnv/detrnv, 0 , etar/detrnv, 0,
+                   0, Hirv/detrv, 0, etar/detrv,
+                   ar/detrnv, 0, Hcrnv/detrnv, 0,
+                   0, ar*(1-vfir)/detrv,0,Hcrv/detrv), nrow=4, byrow = TRUE)
+    
+    Z = diag(x=c(phiA,phiA,psiA+phiA_I,psiA+phiA_I),nrow = 4,ncol=4)
+    
+    Y_1ZX_1 = Y_1 %*% Z %*% X_1
+    
+    Vm <- rbind(cbind(X_1,matrix(0,nrow=4,ncol=4)), cbind(Y_1ZX_1, Y_1))
+    Fm <- matrix(c(betaC*Pnv, betaC*Pnv, betaI*Pnv, betaI*Pnv, 0, 0, 0, 0,
+                   betaC*(1-vftcs)*Pv,betaC*(1-vftcs)*Pv,betaI*(1-vftis)*Pv, betaI*(1-vftis)*Pv, 0,0,0,0,
+                   0,0,0,0,0,0,0,0,
+                   0,0,0,0,0,0,0,0,
+                   0,0,0,0,betaC*f*Pnv, betaC*f*Pnv, betaI*f*Pnv, betaI*f*Pnv,
+                   0,0,0,0,betaC*f*(1-vftcr)*Pv,betaC*f*(1-vftcr)*Pv,betaI*f*(1-vftir)*Pv, betaI*f*(1-vftir)*Pv,
+                   0,0,0,0,0,0,0,0,
+                   0,0,0,0,0,0,0,0), nrow = 8, byrow = TRUE)
+    
+    G = Fm %*% Vm
+    
+    rownames(G) <- c("de type Csnv","de type Csv","de type Isnv","de type Isv",
+                     "de type Crnv","de type Crv","de type Irnv","de type Irv")
+    
+    colnames(G) <- c("par un individu de type Csnv","par un individu de type Csv","par un individu de type Isnv","par un individu de type Isv",
+                     "par un individu de type Crnv","par un individu de type Crv","par un individu de type Irnv","par un individu de type Irv")
+    
+    df <- as.data.frame(G, check.names = FALSE)
+    
+    df <- cbind("Infections secondaires" = rownames(df),df)
+    rownames(df) <- NULL
+    
+    vaps = 1/2*(G[1,1]+ G[2,2]+sqrt(G[1,1]^2+G[2,2]^2-2*G[1,1]*G[2,2]+4*G[2,1]*G[1,2]))
+    vapr = 1/2*(G[5,5]+ G[6,6]+sqrt(G[5,5]^2+G[6,6]^2-2*G[5,5]*G[6,6]+4*G[6,5]*G[5,6]))
+    
+    R0 <- max(vaps,vapr)
+    return(tibble("R0s"= vaps, "R0r" = vapr))
+    #return(list(df,R0))
+  })
+  
+}
+
 #### Compute antibiotic associated flux ####
 
 compute_antibiotic_associated_flux <- function(data, with_specific_flux=T){
@@ -254,5 +347,29 @@ apply_function_on_df <- function(df, fun, col_name) {
       params <- list(...)
       fun(params)
     }))
+}
+
+
+add_variability <- function(ref_values, params_to_change, n = 10, variation = 0.05) {
+  # Create a matrix of random factors for the parameters to change
+  random_factors <- matrix(runif(length(params_to_change) * n, 
+                                 1 - variation, 1 + variation),
+                           nrow = n, ncol = length(params_to_change))
+  
+  # Repeat the reference values n times and apply the random factors
+  random_rows <- ref_values[rep(1, n), ]  # repeat the reference row n times
+  random_rows[params_to_change] <- random_rows[params_to_change] * random_factors
+  
+  # Add bacteria IDs
+  random_rows <- random_rows %>% mutate(bacteria_id = 1:n)
+  
+  # Add reference row with bacteria_id = 0 and put ID first
+  df <- bind_rows(
+    ref_values %>% mutate(bacteria_id = 0),
+    random_rows
+  ) %>% select(bacteria_id, everything()) %>%
+    as_tibble()  # remove any weird row.names causing 1.1, 1.2 etc.
+  
+  return(df)
 }
 

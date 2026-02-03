@@ -8,207 +8,60 @@ library(ggh4x)
 source(here::here("scripts", "model.R"))
 source(here::here("scripts", "functions.R"))
 
-source(here::here("one_and_mult_sim_app","R","reprod_nbrs.R"))
-
-
-#### Utils ####
-
-# Function to run model one year without vaccine
-
-simulate_1y_without_vaccine <- function(params) {
-  
-  out <- ode(
-    y = c(Snv = params$eq_S,Csnv = params$eq_Cs,Crnv = params$eq_Cr,
-          Sv = 0,Csv = 0, Crv =0, 
-          Isnv = params$eq_Is ,Irnv = params$eq_Ir , Isv = 0, Irv =0,
-          inccumCsnv=0, inccumCrnv=0, inccumCsv=0, inccumCrv=0,
-          inccumIsnv=0, inccumIrnv=0, inccumIsv=0, inccumIrv=0,
-          
-          inccumSensitiveNaturalRecoveryForNonVaccinated=0,inccumResistantNaturalRecoveryForNonVaccinated=0,
-          inccumSensitiveNaturalRecoveryForVaccinated=0,inccumResistantNaturalRecoveryForVaccinated=0,
-          
-          inccumSensitiveSpecificAntibioRecoveryForNonVaccinated=0,inccumSensitiveSpecificAntibioRecoveryForVaccinated=0,
-          inccumSensitiveBystanderAntibioRecoveryForNonVaccinated=0,inccumSensitiveBystanderAntibioRecoveryForVaccinated=0,
-          
-          inccumSelectionOfResistantBySpecificAntibioForNonVaccinated=0,inccumSelectionOfResistantBySpecificAntibioForVaccinated=0,
-          inccumSelectionOfResistantByBystanderAntibioForNonVaccinated=0,inccumSelectionOfResistantByBystanderAntibioForVaccinated=0,
-          
-          inccumResistantSpecificAntibioRecoveryForNonVaccinated=0,inccumResistantSpecificAntibioRecoveryForVaccinated=0,
-          
-          inccumSuperInfectionByResistantForNonVaccinated=0,inccumSuperInfectionBySensitiveForNonVaccinated=0,
-          inccumSuperInfectionByResistantForVaccinated=0,inccumSuperInfectionBySensitiveForVaccinated=0),
-    times = seq(from=0,to=370,by=10),
-    func = SCISsrV.model,
-    parms = c(params, list(vftcs = 0, vftis = 0, vfds = 0, vfis = 0, vfrs = 0, vftcr = 0, vftir = 0, vfdr = 0, vfir = 0, vfrr = 0))  
-  ) %>% as.data.frame()
-  
-  out %>%
-    slice_tail(n=1) %>% 
-    select(Snv, Csnv, Crnv, Isnv, Irnv,
-           inccumIsnv, inccumIrnv, inccumIsv, inccumIrv,
-           inccumSelectionOfResistantBySpecificAntibioForNonVaccinated,
-           inccumSelectionOfResistantByBystanderAntibioForNonVaccinated)
-}
-
-# Function to run model one year with vaccine
-
-simulate_1y_with_vaccine <- function(params) {
-  
-  out <- ode(
-    y = c(Snv = params$eq_S * (1-params$Vperc),Csnv = params$eq_Cs * (1-params$Vperc),Crnv = params$eq_Cr * (1-params$Vperc),
-          Sv = params$eq_S * (params$Vperc),Csv = params$eq_Cs * (params$Vperc), Crv =params$eq_Cr * (params$Vperc), 
-          Isnv = params$eq_Is * (1-params$Vperc),Irnv = params$eq_Ir * (1-params$Vperc), Isv = params$eq_Is * (params$Vperc), Irv =params$eq_Ir * (params$Vperc),
-          inccumCsnv=0, inccumCrnv=0, inccumCsv=0, inccumCrv=0,
-          inccumIsnv=0, inccumIrnv=0, inccumIsv=0, inccumIrv=0,
-          
-          inccumSensitiveNaturalRecoveryForNonVaccinated=0,inccumResistantNaturalRecoveryForNonVaccinated=0,
-          inccumSensitiveNaturalRecoveryForVaccinated=0,inccumResistantNaturalRecoveryForVaccinated=0,
-          
-          inccumSensitiveSpecificAntibioRecoveryForNonVaccinated=0,inccumSensitiveSpecificAntibioRecoveryForVaccinated=0,
-          inccumSensitiveBystanderAntibioRecoveryForNonVaccinated=0,inccumSensitiveBystanderAntibioRecoveryForVaccinated=0,
-          
-          inccumSelectionOfResistantBySpecificAntibioForNonVaccinated=0,inccumSelectionOfResistantBySpecificAntibioForVaccinated=0,
-          inccumSelectionOfResistantByBystanderAntibioForNonVaccinated=0,inccumSelectionOfResistantByBystanderAntibioForVaccinated=0,
-          
-          inccumResistantSpecificAntibioRecoveryForNonVaccinated=0,inccumResistantSpecificAntibioRecoveryForVaccinated=0,
-          
-          inccumSuperInfectionByResistantForNonVaccinated=0,inccumSuperInfectionBySensitiveForNonVaccinated=0,
-          inccumSuperInfectionByResistantForVaccinated=0,inccumSuperInfectionBySensitiveForVaccinated=0),
-    times = seq(from=0,to=370,by=10),
-    func = SCISsrV.model,
-    parms = c(params, list(vftis = params$vftcs, vftir = params$vftcr))  
-  ) %>% as.data.frame()
-  
-  out %>%
-    slice_tail(n=1) %>% 
-    select(Snv, Csnv, Crnv, Isnv, Irnv, Sv, Csv, Crv, Isv, Irv,
-           inccumIsnv, inccumIrnv, inccumIsv, inccumIrv,
-           inccumSelectionOfResistantBySpecificAntibioForNonVaccinated,
-           inccumSelectionOfResistantByBystanderAntibioForNonVaccinated,
-           inccumSelectionOfResistantBySpecificAntibioForVaccinated,
-           inccumSelectionOfResistantByBystanderAntibioForVaccinated)
-}
-
 #### Define bacteria ####
 # S_aureus_params
 file_name  = "S_aureus_params10.csv"
-S_aureus_params = read.csv(here::here("case_studies","data",file_name))
-Bacteria_params = S_aureus_params #%>%
-  #mutate(prob_minority_strain_when_colonised = 0.02,
-  #       prob_minority_strain_when_infected = 0.02)
-  #mutate(time_until_decolo_by_bystander_ATB = 10) %>%
-  #mutate(prob_minority_strain_when_infected=0)
-  #       f = 0.95)
+Bacteria_params = read.csv(here::here("files",file_name)) 
 
 # E_coli_params
 file_name = "E_coli_params_primavera1.csv"
-E_coli_params = read.csv(here::here("case_studies","data",file_name))
-Bacteria_params = E_coli_params #%>%
-  #mutate(time_until_decolo_by_bystander_ATB = 10) #%>%
-  #mutate(prob_minority_strain_when_infected=0,
-         #dps = 120, dpr = 120,
-         #betaC = 0.15
-  #       )
+Bacteria_params = read.csv(here::here("case_studies","data",file_name))
 
 # Nombre de jeux de paramètres à générer
 n <- 50
 
-# Fonction pour générer un jeu de paramètres avec un seed donné
-generate_random_params <- function(seed, ref_values,prc) {
-  set.seed(seed)
-  factors <- runif(length(ref_values), min = 1-prc, max = 1+prc)
-  as.numeric(ref_values) * factors
-}
+set.seed(123)  # global seed for reproducibility
 
-# Générer les seeds à l'avance
-set.seed(123)  # seed global pour reproductibilité
-seeds <- sample.int(1e6, n)
+cols_to_noise <- c(	
+  "betaC",
+  "as",
+  "time_until_recovery_without_ATB_s",
+  "dps",
+  "prob_bystander_exposure",
+  "time_until_decolo_by_bystander_ATB",
+  "prob_minority_strain_when_colonised",
+  "prob_specific_exposure",
+  "time_until_decolo_by_specific_ATB",
+  "prob_minority_strain_when_infected",
+  "prob_specific_exposure_r",
+  "time_until_decolo_by_specific_ATB_r"
+)
 
-# df_bacteria <- Bacteria_params %>%
-#   slice(rep(1, n)) %>%
-#   mutate(
-#     f = Bacteria_params$f * (1 + runif(n, -0.05, 0.05))
-#   )%>%
-#   bind_rows(Bacteria_params)
+df_bacteria <- add_variability(Bacteria_params, cols_to_noise, n ,0.05) 
 
-# Créer un data frame des jeux de paramètres
-df_bacteria <- tibble(seed = seeds) %>%
-  mutate(params = map(seed, ~ generate_random_params(.x, Bacteria_params,5/100))) %>%
-  mutate(params = map(params, ~ set_names(.x, names(Bacteria_params)))) %>%
-  unnest_wider(params) %>%
-  bind_rows(Bacteria_params) %>%  # Ajouter les valeurs de référence
+df_bacteria <- set_resistant_and_sensitive_param_equal(df_bacteria, c("dpr", "ar", "time_until_recovery_without_ATB_r"))
+
+df_bacteria <- df_bacteria %>%
+  mutate(betaI = 0) #%>%
+  #mutate(betaI = betaC)
   
-  # Fixer la relative fitness
-  mutate(f = Bacteria_params$f) %>%
-  
-  # Fixer la transmission par les infectés
-  mutate(betaI = 0) %>%
-  #mutate(betaI = betaC) %>%
-  
-  mutate(prob_bystander_exposure = Bacteria_params$prob_bystander_exposure) %>%
-  mutate(thetars = 0,
-         thetasr = 0,
-         dpr = dps,
-         ar = as,
-         eps = 1)
-
-# Vérification des contraintes
 df_bacteria <- df_bacteria %>%
   mutate(prob_specific_exposure_r = pmin(1,prob_specific_exposure_r),
          prob_specific_exposure = pmin(1,prob_specific_exposure),
          prob_minority_strain_when_colonised = pmin(1,prob_minority_strain_when_colonised),
          prob_minority_strain_when_infected = pmin(1,prob_minority_strain_when_infected),
-         prob_bystander_exposure = pmin(1,prob_bystander_exposure),
-  )%>%
-  mutate(lambdaA = prob_bystander_exposure * 1/time_until_decolo_by_bystander_ATB*(1-prob_minority_strain_when_colonised),
-         phiA = prob_bystander_exposure * 1/time_until_decolo_by_bystander_ATB*prob_minority_strain_when_colonised,
-         
-         lambdaA_I = (1-prob_specific_exposure) * prob_bystander_exposure * 1/time_until_decolo_by_bystander_ATB*(1-prob_minority_strain_when_infected),
-         phiA_I = (1-prob_specific_exposure) * prob_bystander_exposure * 1/time_until_decolo_by_bystander_ATB*prob_minority_strain_when_infected,
-         
-         gammaA_s = prob_specific_exposure * 1/time_until_decolo_by_specific_ATB*(1-prob_minority_strain_when_infected),
-         psiA = prob_specific_exposure * 1/time_until_decolo_by_specific_ATB*prob_minority_strain_when_infected,
-         
-         gammaA_r = prob_specific_exposure_r * 1/time_until_decolo_by_specific_ATB_r,
-         etas = (1-prob_specific_exposure) * 1/time_until_recovery_without_ATB_s,
-         etar = (1-prob_specific_exposure_r) * 1/time_until_recovery_without_ATB_r) %>%
-  mutate(coexistence_condition = f <= (1/dpr + ar - etar * ar / (etar + gammaA_r)) /(1/dps + lambdaA + as - etas * as / (etas + lambdaA_I + gammaA_s + psiA + phiA_I)+phiA)*(betaC + betaI*as/(etas + lambdaA_I + gammaA_s + psiA + phiA_I))/(betaC + betaI*ar/(etar + gammaA_r))) %>%
-  mutate(non_disparition_condition = betaC + betaI*as/(etas + lambdaA_I + gammaA_s + psiA + phiA_I) >= 1/dps + lambdaA + as - etas * as / (etas + lambdaA_I + gammaA_s + psiA + phiA_I)+phiA) %>%
-  filter(coexistence_condition & non_disparition_condition)
+         prob_bystander_exposure = pmin(1,prob_bystander_exposure)
+  )
+
+df_bacteria <- filter_coexistence_condition(df_bacteria)
 
 
 
 #### Run analysis equilibrium ####
 
 # Compute equilibrium with analytical expressions 
-eq_results <- df_bacteria %>%
-  mutate(
-    N = 100000,
-    His = etas + lambdaA_I +  gammaA_s+ psiA + phiA_I,
-    eq_S = N/(betaC + betaI*as/His)*(1/dps + lambdaA + as - etas*as/His + phiA),
-    E1 = f*eq_S/N*(betaC + betaI*ar/(etar+gammaA_r))-1/dpr - ar + etar*ar/(etar+gammaA_r),
-    E2 = (betaI*f*eq_S/N +etar)*(psiA + phiA_I)/(etar+gammaA_r)*as/His +phiA,
-    E = E1/E2,
-    G = 1+ ar/(etar+gammaA_r)-E*(1+as/His*(1+(psiA + phiA_I)/(etar+gammaA_r))),
-    eq_Cr = (N-eq_S)/G,
-    eq_Cs = -E*eq_Cr,
-    eq_Is = as/His*eq_Cs,
-    eq_Ir = ar/(etar+gammaA_r)*eq_Cr + (psiA + phiA_I)/(etar+gammaA_r)*eq_Is
-  )%>%
-  select(-N, -His, -E, -E1, -E2, -G) 
+eq_results <- compute_equilibrium(df_bacteria)
 
-
-# Categorise equilibrium outcomes
-eq_results <- eq_results %>%
-  mutate(equilibrium_outcome = case_when(
-    eq_Cr > 1 & eq_Cs > 1 ~ "Coexistence",
-    eq_Cr < 1 & eq_Cs < 1 ~ "Disparition",
-    eq_Cr < 1 ~ "Sensitive only",
-    eq_Cs < 1 ~ "Resistant only",
-    TRUE ~ "Other"))
-
-eq_results %>%
-  count(equilibrium_outcome)
 
 #### Description des equilibres min max ####
 View(eq_results %>%
