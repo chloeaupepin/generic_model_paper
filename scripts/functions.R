@@ -373,3 +373,11 @@ add_variability <- function(ref_values, params_to_change, n = 10, variation = 0.
   return(df)
 }
 
+add_vaccine_parameters <- function(df_to_which_add,df_to_add){
+  df <- df_to_which_add %>%
+    slice(rep(1:n(), each = nrow(df_to_add))) %>%
+    mutate(vaccine_id = rep(1:nrow(df_to_add), times = nrow(df_to_which_add))) %>%
+    left_join(vaccine_scenarios_complete_df, by = "vaccine_id")
+  return(df)
+}
+
