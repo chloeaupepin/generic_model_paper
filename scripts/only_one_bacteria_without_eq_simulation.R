@@ -6,6 +6,7 @@ library(ggplot2)
 library(ggh4x)
 library(furrr)
 library(tidyr)
+library(stringr)
 
 n_cores = parallel::detectCores() - 1
 plan(multisession, workers = n_cores)
@@ -201,115 +202,33 @@ results <- df_for_vaccine_simulations %>%
   unnest_wider(res_1y_wv, names_sep = "_")
 
 
-#### MAnipule les résultats ####
+#### Results manipulation ####
 # Compute resistance change
-results <- results %>%
-  mutate(res_1y_wov_inccumIrnv_tot = res_1y_wov_inccumIrnv + res_1y_wov_inccumSelectionOfResistantBySpecificAntibioForNonVaccinated + res_1y_wov_inccumSelectionOfResistantByBystanderAntibioForNonVaccinated,
-         res_1y_wv_inccumIrnv_tot = res_1y_wv_inccumIrnv + res_1y_wv_inccumSelectionOfResistantBySpecificAntibioForNonVaccinated + res_1y_wv_inccumSelectionOfResistantByBystanderAntibioForNonVaccinated,
-         res_1y_wv_inccumIrv_tot = res_1y_wv_inccumIrv + res_1y_wv_inccumSelectionOfResistantBySpecificAntibioForVaccinated + res_1y_wv_inccumSelectionOfResistantByBystanderAntibioForVaccinated) %>%
-  mutate(resistance_change_prc = -(res_1y_wov_inccumIrnv_tot-(res_1y_wv_inccumIrnv_tot + res_1y_wv_inccumIrv_tot))/(res_1y_wov_inccumIrnv_tot)*100)%>%
-  mutate(resistance_change_prc_non_vaccinated = -(res_1y_wov_inccumIrnv_tot*(1-Vperc)-res_1y_wv_inccumIrnv_tot)/(res_1y_wov_inccumIrnv_tot*(1-Vperc))*100)%>%
-  mutate(resistance_change_prc_vaccinated = -(res_1y_wov_inccumIrnv_tot*Vperc-res_1y_wv_inccumIrv_tot)/(res_1y_wov_inccumIrnv_tot*Vperc)*100) %>%
-  mutate(infections_change_prc = -(res_1y_wov_inccumIrnv_tot+res_1y_wov_inccumIsnv-(res_1y_wv_inccumIrnv_tot + res_1y_wv_inccumIrv_tot + res_1y_wv_inccumIsnv + res_1y_wv_inccumIsv))/(res_1y_wov_inccumIrnv_tot+res_1y_wov_inccumIsnv)*100)%>%
-  mutate(infections_change_prc_non_vaccinated = -((res_1y_wov_inccumIrnv_tot+res_1y_wov_inccumIsnv)*(1-Vperc)-res_1y_wv_inccumIrnv_tot - res_1y_wv_inccumIsnv)/((res_1y_wov_inccumIrnv_tot+res_1y_wov_inccumIsnv)*(1-Vperc))*100)%>%
-  mutate(infections_change_prc_vaccinated = -((res_1y_wov_inccumIrnv_tot+res_1y_wov_inccumIsnv)*Vperc-res_1y_wv_inccumIrv_tot-res_1y_wv_inccumIsv)/((res_1y_wov_inccumIrnv_tot+res_1y_wov_inccumIsnv)*Vperc)*100)
+results_with_outputs <- compute_outputs(results)
 
-results<- results %>%
-  mutate(ratio_rs_total_wov = (res_1y_wov_Crnv+res_1y_wov_Irnv)/(res_1y_wov_Crnv + res_1y_wov_Irnv + res_1y_wov_Csnv + res_1y_wov_Isnv),
-         ratio_rs_total_wv = (res_1y_wv_Crnv+res_1y_wv_Irnv + res_1y_wv_Crv+res_1y_wv_Irv)/(res_1y_wv_Crnv + res_1y_wv_Irnv + res_1y_wv_Csnv + res_1y_wv_Isnv + res_1y_wv_Crv + res_1y_wv_Irv + res_1y_wv_Csv + res_1y_wv_Isv),
-         ratio_rs_nv_wv = (res_1y_wv_Crnv+res_1y_wv_Irnv)/(res_1y_wv_Crnv + res_1y_wv_Irnv + res_1y_wv_Csnv + res_1y_wv_Isnv),
-         ratio_rs_v_wv = (res_1y_wv_Crv+res_1y_wv_Irv)/(res_1y_wv_Crv + res_1y_wv_Irv + res_1y_wv_Csv + res_1y_wv_Isv)) %>%
-  mutate(ratio_total_prc = 100*(ratio_rs_total_wv - ratio_rs_total_wov)/ratio_rs_total_wov,
-         ratio_nv_prc = 100*(ratio_rs_nv_wv - ratio_rs_total_wov)/ratio_rs_total_wov,
-         ratio_v_prc = 100*(ratio_rs_v_wv - ratio_rs_total_wov)/ratio_rs_total_wov)
+results_with_outputs <- clean_vaccine_related_parameters(results_with_outputs)
 
+# save results_with_outputs
+save(results_with_outputs, file = here::here("files",folder_name,"results_with_outputs.RData"))
 
-results <- results %>%
-  mutate(prev_resistance_change_prc = -(res_1y_wov_Crnv-(res_1y_wv_Crnv + res_1y_wv_Crv))/(res_1y_wov_Crnv)*100)%>%
-  mutate(prev_resistance_change_prc_non_vaccinated = -(res_1y_wov_Crnv*(1-Vperc)-res_1y_wv_Crnv)/(res_1y_wov_Crnv*(1-Vperc))*100)%>%
-  mutate(prev_resistance_change_prc_vaccinated = -(res_1y_wov_Crnv*Vperc-res_1y_wv_Crv)/(res_1y_wov_Crnv*Vperc)*100) %>%
-  mutate(prev_total_change_prc = -(res_1y_wov_Crnv+res_1y_wov_Csnv-(res_1y_wv_Crnv + res_1y_wv_Crv + res_1y_wv_Csnv + res_1y_wv_Csv))/(res_1y_wov_Crnv+res_1y_wov_Csnv)*100)%>%
-  mutate(prev_total_change_prc_non_vaccinated = -((res_1y_wov_Crnv+res_1y_wov_Csnv)*(1-Vperc)-res_1y_wv_Crnv - res_1y_wv_Csnv)/((res_1y_wov_Crnv+res_1y_wov_Csnv)*(1-Vperc))*100)%>%
-  mutate(prev_total_change_prc_vaccinated = -((res_1y_wov_Crnv+res_1y_wov_Csnv)*Vperc-res_1y_wv_Crv-res_1y_wv_Csv)/((res_1y_wov_Crnv+res_1y_wov_Csnv)*Vperc)*100)
+# load results_with_outputs
+#load(here::here("files",folder_name,"results_with_outputs.RData"))
 
-
-# Filter results
-results_filtered <- results %>%
-  #filter(R0s>1, R0r>1)%>%
-  filter(equilibrium_outcome == "Coexistence") %>%
-  mutate(varying_param = case_when(
-    vftcs != 0 ~ vftcs,
-    vfds != 0 ~ vfds,
-    vfis != 0 ~ vfis,
-    TRUE ~ 0
-  )) %>% 
-  filter(varying_param != 0) %>%
-  mutate(name = factor(name, levels = c("vftc","vfi","vftc_vfd","vftc_vfi","vfd_vfi","vftc_vfd_vfi")))
-
-results_filtered <- results_filtered %>%
-  #mutate(R0 = pmax(R0s,R0r)) %>%
-  mutate(Vperc_prc = Vperc*100) %>%
-  mutate(Vperc_prc = factor(Vperc_prc, levels = c(10,30,50,70,90)))
-
-# Rename vaccine names
-results_filtered <- results_filtered %>%
-  mutate(name_renamed= case_when(
-    name == "vftc" ~ "va",
-    name == "vfi" ~ "vi",
-    name == "vftc_vfd" ~ "va_vd",
-    name == "vftc_vfi" ~ "va_vi",
-    name == "vfd_vfi" ~ "vd_vi",
-    name == "vftc_vfd_vfi" ~ "va_vd_vi"
-  )) %>%
-  mutate(name_renamed = factor(name_renamed, levels = c("va","vi","va_vd","va_vi","vd_vi","va_vd_vi")))
-
-# save results_to_plot
-save(results_filtered, file = here::here("exploration",file_name,"only_one_bacteria_results_SAureus10.RData"))
-save(results_filtered, file = here::here("exploration",file_name,"only_one_bacteria_results_EColi.RData"))
-
-# load results_to_plot
-#load(here::here("exploration",file_name,"only_one_bacteria_results_SAureus10.RData"))
-#load(here::here("exploration",file_name,"only_one_bacteria_results_EColi.RData"))
-
-
-#### Plot relative change results ####
-results_to_plot <- results_filtered %>%
-  pivot_longer(cols = c("resistance_change_prc", "resistance_change_prc_non_vaccinated","resistance_change_prc_vaccinated",
-                        "infections_change_prc", "infections_change_prc_non_vaccinated","infections_change_prc_vaccinated",
-                        "ratio_total_prc","ratio_nv_prc","ratio_v_prc",
-                        "prev_resistance_change_prc", "prev_resistance_change_prc_non_vaccinated","prev_resistance_change_prc_vaccinated",
-                        "prev_total_change_prc", "prev_total_change_prc_non_vaccinated","prev_total_change_prc_vaccinated"), 
-               names_to = "metric",
-               values_to = "metric_value")%>%
-  mutate(metric_name = case_when(
-    metric %in% c("resistance_change_prc", "resistance_change_prc_non_vaccinated","resistance_change_prc_vaccinated") ~ "Relative change of\nresistant infections",
-    metric %in% c("infections_change_prc", "infections_change_prc_non_vaccinated","infections_change_prc_vaccinated") ~ "Relative change of\ntotal infections",
-    metric %in% c("prev_resistance_change_prc", "prev_resistance_change_prc_non_vaccinated","prev_resistance_change_prc_vaccinated") ~ "Relative change of\nresistant colonisation",
-    metric %in% c("prev_total_change_prc", "prev_total_change_prc_non_vaccinated","prev_total_change_prc_vaccinated") ~ "Relative change of\ntotal colonisation",
-    metric %in% c("ratio_total_prc","ratio_nv_prc","ratio_v_prc") ~ "Relative change of\nresistant to sensitive prevalence ratio"
-  ),
-  population_target = case_when(
-    metric %in% c("resistance_change_prc","infections_change_prc","prev_resistance_change_prc","prev_total_change_prc","ratio_total_prc") ~ "Total population",
-    metric %in% c("resistance_change_prc_non_vaccinated","infections_change_prc_non_vaccinated","prev_resistance_change_prc_non_vaccinated","prev_total_change_prc_non_vaccinated","ratio_nv_prc") ~ "Non vaccinated",
-    metric %in% c("resistance_change_prc_vaccinated","infections_change_prc_vaccinated","prev_resistance_change_prc_vaccinated","prev_total_change_prc_vaccinated","ratio_v_prc") ~ "Vaccinated",
-  ))%>%
-  mutate(metric_name = factor(metric_name, levels = c("Relative change of\ntotal infections","Relative change of\nresistant infections","Relative change of\ntotal colonisation","Relative change of\nresistant colonisation","Relative change of\nresistant to sensitive prevalence ratio")),
-         population_target = factor(population_target, levels = c("Total population",  "Vaccinated","Non vaccinated")))%>%
-  group_by(name_renamed, Vperc, varying_param, metric_name, population_target) %>%
-  summarise(mean = mean(metric_value),
-            min  = min(metric_value),
-            max  = max(metric_value),
-            sd = sd(metric_value),
-            n = n(),
-            .groups = "drop")%>%
+# Compute statistics
+results_to_plot <- results_with_outputs %>%
+  compute_statistics(starts_with(c("prc_red_", "averted_")))%>%
   mutate(
-   ci_low = mean - 1.96*sd,
-   ci_high = mean + 1.96*sd
+    population = case_when(
+      str_detect(metric_name, "non_vaccinated") ~ "Non vaccinated",
+      str_detect(metric_name, "_vaccinated") ~ "Vaccinated",
+      TRUE ~ "Total population"
+    )
   )
 
 # save results_to_plot
-save(results_to_plot, file = here::here("exploration",file_name,"only_one_bacteria_results_to_plot_SAureus.RData"))
-save(results_to_plot, file = here::here("exploration",file_name,"only_one_bacteria_results_to_plot_EColi.RData"))
+save(results_to_plot, file = here::here("files",folder_name,"results_to_plot.RData"))
+
+#### Plot relative change results ####
 
 palette_orange_dark <- c(
   "#FFB84D",  # moyen-clair

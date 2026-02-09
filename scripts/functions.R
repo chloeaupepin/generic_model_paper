@@ -381,3 +381,124 @@ add_vaccine_parameters <- function(df_to_which_add,df_to_add){
   return(df)
 }
 
+# Compute outputs 
+prc_red <- function(ref, new) {
+  -(ref - new) / ref * 100
+}
+
+compute_outputs <- function(sim){
+  # Add cumulative incidence of selection to cumulative incidence of resistant infections
+  results <- sim %>%
+    mutate(res_1y_wov_inccumIrnv_sel = res_1y_wov_inccumIrnv + res_1y_wov_inccumSelectionOfResistantBySpecificAntibioForNonVaccinated + res_1y_wov_inccumSelectionOfResistantByBystanderAntibioForNonVaccinated,
+           res_1y_wv_inccumIrnv_sel = res_1y_wv_inccumIrnv + res_1y_wv_inccumSelectionOfResistantBySpecificAntibioForNonVaccinated + res_1y_wv_inccumSelectionOfResistantByBystanderAntibioForNonVaccinated,
+           res_1y_wv_inccumIrv_sel = res_1y_wv_inccumIrv + res_1y_wv_inccumSelectionOfResistantBySpecificAntibioForVaccinated + res_1y_wv_inccumSelectionOfResistantByBystanderAntibioForVaccinated)
+    
+  
+  # Add cumulative incidence of total infections
+  results <- results %>%
+    mutate(res_1y_wov_inccumI = res_1y_wov_inccumIrnv_sel+res_1y_wov_inccumIsnv,
+           res_1y_wv_inccumI_non_vaccinated = res_1y_wv_inccumIrnv_sel + res_1y_wv_inccumIsnv,
+           res_1y_wv_inccumI_vaccinated = res_1y_wv_inccumIrv_sel + res_1y_wv_inccumIsv,
+           res_1y_wv_inccumI = res_1y_wv_inccumI_non_vaccinated + res_1y_wv_inccumI_vaccinated)
+  
+  # Compute reduction change in cumulative incidences
+  results<- results %>%
+    mutate(prc_red_inccumIs = prc_red(res_1y_wov_inccumIsnv,res_1y_wv_inccumIsnv + res_1y_wv_inccumIsv),
+           prc_red_inccumIs_non_vaccinated = prc_red(res_1y_wov_inccumIsnv*(1-Vperc),res_1y_wv_inccumIsnv ),
+           prc_red_inccumIs_vaccinated = prc_red(res_1y_wov_inccumIsnv*Vperc, res_1y_wv_inccumIsv),
+           prc_red_inccumIr = prc_red(res_1y_wov_inccumIrnv_sel,res_1y_wv_inccumIrnv_sel + res_1y_wv_inccumIrv_sel),
+           prc_red_inccumIr_non_vaccinated = prc_red(res_1y_wov_inccumIrnv_sel*(1-Vperc),res_1y_wv_inccumIrnv_sel ),
+           prc_red_inccumIr_vaccinated = prc_red(res_1y_wov_inccumIrnv_sel*Vperc, res_1y_wv_inccumIrv_sel),
+           prc_red_inccumI = prc_red(res_1y_wov_inccumI, res_1y_wv_inccumI),
+           prc_red_inccumI_non_vaccinated = prc_red(res_1y_wov_inccumI*(1-Vperc), res_1y_wv_inccumI_non_vaccinated),
+           prc_red_inccumI_vaccinated = prc_red(res_1y_wov_inccumI*Vperc, res_1y_wv_inccumI_vaccinated)
+           )
+  
+  # Compute proportion of resistant infections among infections in cumulative incidences
+  
+  # Compute proportion of resistant colonisation among colonisation in prevalences at the end of the year
+  results <- results %>%
+    mutate(res_1y_wov_prop_prevCIr = (res_1y_wov_Crnv+res_1y_wov_Irnv)/(res_1y_wov_Crnv + res_1y_wov_Irnv + res_1y_wov_Csnv + res_1y_wov_Isnv),
+           res_1y_wv_prop_prevCIr = (res_1y_wv_Crnv+res_1y_wv_Irnv + res_1y_wv_Crv+res_1y_wv_Irv)/(res_1y_wv_Crnv + res_1y_wv_Irnv + res_1y_wv_Csnv + res_1y_wv_Isnv + res_1y_wv_Crv + res_1y_wv_Irv + res_1y_wv_Csv + res_1y_wv_Isv),
+           res_1y_wv_prop_prevCIr_non_vaccinated = (res_1y_wv_Crnv+res_1y_wv_Irnv)/(res_1y_wv_Crnv + res_1y_wv_Irnv + res_1y_wv_Csnv + res_1y_wv_Isnv),
+           res_1y_wv_prop_prevCIr_vaccinated = (res_1y_wv_Crv+res_1y_wv_Irv)/(res_1y_wv_Crv + res_1y_wv_Irv + res_1y_wv_Csv + res_1y_wv_Isv),
+           
+           res_1y_wov_prop_prevCr = (res_1y_wov_Crnv)/(res_1y_wov_Crnv + res_1y_wov_Csnv),
+           res_1y_wv_prop_prevCr = (res_1y_wv_Crnv + res_1y_wv_Crv)/(res_1y_wv_Crnv + res_1y_wv_Csnv + res_1y_wv_Crv  + res_1y_wv_Csv ),
+           res_1y_wv_prop_prevCr_non_vaccinated = (res_1y_wv_Crnv)/(res_1y_wv_Crnv + res_1y_wv_Csnv ),
+           res_1y_wv_prop_prevCr_vaccinated = (res_1y_wv_Crv)/(res_1y_wv_Crv + res_1y_wv_Csv )
+           )
+  
+  # Compute reduction change in proportions
+  results<- results %>%
+    mutate(prc_red_prop_prevCIr = prc_red(res_1y_wov_prop_prevCIr,res_1y_wv_prop_prevCIr ),
+           prc_red_prop_prevCIr_non_vaccinated = prc_red(res_1y_wov_prop_prevCIr,res_1y_wv_prop_prevCIr_non_vaccinated ),
+           prc_red_prop_prevCIr_vaccinated = prc_red(res_1y_wov_prop_prevCIr,res_1y_wv_prop_prevCIr_vaccinated ))%>%
+    mutate(prc_red_prop_prevCr = prc_red(res_1y_wov_prop_prevCr,res_1y_wv_prop_prevCr ),
+           prc_red_prop_prevCr_non_vaccinated = prc_red(res_1y_wov_prop_prevCr,res_1y_wv_prop_prevCr_non_vaccinated ),
+           prc_red_prop_prevCr_vaccinated = prc_red(res_1y_wov_prop_prevCr,res_1y_wv_prop_prevCr_vaccinated ))
+  
+  # Compute reduction change in prevalences
+  results <- results %>%
+    mutate(prc_red_prevCr = prc_red(res_1y_wov_Crnv, res_1y_wv_Crnv + res_1y_wv_Crv),
+           prc_red_prevCr_non_vaccinated = prc_red(res_1y_wov_Crnv*(1-Vperc), res_1y_wv_Crnv),
+           prc_red_prevCr_vaccinated = prc_red(res_1y_wov_Crnv*Vperc, res_1y_wv_Crv))%>%
+    mutate(prc_red_prevC = prc_red(res_1y_wov_Crnv+res_1y_wov_Csnv,res_1y_wv_Crnv + res_1y_wv_Crv + res_1y_wv_Csnv + res_1y_wv_Csv),
+           prc_red_prevC_non_vaccinated = prc_red((res_1y_wov_Crnv+res_1y_wov_Csnv)*(1-Vperc),res_1y_wv_Crnv +res_1y_wv_Csnv ),
+           prc_red_prevC_vaccinated = prc_red((res_1y_wov_Crnv+res_1y_wov_Csnv)*Vperc, res_1y_wv_Crv + res_1y_wv_Csv))
+  
+  
+  # Compute averted infections 
+  results <- results %>%
+    mutate(averted_inccumIs = res_1y_wov_inccumIsnv - res_1y_wv_inccumIsnv - res_1y_wv_inccumIsv,
+           averted_inccumIr = res_1y_wov_inccumIrnv_sel - res_1y_wv_inccumIrnv_sel - res_1y_wv_inccumIrv_sel,
+           averted_inccumI = averted_inccumIs + averted_inccumIr,
+           averted_inccumIs_non_vaccinated = res_1y_wov_inccumIsnv*(1-Vperc) - res_1y_wv_inccumIsnv ,
+           averted_inccumIr_non_vaccinated = res_1y_wov_inccumIrnv_sel*(1-Vperc) - res_1y_wv_inccumIrnv_sel,
+           averted_inccumI_non_vaccinated = averted_inccumIs_non_vaccinated + averted_inccumIr_non_vaccinated,
+           averted_inccumIs_vaccinated = res_1y_wov_inccumIsnv*Vperc - res_1y_wv_inccumIsv,
+           averted_inccumIr_vaccinated = res_1y_wov_inccumIrnv_sel*Vperc - res_1y_wv_inccumIrv_sel,
+           averted_inccumI_vaccinated = averted_inccumIs_vaccinated + averted_inccumIr_vaccinated) 
+  
+  return(results)
+  
+}
+
+clean_vaccine_related_parameters <- function(sim){
+  # Add one column with each varying param
+  results <- sim %>%
+    mutate(varying_param = case_when(
+      vftcs != 0 ~ vftcs,
+      vfds != 0 ~ vfds,
+      vfis != 0 ~ vfis,
+      TRUE ~ 0
+    )) %>% 
+    filter(varying_param != 0) %>%
+    mutate(name = factor(name, levels = c("vftc","vfi","vftc_vfd","vftc_vfi","vfd_vfi","vftc_vfd_vfi")))
+  
+  # Rename vaccine names
+  results <- results %>%
+    mutate(name_renamed= case_when(
+      name == "vftc" ~ "va",
+      name == "vfi" ~ "vi",
+      name == "vftc_vfd" ~ "va_vd",
+      name == "vftc_vfi" ~ "va_vi",
+      name == "vfd_vfi" ~ "vd_vi",
+      name == "vftc_vfd_vfi" ~ "va_vd_vi"
+    )) %>%
+    mutate(name_renamed = factor(name_renamed, levels = c("va","vi","va_vd","va_vi","vd_vi","va_vd_vi")))
+  
+  return(results)
+}
+
+compute_statistics <- function(results, chosen_cols){
+  results_with_stats <- results %>%
+    pivot_longer(cols = chosen_cols, names_to = "metric_name", values_to = "metric_value")%>%
+    group_by(name_renamed, Vperc, varying_param, metric_name) %>%
+    summarise(median = median(metric_value),
+              q025 = quantile(metric_value, 0.025),
+              q975 = quantile(metric_value, 0.975),
+              .groups = "drop")
+  
+  return(results_with_stats)
+}
