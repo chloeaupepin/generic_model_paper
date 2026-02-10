@@ -2,7 +2,6 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(ggh4x)
-library(ggnewscale)
 library(scales)
 
 

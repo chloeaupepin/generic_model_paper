@@ -2,10 +2,7 @@ library(purrr)
 library(tidyr)
 library(dplyr)
 library(deSolve)
-library(ggplot2)
-library(ggh4x)
 library(furrr)
-library(tidyr)
 library(stringr)
 
 n_cores = parallel::detectCores() - 1

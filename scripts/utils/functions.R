@@ -494,7 +494,7 @@ clean_vaccine_related_parameters <- function(sim){
 
 compute_statistics <- function(results, chosen_cols){
   results_with_stats <- results %>%
-    pivot_longer(cols = chosen_cols, names_to = "metric_name", values_to = "metric_value")%>%
+    pivot_longer(cols = all_of(chosen_cols), names_to = "metric_name", values_to = "metric_value")%>%
     group_by(name_renamed, Vperc, varying_param, metric_name) %>%
     summarise(median = median(metric_value),
               q025 = quantile(metric_value, 0.025),
