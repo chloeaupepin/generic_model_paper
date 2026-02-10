@@ -15,26 +15,36 @@ plan(multisession, workers = n_cores)
 source(here::here("scripts", "model.R"))
 source(here::here("scripts", "functions.R"))
 
-#### Define bacteria ####
-# S_aureus_params
-folder_name = "S_aureus"
-file_name  = "S_aureus_params10.csv"
-Bacteria_params = read.csv(here::here("files",file_name)) 
-
-# E_coli_params
-#file_name = "E_coli_params_primavera1.csv"
-#Bacteria_params = read.csv(here::here("case_studies","data",file_name))
-
-# Nombre de jeux de paramètres à générer
-n <- 50
-
 set.seed(123)  # global seed for reproducibility
 
+#### Define settings ####
+
+## Choose bacteria 
+# S_aureus
+folder_name = "S_aureus"
+file_name  = "S_aureus_params10.csv"
+
+# E_coli
+#folder_name = "E_coli"
+#file_name = "E_coli_params_primavera2.csv"
+
+## Choose number of bacteria to generate
+n <- 50
+
+## Is transmission by infected individuals allowed ? 
+# For S_aureus no, for E_coli yes
+# if transmission is allowed, it equals transmission by colonized individuals
+transmission_by_infected = FALSE
+#transmission_by_infected = TRUE
+
+
+#### Define bacteria ####
+Bacteria_params = read.csv(here::here("files",file_name)) 
+
+# cols_to_noise include bacteria parameters and antibiotic parameters
+# the relative fitness f isn't varied due to too much sensitivity of resistant proportion
 cols_to_noise <- c(	
-  "betaC",
-  "as",
-  "time_until_recovery_without_ATB_s",
-  "dps",
+  "betaC","as","time_until_recovery_without_ATB_s","dps",
   "prob_bystander_exposure",
   "time_until_decolo_by_bystander_ATB",
   "prob_minority_strain_when_colonised",
@@ -49,9 +59,15 @@ df_bacteria <- add_variability(Bacteria_params, cols_to_noise, n ,0.05)
 
 df_bacteria <- set_resistant_and_sensitive_param_equal(df_bacteria, c("dpr", "ar", "time_until_recovery_without_ATB_r"))
 
-df_bacteria <- df_bacteria %>%
-  mutate(betaI = 0) #%>%
-  #mutate(betaI = betaC)
+
+if(transmission_by_infected){
+  df_bacteria <- df_bacteria %>%
+    mutate(betaI = betaC)
+} else {
+  df_bacteria <- df_bacteria %>%
+    mutate(betaI = 0)
+}
+
   
 df_bacteria <- df_bacteria %>%
   mutate(prob_specific_exposure_r = pmin(1,prob_specific_exposure_r),
