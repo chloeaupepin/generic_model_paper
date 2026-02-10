@@ -135,7 +135,8 @@ results_to_plot <- results_with_outputs %>%
       str_detect(metric_name, "_vaccinated") ~ "Vaccinated",
       TRUE ~ "Total population"
     )
-  )
+  ) %>%
+  mutate(population = factor(population, levels = c("Total population", "Vaccinated", "Non vaccinated")))
 
 # save results_to_plot
 save(results_to_plot, file = here::here("files",folder_name,"results_to_plot.RData"))

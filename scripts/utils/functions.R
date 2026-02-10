@@ -474,7 +474,8 @@ clean_vaccine_related_parameters <- function(sim){
       TRUE ~ 0
     )) %>% 
     filter(varying_param != 0) %>%
-    mutate(name = factor(name, levels = c("vftc","vfi","vftc_vfd","vftc_vfi","vfd_vfi","vftc_vfd_vfi")))
+    mutate(name = factor(name, levels = c("vftc","vfi","vftc_vfd","vftc_vfi","vfd_vfi","vftc_vfd_vfi"))) %>%
+    mutate(varying_param = factor(varying_param))
   
   # Rename vaccine names
   results <- results %>%
