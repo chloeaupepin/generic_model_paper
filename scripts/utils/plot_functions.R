@@ -215,4 +215,55 @@ plot_vaccine_metric_both_bacteria <- function(data1,
   return(p)
 }
 
+prepare_for_antibiotic_metric_plot <- function(data){
+  data %>% mutate(prc_red_prob_bystander_exposure = case_when(
+    scenario_id == 1 ~ 10,
+    scenario_id == 2 ~ 30,
+    scenario_id == 3 ~ 50,
+    scenario_id == 4 ~ 70,
+    scenario_id == 5 ~ 90
+  )) %>%
+    mutate(metric_name_for_plot = case_when(
+      metric_name == "prc_red_inccumI" ~ "Cumulative incidence of\nall infections",
+      metric_name == "prc_red_inccumIr" ~ "Cumulative incidence of\nresistant infections",
+      metric_name == "prc_red_inccumIs" ~ "Cumulative incidence of\nsensitive infections",
+      metric_name == "prc_red_prop_prevCr" ~ "Proportion of resistant carriers\n among carriers",
+      T ~ metric_name
+    ))
+}
+
+
+plot_antibiotic_metric_both_bacteria <- function(data1,
+                                   data2,
+                                   metric_name_to_plot,
+                                   chosen_shapes){
+  
+  data <- data1 %>%
+    mutate(Bacteria = "1") %>%
+    bind_rows(data2 %>% mutate(Bacteria = "2")) %>%
+    prepare_for_antibiotic_metric_plot()
+  
+  
+  p <- data %>%
+    filter(metric_name %in% metric_name_to_plot) %>%
+    ggplot(aes(x=prc_red_prob_bystander_exposure)) + 
+    geom_hline(yintercept = 0, linetype="dashed", color = "black")+
+    geom_ribbon(aes(ymin = q025, ymax = q975, color = Bacteria, fill = Bacteria),
+                alpha = 0.2) +
+    geom_line(aes(y = median, color = Bacteria)) +
+    geom_point(aes(y = median, color = Bacteria, fill = Bacteria, shape = Bacteria), size = 2)+
+    {if (length(metric_name_to_plot)>1) facet_nested(~ metric_name_for_plot) else NULL}+
+    scale_x_continuous(breaks = c(10, 30, 50, 70, 90))+
+    scale_color_manual(values = c(palette_orange_dark[3], palette_pink_purple[3]))+
+    scale_fill_manual(values = c(palette_orange_dark[3], palette_pink_purple[3]))+
+    scale_shape_manual(values = c(chosen_shapes[1],chosen_shapes[2]))+
+    labs(
+      x = "Reduction percentage of bystander antibiotic exposure (%)",
+      y = "Relative change due to\nbystander antibiotic reduction (%)"
+    ) +
+    personal_theme +
+    theme(legend.position = "bottom")
+  
+  return(p)
+}
 
