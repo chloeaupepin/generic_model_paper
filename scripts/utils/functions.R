@@ -341,9 +341,9 @@ check_eq_without_vaccine <- function(params){
 }
 
 # Apply a function on dataframe rows
-apply_function_on_df <- function(df, fun, col_name) {
+apply_function_on_df <- function(df, fun, col_name, map_fun = future_pmap) {
   df %>%
-    mutate(!!col_name := future_pmap(., function(...) {
+    mutate(!!col_name := map_fun(., function(...) {
       params <- list(...)
       fun(params)
     }))

@@ -13,7 +13,7 @@ plan(multisession, workers = n_cores)
 
 
 source(here::here("scripts", "model.R"))
-source(here::here("scripts", "functions.R"))
+source(here::here("scripts","utils", "functions.R"))
 
 set.seed(123)  # global seed for reproducibility
 

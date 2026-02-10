@@ -10,8 +10,8 @@ library(tidyr)
 n_cores = parallel::detectCores() - 1
 plan(multisession, workers = n_cores)
 
-source(here::here("scripts","utils_lhs_and_prcc.R"))
-source(here::here("scripts","functions.R"))
+source(here::here("scripts","utils","utils_lhs_and_prcc.R"))
+source(here::here("scripts","utils","functions.R"))
 source(here::here("scripts","model.R"))
 
 #### Define parameter distributions ####
