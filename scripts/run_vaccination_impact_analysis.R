@@ -21,12 +21,12 @@ set.seed(123)  # global seed for reproducibility
 
 ## Choose bacteria 
 # S_aureus
-folder_name = "S_aureus"
-file_name  = "S_aureus_params10.csv"
+#folder_name = "S_aureus"
+#file_name  = "S_aureus_params10.csv"
 
 # E_coli
-#folder_name = "E_coli"
-#file_name = "E_coli_params_primavera2.csv"
+folder_name = "E_coli"
+file_name = "E_coli_params_primavera2.csv"
 
 ## Choose number of bacteria to generate
 n <- 50
@@ -34,8 +34,8 @@ n <- 50
 ## Is transmission by infected individuals allowed ? 
 # For S_aureus no, for E_coli yes
 # if transmission is allowed, it equals transmission by colonized individuals
-transmission_by_infected = FALSE
-#transmission_by_infected = TRUE
+#transmission_by_infected = FALSE
+transmission_by_infected = TRUE
 
 
 #### Define bacteria ####
@@ -43,17 +43,32 @@ Bacteria_params = read.csv(here::here("files",file_name))
 
 # cols_to_noise include bacteria parameters and antibiotic parameters
 # the relative fitness f isn't varied due to too much sensitivity of resistant proportion
-cols_to_noise <- c(	
-  "betaC","as","time_until_recovery_without_ATB_s","dps",
-  "prob_bystander_exposure",
-  "time_until_decolo_by_bystander_ATB",
-  "prob_minority_strain_when_colonised",
-  "prob_specific_exposure",
-  "time_until_decolo_by_specific_ATB",
-  "prob_minority_strain_when_infected",
-  "prob_specific_exposure_r",
-  "time_until_decolo_by_specific_ATB_r"
-)
+if(folder_name == "S_aureus"){
+  cols_to_noise <- c(	
+    "betaC","as","time_until_recovery_without_ATB_s","dps",
+    "prob_bystander_exposure",
+    "time_until_decolo_by_bystander_ATB",
+    "prob_minority_strain_when_colonised",
+    "prob_specific_exposure",
+    "time_until_decolo_by_specific_ATB",
+    "prob_minority_strain_when_infected",
+    "prob_specific_exposure_r",
+    "time_until_decolo_by_specific_ATB_r"
+  )
+} else {
+  cols_to_noise <- c(	
+    "betaC","as","time_until_recovery_without_ATB_s","dps",
+    "prob_bystander_exposure",
+    "time_until_decolo_by_bystander_ATB",
+    "prob_minority_strain_when_colonised",
+    "prob_specific_exposure",
+    "prob_minority_strain_when_infected",
+    "prob_specific_exposure_r",
+    "gammaA_s",
+    "psiA",
+    "gammaA_r"
+  )
+}
 
 df_bacteria <- add_variability(Bacteria_params, cols_to_noise, n ,0.05) 
 
@@ -85,6 +100,8 @@ df_bacteria <- filter_coexistence_condition(df_bacteria)
 
 # Compute equilibrium with analytical expressions 
 eq_results <- compute_equilibrium(df_bacteria)
+
+create_folder(file.path(getwd(),"files",folder_name))
 save(eq_results, file = here::here("files",folder_name,"equilibrium_results.RData"))
 
 #### Simulation de un an sans vaccin et un an avec vaccin ####

@@ -119,9 +119,9 @@ compute_antibiotic_associated_flux <- function(data, with_specific_flux=T){
 #### Analytical conditions for coexistence ####
 
 compute_analytical_conditions <- function(data){
-  if(is.null(data$gammaA_s)){
-    data <- compute_antibiotic_associated_flux(data)
-  }
+  data <- compute_antibiotic_associated_flux(data, is.null(data$gammaA_s))
+  
+  
   data %>%
     mutate(coexistence_condition = f <= (1/dpr + ar - etar * ar / (etar + gammaA_r)) /(1/dps + lambdaA + as - etas * as / (etas + lambdaA_I + gammaA_s + psiA + phiA_I)+phiA)*(betaC + betaI*as/(etas + lambdaA_I + gammaA_s + psiA + phiA_I))/(betaC + betaI*ar/(etar + gammaA_r))) %>%
     mutate(non_disparition_condition = betaC + betaI*as/(etas + lambdaA_I + gammaA_s + psiA + phiA_I) >= 1/dps + lambdaA + as - etas * as / (etas + lambdaA_I + gammaA_s + psiA + phiA_I)+phiA)
@@ -502,4 +502,10 @@ compute_statistics <- function(results, chosen_cols){
               .groups = "drop")
   
   return(results_with_stats)
+}
+
+create_folder <- function(path){
+  if(!dir.exists(path)){
+    dir.create(path)
+  }
 }

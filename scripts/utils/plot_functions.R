@@ -29,6 +29,22 @@ palette_pink_purple <- c(
 
 palette_pink_purple_3 <- palette_pink_purple[c(1,3,5)]
 
+palette_combined_named = c(
+  "0.3 - Bacteria 1" = palette_orange_dark[1],
+  "0.6 - Bacteria 1" = palette_orange_dark[3],
+  "0.9 - Bacteria 1" = palette_orange_dark[5],
+  "0.3 - Bacteria 2" = palette_pink_purple[1],
+  "0.6 - Bacteria 2" = palette_pink_purple[3],
+  "0.9 - Bacteria 2" = palette_pink_purple[5]
+)
+
+shapes = c(21,23)
+
+colors_and_shapes <- list(
+  "S_aureus" = list(palette = palette_orange_dark_3, shape = shapes[1]),
+  "E_coli" = list(palette = palette_pink_purple_3, shape = shapes[2])
+)
+
 # Plot histogram of equilibrium results
 
 prepare_eq_results_for_plot <- function(eq_results){
@@ -71,4 +87,132 @@ plot_histogram_eq_results_two_bacteria <- function(eq_results_1, eq_results_2){
          y = "Count") +
     personal_theme + theme(legend.position = "none")
 }
+
+
+
+
+# Lignes de référence horizontales
+geom_hrefs <- function(y = c(0), linetype = "dashed", color = "grey") {
+  lapply(y, function(yval) geom_hline(yintercept = yval, linetype = linetype, color = color))
+}
+
+# Ligne verticale de référence
+geom_vrefs <- function(x = c(30), linetype = "dashed", color = "grey") {
+  lapply(x, function(xval) geom_vline(xintercept = xval, linetype = linetype, color = color))
+}
+
+# Plot vaccine metric for each vaccine type 
+plot_vaccine_metric <- function(data,
+                                metric_name_to_plot,
+                                population_to_plot = c("Total population","Vaccinated", "Non vaccinated"),
+                                vaccine_effects_to_plot = c(0.3, 0.6, 0.9),
+                                y_label,
+                                chosen_shape,
+                                chosen_palette,
+                                ylim_values = NULL,
+                                hrefs,
+                                vrefs){
+  p <- data %>%
+    filter(metric_name %in% metric_name_to_plot, 
+           population %in% population_to_plot) %>%
+    filter(varying_param %in% vaccine_effects_to_plot) %>%
+    ggplot(aes(x = Vperc*100)) +
+    geom_ribbon(aes(ymin = q025, ymax = q975,
+                    fill = varying_param,
+                    group = varying_param),
+                alpha = 0.2) +
+    geom_hrefs(y = hrefs)+
+    geom_vrefs(x = vrefs)+
+    geom_point(aes(y = median, color = varying_param, fill = varying_param), 
+               shape = chosen_shape, size = 2)+
+    geom_line(aes(y = median, color = varying_param)) +
+    {if (length(metric_name_to_plot)>1) facet_nested(population ~ name_renamed) else facet_nested(~ name_renamed)}+
+    scale_x_continuous(breaks = c(10, 30, 50, 70, 90))+
+    scale_color_manual(values = chosen_palette)+
+    scale_fill_manual(values = chosen_palette)+
+    labs(x = "Vaccine coverage (%)",
+         y = y_label,
+         color = "Vaccine efficacy",
+         fill = "Vaccine efficacy")+
+    personal_theme + 
+    theme(legend.position = "bottom")+
+    {if (!is.null(ylim_values)) ylim(ylim_values[1], ylim_values[2]) else NULL}
+  
+  return(p)
+}
+
+
+plot_vaccine_metric_both_bacteria <- function(data1,
+                                              data2,
+                                              metric_name_to_plot,
+                                              population_to_plot = c("Total population","Vaccinated", "Non vaccinated"),
+                                              vaccine_effects_to_plot = c(0.3, 0.6, 0.9),
+                                              y_label,
+                                              chosen_shapes,
+                                              chosen_palette,
+                                              ylim_values = NULL,
+                                              hrefs,
+                                              vrefs,
+                                              logscale = F){
+  
+  data <- data1 %>%
+    mutate(bacteria = "1") %>%
+    bind_rows(data2 %>% mutate(bacteria = "2"))
+  
+  p <- data %>%
+    filter(metric_name %in% metric_name_to_plot, 
+           population %in% population_to_plot) %>%
+    mutate(color_group = factor(
+      case_when(
+        bacteria == "1" & varying_param == 0.3 ~ 1,
+        bacteria == "1" & varying_param == 0.6 ~ 2,
+        bacteria == "1" & varying_param == 0.9 ~ 3,
+        bacteria == "2" & varying_param == 0.3 ~ 4,
+        bacteria == "2" & varying_param == 0.6 ~ 5,
+        bacteria == "2" & varying_param == 0.9 ~ 6
+      ),
+      labels = c(
+        "0.3 - Bacteria 1",
+        "0.6 - Bacteria 1",
+        "0.9 - Bacteria 1",
+        "0.3 - Bacteria 2",
+        "0.6 - Bacteria 2",
+        "0.9 - Bacteria 2"
+      )
+    )) %>%
+    filter(varying_param %in% vaccine_effects_to_plot) %>%
+    ggplot(aes(x = Vperc*100)) +
+    geom_ribbon(aes(ymin = q025, ymax = q975,
+                    fill = color_group,
+                    group = color_group),
+                alpha = 0.2) +
+    geom_hrefs(y = hrefs)+
+    geom_vrefs(x = vrefs)+
+    geom_point(aes(y = median, color = color_group, fill = color_group, shape = color_group),size = 2)+
+    geom_line(aes(y = median, color = color_group)) +
+    {if (length(metric_name_to_plot)>1) facet_nested(population ~ name_renamed) else facet_nested(~ name_renamed)}+
+    {if(logscale) scale_y_log10(minor_breaks = minor_breaks_log())}+
+    scale_x_continuous(breaks = c(10, 30, 50, 70, 90))+
+    scale_color_manual(values = chosen_palette)+
+    scale_fill_manual(values = chosen_palette)+
+    scale_shape_manual(values = c(chosen_shapes[1],chosen_shapes[1],chosen_shapes[1],chosen_shapes[2],chosen_shapes[2], chosen_shapes[2]))+
+    labs(x = "Vaccine coverage (%)",
+         y = y_label,
+         color = "Vaccine efficacy",
+         fill = "Vaccine efficacy")+
+    personal_theme + 
+    theme(legend.position = "bottom")+
+    {if (!is.null(ylim_values)) ylim(ylim_values[1], ylim_values[2]) else NULL}
+  
+  p <- p + 
+    guides(fill = guide_legend(nrow = 2, 
+                               byrow = TRUE,
+                               override.aes = list(shape = ifelse(grepl("Bacteria 1", levels(p$data$color_group)), 21, 23))), 
+           color = guide_legend(nrow = 2, 
+                                byrow = TRUE), 
+           shape = "none")
+  
+  return(p)
+}
+
 
