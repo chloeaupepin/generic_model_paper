@@ -174,9 +174,8 @@ set_resistant_and_sensitive_param_equal <- function(data, res_param_names){
 
 #### Compute equilibrium ####
 compute_equilibrium <- function(data,population_size = 100000){
-  if(is.null(data$gammaA_s)){
-    data <- compute_antibiotic_associated_flux(data)
-  }
+  data <- compute_antibiotic_associated_flux(data, is.null(data$gammaA_s))
+  
   
   data %>%
     mutate(
@@ -386,7 +385,7 @@ prc_red <- function(ref, new) {
   -(ref - new) / ref * 100
 }
 
-compute_outputs <- function(sim){
+compute_outputs <- function(sim, population_size = 100000, factor = 100000){
   # Add cumulative incidence of selection to cumulative incidence of resistant infections
   results <- sim %>%
     mutate(res_1y_wov_inccumIrnv_sel = res_1y_wov_inccumIrnv + res_1y_wov_inccumSelectionOfResistantBySpecificAntibioForNonVaccinated + res_1y_wov_inccumSelectionOfResistantByBystanderAntibioForNonVaccinated,
@@ -458,7 +457,8 @@ compute_outputs <- function(sim){
            averted_inccumI_non_vaccinated = averted_inccumIs_non_vaccinated + averted_inccumIr_non_vaccinated,
            averted_inccumIs_vaccinated = res_1y_wov_inccumIsnv*Vperc - res_1y_wv_inccumIsv,
            averted_inccumIr_vaccinated = res_1y_wov_inccumIrnv_sel*Vperc - res_1y_wv_inccumIrv_sel,
-           averted_inccumI_vaccinated = averted_inccumIs_vaccinated + averted_inccumIr_vaccinated) 
+           averted_inccumI_vaccinated = averted_inccumIs_vaccinated + averted_inccumIr_vaccinated)%>%
+    mutate(across(starts_with("averted"), ~ .x * factor/population_size))
   
   return(results)
   

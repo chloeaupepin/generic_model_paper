@@ -16,12 +16,17 @@ set.seed(123)  # global seed for reproducibility
 
 #### Define settings ####
 
+## Population size
+population_size = 100000
+
 ## Choose bacteria 
 # S_aureus
+#bacteria = "S_aureus"
 #folder_name = "S_aureus"
 #file_name  = "S_aureus_params10.csv"
 
 # E_coli
+bacteria = "E_coli"
 folder_name = "E_coli"
 file_name = "E_coli_params_primavera2.csv"
 
@@ -34,13 +39,12 @@ n <- 50
 #transmission_by_infected = FALSE
 transmission_by_infected = TRUE
 
-
 #### Define bacteria ####
 Bacteria_params = read.csv(here::here("files",file_name)) 
 
 # cols_to_noise include bacteria parameters and antibiotic parameters
 # the relative fitness f isn't varied due to too much sensitivity of resistant proportion
-if(folder_name == "S_aureus"){
+if(bacteria == "S_aureus"){
   cols_to_noise <- c(	
     "betaC","as","time_until_recovery_without_ATB_s","dps",
     "prob_bystander_exposure",
@@ -96,7 +100,7 @@ df_bacteria <- filter_coexistence_condition(df_bacteria)
 #### Run analysis equilibrium ####
 
 # Compute equilibrium with analytical expressions 
-eq_results <- compute_equilibrium(df_bacteria)
+eq_results <- compute_equilibrium(df_bacteria, population_size)
 
 create_folder(file.path(getwd(),"files",folder_name))
 save(eq_results, file = here::here("files",folder_name,"equilibrium_results.RData"))
@@ -130,7 +134,7 @@ results <- df_for_vaccine_simulations %>%
 
 #### Results manipulation ####
 # Compute resistance change
-results_with_outputs <- compute_outputs(results)
+results_with_outputs <- compute_outputs(results, population_size)
 
 results_with_outputs <- clean_vaccine_related_parameters(results_with_outputs)
 
