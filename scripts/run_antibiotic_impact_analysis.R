@@ -73,9 +73,15 @@ results_with_outputs_antibiotic <- results %>%
   mutate(res_1y_wov_prop_prevCr = (res_1y_wov_Crnv)/(res_1y_wov_Crnv + res_1y_wov_Csnv),
          res_1y_wov_antibiotic_prop_prevCr = (res_1y_wov_antibiotic_Crnv)/(res_1y_wov_antibiotic_Crnv + res_1y_wov_antibiotic_Csnv)) %>%
   
+  mutate(res_1y_wov_prop_inccumIr = (res_1y_wov_inccumIrnv)/(res_1y_wov_inccumIrnv + res_1y_wov_inccumIsnv),
+         res_1y_wov_antibiotic_prop_inccumIr = (res_1y_wov_antibiotic_inccumIrnv)/(res_1y_wov_antibiotic_inccumIrnv + res_1y_wov_antibiotic_inccumIsnv)) %>%
+  
   mutate(prc_red_inccumI = prc_red(res_1y_wov_inccumI,res_1y_wov_antibiotic_inccumI),
          prc_red_inccumIr = prc_red(res_1y_wov_inccumIrnv_sel,res_1y_wov_antibiotic_inccumIrnv_sel),
          prc_red_inccumIs = prc_red(res_1y_wov_inccumIsnv,res_1y_wov_antibiotic_inccumIsnv),
+         prc_red_prop_inccumIr = prc_red(res_1y_wov_prop_inccumIr, res_1y_wov_antibiotic_prop_inccumIr),
+         prc_red_prevC = prc_red(res_1y_wov_Crnv + res_1y_wov_Csnv, res_1y_wov_antibiotic_Crnv + res_1y_wov_antibiotic_Csnv), 
+         prc_red_prevCs = prc_red(res_1y_wov_Csnv, res_1y_wov_antibiotic_Csnv),
          prc_red_prevCr = prc_red(res_1y_wov_Crnv, res_1y_wov_antibiotic_Crnv ),
          prc_red_prop_prevCr = prc_red(res_1y_wov_prop_prevCr, res_1y_wov_antibiotic_prop_prevCr ))
 
@@ -92,3 +98,7 @@ results_to_plot_antibiotic <- results_with_outputs_antibiotic %>%
 
 
 save(results_to_plot_antibiotic, file = here::here("files",folder_name,"results_to_plot_antibiotic.RData"))
+
+
+
+

@@ -215,7 +215,7 @@ plot_vaccine_metric_both_bacteria <- function(data1,
   return(p)
 }
 
-prepare_for_antibiotic_metric_plot <- function(data){
+prepare_for_antibiotic_metric_plot <- function(data, output_order){
   data %>% mutate(prc_red_prob_bystander_exposure = case_when(
     scenario_id == 1 ~ 10,
     scenario_id == 2 ~ 30,
@@ -223,25 +223,33 @@ prepare_for_antibiotic_metric_plot <- function(data){
     scenario_id == 4 ~ 70,
     scenario_id == 5 ~ 90
   )) %>%
-    mutate(metric_name_for_plot = case_when(
-      metric_name == "prc_red_inccumI" ~ "Cumulative incidence of\nall infections",
-      metric_name == "prc_red_inccumIr" ~ "Cumulative incidence of\nresistant infections",
-      metric_name == "prc_red_inccumIs" ~ "Cumulative incidence of\nsensitive infections",
-      metric_name == "prc_red_prop_prevCr" ~ "Proportion of resistant carriers\n among carriers",
-      T ~ metric_name
-    ))
+    mutate(metric_name = factor(metric_name, levels = output_order))
 }
 
+
+output_labeller = c("prc_red_inccumI" = "Cumulative incidence \nof all infections",
+                    "prc_red_inccumIs" = "Cumulative incidence \nof sensitive infections",
+                    "prc_red_inccumIr" = "Cumulative incidence \nof resistant infections",
+                    "prc_red_prop_inccumIr" = "Proportion of cumulative \nincidence of infections \ndue to resistant infections",
+                    "prc_red_prevC" = "Prevalence of all colonizations",
+                    "prc_red_prevCs" = "Prevalence of sensitive colonization",
+                    "prc_red_prevCr" = "Prevalence of resistant colonization",
+                    "prc_red_prop_prevCr" = "Proportion of prevalence \nof colonization \ndue to resistant colonization"
+                    
+                    
+)
 
 plot_antibiotic_metric_both_bacteria <- function(data1,
                                    data2,
                                    metric_name_to_plot,
-                                   chosen_shapes){
+                                   chosen_shapes,
+                                   facet_cols = NULL,
+                                   chosen_output_labeller = output_labeller){
   
   data <- data1 %>%
     mutate(Bacteria = "1") %>%
     bind_rows(data2 %>% mutate(Bacteria = "2")) %>%
-    prepare_for_antibiotic_metric_plot()
+    prepare_for_antibiotic_metric_plot(., output_order = names(chosen_output_labeller))
   
   
   p <- data %>%
@@ -252,7 +260,8 @@ plot_antibiotic_metric_both_bacteria <- function(data1,
                 alpha = 0.2) +
     geom_line(aes(y = median, color = Bacteria)) +
     geom_point(aes(y = median, color = Bacteria, fill = Bacteria, shape = Bacteria), size = 2)+
-    {if (length(metric_name_to_plot)>1) facet_nested(~ metric_name_for_plot) else NULL}+
+    {if (length(metric_name_to_plot)>1) facet_wrap(~ metric_name, ncol = facet_cols, 
+                                                   labeller = as_labeller(chosen_output_labeller)) else NULL}+
     scale_x_continuous(breaks = c(10, 30, 50, 70, 90))+
     scale_color_manual(values = c(palette_orange_dark[3], palette_pink_purple[3]))+
     scale_fill_manual(values = c(palette_orange_dark[3], palette_pink_purple[3]))+

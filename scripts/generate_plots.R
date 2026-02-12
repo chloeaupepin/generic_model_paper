@@ -193,9 +193,12 @@ plot_antibiotic_metric_both_bacteria(data1 = results_to_plot_antibiotic_Saureus,
 
 plot_antibiotic_metric_both_bacteria(data1 = results_to_plot_antibiotic_Saureus,
                                      data2 = results_to_plot_antibiotic_Ecoli,
-                                     metric_name_to_plot = c("prc_red_inccumI","prc_red_inccumIs","prc_red_inccumIr"),
-                                     chosen_shapes = shapes)
+                                     metric_name_to_plot = c("prc_red_inccumI","prc_red_inccumIs","prc_red_inccumIr", "prc_red_prop_inccumIr",
+                                                             "prc_red_prevC", "prc_red_prevCr", "prc_red_prevCs", "prc_red_prop_prevCr"),
+                                     chosen_shapes = shapes,
+                                     facet_cols = 4)
 
+ggsave(paste0("figures/figure7.png"), width = 15, height = 10)
 
 
 #### Create figure files ####
