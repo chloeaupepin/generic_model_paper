@@ -59,7 +59,7 @@ for(folder_name in folder_names){
                       hrefs = c(0, -50),
                       vrefs = c(30),
                       ylim_values = c(-100, 1))
-  ggsave(here::here("figures",folder_name,"prc_red_inccumI.png"), width = 10, height = 7)
+  ggsave(here::here("figures",folder_name,"prc_red_inccumI.png"), width = 12, height = 7)
   
 
   plot_vaccine_metric(data = chosen_results_to_plot,
@@ -72,7 +72,7 @@ for(folder_name in folder_names){
                       hrefs = c(0, -50),
                       vrefs = c(30),
                       ylim_values = c(-100, 1))
-  ggsave(here::here("figures",folder_name,"prc_red_inccumIr.png"), width = 10, height = 7)
+  ggsave(here::here("figures",folder_name,"prc_red_inccumIr.png"), width = 12, height = 7)
   
   plot_vaccine_metric(data = chosen_results_to_plot,
                       metric_name_to_plot = c("prc_red_inccumIs", 
@@ -84,7 +84,7 @@ for(folder_name in folder_names){
                       hrefs = c(0, -50),
                       vrefs = c(30),
                       ylim_values = c(-100, 1))
-  ggsave(here::here("figures",folder_name,"prc_red_inccumIs.png"), width = 10, height = 7)
+  ggsave(here::here("figures",folder_name,"prc_red_inccumIs.png"), width = 12, height = 7)
   
   plot_vaccine_metric(data = chosen_results_to_plot,
                       metric_name_to_plot = c("prc_red_prevC", 
@@ -95,7 +95,7 @@ for(folder_name in folder_names){
                       chosen_palette = chosen_palette,
                       hrefs = c(0, -50),
                       vrefs = c(30))
-  ggsave(here::here("figures",folder_name,"prc_red_prevC.png"), width = 10, height = 7)
+  ggsave(here::here("figures",folder_name,"prc_red_prevC.png"), width = 12, height = 7)
   
   plot_vaccine_metric(data = chosen_results_to_plot,
                       metric_name_to_plot = c("prc_red_prevCr", 
@@ -106,7 +106,7 @@ for(folder_name in folder_names){
                       chosen_palette = chosen_palette,
                       hrefs = c(0, -50),
                       vrefs = c(30))
-  ggsave(here::here("figures",folder_name,"prc_red_prevCr.png"), width = 10, height = 7)
+  ggsave(here::here("figures",folder_name,"prc_red_prevCr.png"), width = 12, height = 7)
   
 
   plot_vaccine_metric(data = chosen_results_to_plot,
@@ -119,7 +119,7 @@ for(folder_name in folder_names){
                       hrefs = c(0),
                       vrefs = c(30))
 
-  ggsave(here::here("figures",folder_name,"prc_red_prop_prevCIr.png"), width = 10, height = 7)
+  ggsave(here::here("figures",folder_name,"prc_red_prop_prevCIr.png"), width = 12, height = 7)
   
 
   plot_vaccine_metric(data = chosen_results_to_plot,
@@ -131,7 +131,7 @@ for(folder_name in folder_names){
                       chosen_palette = chosen_palette,
                       hrefs = c(0),
                       vrefs = c(30))
-  ggsave(here::here("figures",folder_name,paste0("prc_red_prop_prevCr.png")), width = 10, height = 7)
+  ggsave(here::here("figures",folder_name,paste0("prc_red_prop_prevCr.png")), width = 12, height = 7)
   
 
   plot_vaccine_metric(data = results_to_plot,
@@ -174,7 +174,7 @@ plot_vaccine_metric_both_bacteria(data1 = results_to_plot_Saureus,
                                   hrefs = c(),
                                   vrefs = c(30),
                                   logscale = T)
-ggsave(here::here("figures","figure5.png"), width = 12, height = 5)
+ggsave(here::here("figures","figure5.png"), width = 14, height = 5)
 
 
 #### Plot combined antibiotic impact ####
