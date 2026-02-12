@@ -198,7 +198,7 @@ plot_antibiotic_metric_both_bacteria(data1 = results_to_plot_antibiotic_Saureus,
                                      chosen_shapes = shapes,
                                      facet_cols = 4)
 
-ggsave(paste0("figures/figure7.png"), width = 15, height = 10)
+ggsave(paste0("figures/figure7.png"), width = 12, height = 7)
 
 
 #### Create figure files ####
