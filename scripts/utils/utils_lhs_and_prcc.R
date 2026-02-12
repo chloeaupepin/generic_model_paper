@@ -60,9 +60,51 @@ compute_prcc_epi_multi_outputs <- function(input_df, outputs,outputs_order){
   return(epi_prcc_df)
 }
 
-# plots with color on parameters
-plot_prcc_epi_multi_color <- function(epi_prcc_df, column_nbr, plot_title){
-  epi_prcc_df <- epi_prcc_df %>%
+output_labeller = c("prc_red_inccumI" = "Relative reduction of \ncumulative incidence \nof all infections",
+                    "prc_red_inccumIs" = "Relative reduction of \ncumulative incidence \nof sensitive infections",
+                    "prc_red_inccumIr" = "Relative reduction of \ncumulative incidence \nof resistant infections",
+                    "inccumI" = "Cumulative incidence of \nall infections",
+                    "inccumIs" = "Cumulative incidence of \nsensitive infections",
+                    "inccumIr" = "Cumulative incidence of \nresistant infections",
+                    "prop_inccumIr" = "Proportion of cumulative \nincidence of infections \ndue to resistant infections",
+                    "prc_red_prop_inccumIr" = "Relative change of \nproportion of cumulative \nincidence of infections \ndue to resistant infections",
+                    "prc_red_prevC" = "Relative reduction of \nprevalence of all colonizations",
+                    "prc_red_prevCs" = "Relative reduction of \nprevalence of sensitive colonization",
+                    "prc_red_prevCr" = "Relative reduction of \nprevalence of resistant colonization",
+                    "prevC" = "Prevalence of \n all colonizations",
+                    "prevCs" = "Prevalence of \nsensitive colonization",
+                    "prevCr" = "Prevalence of \nresistant colonization",
+                    "prop_prevCr" = "Proportion of prevalence \nof colonization \ndue to resistant colonization",
+                    "prc_red_prop_prevCr" = "Relative change of \nproportion of prevalence \nof colonization \ndue to resistant colonization",
+                    "Coexistence condition" = "Coexistence condition"
+
+                    )
+
+param_labeller = c("betaC" = bquote("\u03B2"[C]),
+                   "betaI" = bquote("\u03B2"[I]),
+                   "f"     = "f",
+                   "as"    = "a",
+                   "time_until_recovery_without_ATB_s" = bquote("\u03C4"[rec]),
+                   "dps"   = "d",
+                   "thetasr" = bquote("\u03B8"),
+                   "prob_bystander_exposure"             = bquote(p[by]),
+                   "time_until_decolo_by_bystander_ATB"  = bquote("\u03C4"["dec,by"]),
+                   "prob_minority_strain_when_colonised" = bquote(p["min,C"]),
+                   "prob_specific_exposure"              = bquote(p["sp,s"]),
+                   "time_until_decolo_by_specific_ATB"   = bquote("\u03C4"["dec,sp,s"]),
+                   "prob_minority_strain_when_infected" = bquote(p["min,I"]),
+                   "prob_specific_exposure_r"              = bquote(p["sp,r"]),
+                   "time_until_decolo_by_specific_ATB_r"   = bquote("\u03C4"["dec,sp,r"]),
+                   "Vperc" = bquote(V["perc"]),
+                   "vftcs" = bquote(v[a]),
+                   "vfds"= bquote(v[d]),
+                   "vfis" = bquote(v[i]),
+                   "vfrs" = bquote(v[r]))
+
+param_category_colors = c("bacteria" = "#E19BE1", "bystander antibiotic exposure" = "#FFCC31", "specific antibiotic exposure" = "#FF8000", "vaccine" = "#9BB4E9")
+
+prepare_for_prcc_plot <- function(epi_prcc_df){
+  epi_prcc_df %>%
     mutate(param_category = case_when(
       param %in% c("betaC","betaI","f","as","time_until_recovery_without_ATB_s","dps", "thetasr") ~ "bacteria",
       param %in% c("prob_bystander_exposure" ,"time_until_decolo_by_bystander_ATB","prob_minority_strain_when_colonised") ~ "bystander antibiotic exposure",
@@ -76,6 +118,14 @@ plot_prcc_epi_multi_color <- function(epi_prcc_df, column_nbr, plot_title){
                                      "prob_minority_strain_when_colonised","time_until_decolo_by_bystander_ATB","prob_bystander_exposure" ,
                                      "time_until_recovery_without_ATB_s","thetasr","as","dps","f","betaI","betaC"))
     )
+}
+
+# plots with color on parameters
+plot_prcc_epi_multi_color <- function(epi_prcc_df, column_nbr, chosen_output_labeller = output_labeller,
+                                      chosen_param_category_colors = param_category_colors,chosen_param_labeller = param_labeller){
+  
+  epi_prcc_df <- prepare_for_prcc_plot(epi_prcc_df)
+  
   p_epi_1 <- epi_prcc_df %>%
     filter(output %in% c("prc_red_inccumI","prc_red_inccumIs","prc_red_inccumIr","inccumI","inccumIs","inccumIr","prop_inccumIr", "prc_red_prop_inccumIr")) %>%
     ggplot(aes(x = param, y = prcc, fill = param_category)) +
@@ -84,36 +134,9 @@ plot_prcc_epi_multi_color <- function(epi_prcc_df, column_nbr, plot_title){
     ylim(-1,1)+
     coord_flip() +
     facet_wrap(~output, ncol = column_nbr, 
-               labeller = as_labeller(c("prc_red_inccumI" = "Relative reduction of \ncumulative incidence \nof all infections",
-                                        "prc_red_inccumIs" = "Relative reduction of \ncumulative incidence \nof sensitive infections",
-                                        "prc_red_inccumIr" = "Relative reduction of \ncumulative incidence \nof resistant infections",
-                                        "inccumI" = "Cumulative incidence of \nall infections",
-                                        "inccumIs" = "Cumulative incidence of \nsensitive infections",
-                                        "inccumIr" = "Cumulative incidence of \nresistant infections",
-                                        "prop_inccumIr" = "Proportion of cumulative \nincidence of infections \ndue to resistant infections",
-                                        "prc_red_prop_inccumIr" = "Relative change of \nproportion of cumulative \nincidence of infections \ndue to resistant infections"
-               )))+
-    scale_fill_manual(values = c("bacteria" = "#E19BE1", "bystander antibiotic exposure" = "#FFCC31", "specific antibiotic exposure" = "#FF8000", "vaccine" = "#9BB4E9")) +
-    scale_x_discrete(labels=c("betaC" = bquote("\u03B2"[C]),
-                              "betaI" = bquote("\u03B2"[I]),
-                              "f"     = "f",
-                              "as"    = "a",
-                              "time_until_recovery_without_ATB_s" = bquote("\u03C4"[rec]),
-                              "dps"   = "d",
-                              "thetasr" = bquote("\u03B8"),
-                              "prob_bystander_exposure"             = bquote(p[by]),
-                              "time_until_decolo_by_bystander_ATB"  = bquote("\u03C4"["dec,by"]),
-                              "prob_minority_strain_when_colonised" = bquote(p["min,C"]),
-                              "prob_specific_exposure"              = bquote(p["sp,s"]),
-                              "time_until_decolo_by_specific_ATB"   = bquote("\u03C4"["dec,sp,s"]),
-                              "prob_minority_strain_when_infected" = bquote(p["min,I"]),
-                              "prob_specific_exposure_r"              = bquote(p["sp,r"]),
-                              "time_until_decolo_by_specific_ATB_r"   = bquote("\u03C4"["dec,sp,r"]),
-                              "Vperc" = bquote(V["perc"]),
-                              "vftcs" = bquote(v[a]),
-                              "vfds"= bquote(v[d]),
-                              "vfis" = bquote(v[i]),
-                              "vfrs" = bquote(v[r])))+
+               labeller = as_labeller(chosen_output_labeller))+
+    scale_fill_manual(values = chosen_param_category_colors) +
+    scale_x_discrete(labels=chosen_param_labeller)+
     labs(
       title = "Cumulative incidence of infections",
       x = "Parameters",#"Variables d'entrée",
@@ -136,38 +159,11 @@ plot_prcc_epi_multi_color <- function(epi_prcc_df, column_nbr, plot_title){
     ylim(-1,1)+
     coord_flip() +
     facet_wrap(~output, ncol = column_nbr, 
-               labeller = as_labeller(c("prc_red_prevC" = "Relative reduction of \nprevalence of all colonizations",
-                                        "prc_red_prevCs" = "Relative reduction of \nprevalence of sensitive colonization",
-                                        "prc_red_prevCr" = "Relative reduction of \nprevalence of resistant colonization",
-                                        "prevC" = "Prevalence of \n all colonizations",
-                                        "prevCs" = "Prevalence of \nsensitive colonization",
-                                        "prevCr" = "Prevalence of \nresistant colonization",
-                                        "prop_prevCr" = "Proportion of prevalence \nof colonization \ndue to resistant colonization",
-                                        "prc_red_prop_prevCr" = "Relative change of \nproportion of prevalence \nof colonization \ndue to resistant colonization")))+
-    scale_fill_manual(values = c("bacteria" = "#E19BE1", "bystander antibiotic exposure" = "#FFCC31", "specific antibiotic exposure" = "#FF8000", "vaccine" = "#9BB4E9")) +
-    scale_x_discrete(labels=c("betaC" = bquote("\u03B2"[C]),
-                              "betaI" = bquote("\u03B2"[I]),
-                              "f"     = "f",
-                              "as"    = "a",
-                              "time_until_recovery_without_ATB_s" = bquote("\u03C4"[rec]),
-                              "dps"   = "d",
-                              "thetasr" = bquote("\u03B8"),
-                              "prob_bystander_exposure"             = bquote(p[by]),
-                              "time_until_decolo_by_bystander_ATB"  = bquote("\u03C4"["dec,by"]),
-                              "prob_minority_strain_when_colonised" = bquote(p["min,C"]),
-                              "prob_specific_exposure"              = bquote(p["sp,s"]),
-                              "time_until_decolo_by_specific_ATB"   = bquote("\u03C4"["dec,sp,s"]),
-                              "prob_minority_strain_when_infected" = bquote(p["min,I"]),
-                              "prob_specific_exposure_r"              = bquote(p["sp,r"]),
-                              "time_until_decolo_by_specific_ATB_r"   = bquote("\u03C4"["dec,sp,r"]),
-                              "Vperc" = bquote(V["perc"]),
-                              "vftcs" = bquote(v[a]),
-                              "vfds"= bquote(v[d]),
-                              "vfis" = bquote(v[i]),
-                              "vfrs" = bquote(v[r])))+
+               labeller = as_labeller(chosen_output_labeller))+
+    scale_fill_manual(values = chosen_param_category_colors) +
+    scale_x_discrete(labels=chosen_param_labeller)+
     labs(
       title = "Prevalence of colonization",
-      #subtitle = paste0(plot_title, input_model, " ; ", number_of_samples, " échantillons"),
       x = "Parameters",#"Variables d'entrée",
       y = "PRCC coefficient", #"Coefficient PRCC",
       fill = "Parameter category:"
@@ -184,59 +180,22 @@ plot_prcc_epi_multi_color <- function(epi_prcc_df, column_nbr, plot_title){
   return(p_epi)
 }
 
-plot_prcc_epi_multi_color_only_inccum <- function(epi_prcc_df, column_nbr, plot_title){
-  epi_prcc_df <- epi_prcc_df %>%
-    mutate(param_category = case_when(
-      param %in% c("betaC","betaI","f","as","time_until_recovery_without_ATB_s","dps", "thetasr") ~ "bacteria",
-      param %in% c("prob_bystander_exposure" ,"time_until_decolo_by_bystander_ATB","prob_minority_strain_when_colonised") ~ "bystander\nantibiotic\nexposure",
-      param %in% c("prob_specific_exposure","time_until_decolo_by_specific_ATB","prob_minority_strain_when_infected" ,
-                   "prob_specific_exposure_r" ,"time_until_decolo_by_specific_ATB_r") ~ "specific\nantibiotic\nexposure",
-      param %in% c("Vperc","vftcs", "vfis", "vfds", "vfrs") ~"vaccine"
-    ),
-    param = factor(param, levels = c("vfrs", "vfis","vfds","vftcs","Vperc",
-                                     "time_until_decolo_by_specific_ATB_r","prob_specific_exposure_r" ,
-                                     "prob_minority_strain_when_infected","time_until_decolo_by_specific_ATB", "prob_specific_exposure",
-                                     "prob_minority_strain_when_colonised","time_until_decolo_by_bystander_ATB","prob_bystander_exposure" ,
-                                     "time_until_recovery_without_ATB_s","thetasr","as","dps","f","betaI","betaC"))
-    )
+plot_prcc_epi_multi_color_only_inccum_or_prev <- function(epi_prcc_df, column_nbr,cols_choice = c("prc_red_inccumI","prc_red_inccumIs","prc_red_inccumIr","inccumI","inccumIs","inccumIr","prop_inccumIr","prc_red_prop_inccumIr") ,chosen_output_labeller = output_labeller,
+                                                  chosen_param_category_colors = param_category_colors,chosen_param_labeller = param_labeller){
+  
+  epi_prcc_df <- prepare_for_prcc_plot(epi_prcc_df)
+  
   p_epi_1 <- epi_prcc_df %>%
-    filter(output %in% c("prc_red_inccumI","prc_red_inccumIs","prc_red_inccumIr","inccumI","inccumIs","inccumIr","prop_inccumIr","prc_red_prop_inccumIr")) %>%
+    filter(output %in% cols_choice) %>%
     ggplot(aes(x = param, y = prcc, fill = param_category)) +
     geom_bar(stat = "identity") +
     geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.2) +
     ylim(-1,1)+
     coord_flip() +
     facet_wrap(~output, ncol = column_nbr, 
-               labeller = as_labeller(c("prc_red_inccumI" = "Relative reduction of \ncumulative incidence of \nall infections",
-                                        "prc_red_inccumIs" = "Relative reduction of \ncumulative incidence of \nsensitive infections",
-                                        "prc_red_inccumIr" = "Relative reduction of \ncumulative incidence of \nresistant infections",
-                                        "inccumI" = "Cumulative incidence of \nall infections",
-                                        "inccumIs" = "Cumulative incidence of \nsensitive infections",
-                                        "inccumIr" = "Cumulative incidence of \nresistant infections",
-                                        "prop_inccumIr" = "Proportion of cumulative \nincidence of infections \ndue to resistant infections",
-                                        "prc_red_prop_inccumIr" = "Relative change of \nproportion of cumulative \nincidence of infections \ndue to resistant infections"
-               )))+
-    scale_fill_manual(values = c("bacteria" = "#E19BE1", "bystander\nantibiotic\nexposure" = "#FFCC31", "specific\nantibiotic\nexposure" = "#FF8000", "vaccine" = "#9BB4E9")) +
-    scale_x_discrete(labels=c("betaC" = bquote("\u03B2"[C]),
-                              "betaI" = bquote("\u03B2"[I]),
-                              "f"     = "f",
-                              "as"    = "a",
-                              "time_until_recovery_without_ATB_s" = bquote("\u03C4"[rec]),
-                              "dps"   = "d",
-                              "thetasr" = bquote("\u03B8"),
-                              "prob_bystander_exposure"             = bquote(p[by]),
-                              "time_until_decolo_by_bystander_ATB"  = bquote("\u03C4"["dec,by"]),
-                              "prob_minority_strain_when_colonised" = bquote(p["min,C"]),
-                              "prob_specific_exposure"              = bquote(p["sp,s"]),
-                              "time_until_decolo_by_specific_ATB"   = bquote("\u03C4"["dec,sp,s"]),
-                              "prob_minority_strain_when_infected" = bquote(p["min,I"]),
-                              "prob_specific_exposure_r"              = bquote(p["sp,r"]),
-                              "time_until_decolo_by_specific_ATB_r"   = bquote("\u03C4"["dec,sp,r"]),
-                              "Vperc" = bquote(V["perc"]),
-                              "vftcs" = bquote(v[a]),
-                              "vfds"= bquote(v[d]),
-                              "vfis" = bquote(v[i]),
-                              "vfrs" = bquote(v[r])))+
+               labeller = as_labeller(chosen_output_labeller))+
+    scale_fill_manual(values = chosen_param_category_colors) +
+    scale_x_discrete(labels=chosen_param_labeller)+
     labs(
       x = "Parameters",#"Variables d'entrée",
       y = "PRCC coefficient", #"Coefficient PRCC",

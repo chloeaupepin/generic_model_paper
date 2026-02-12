@@ -79,12 +79,12 @@ save(epi_prcc_df, file = here::here("files",paste0("prcc_for_eq_",number_of_samp
 
 load(file = here::here("files",paste0("prcc_for_eq_",number_of_samples,".data")))
 
-p_epi <- plot_prcc_epi_multi_color(epi_prcc_df, 4, "Au bout d'un an sans vaccination pour ")
+p_epi <- plot_prcc_epi_multi_color(epi_prcc_df, 4)
 #p_epi
 ggsave(paste0("figures/figure2.png"), plot = p_epi, width = 14, height = 9)
 
 # Run the code below if you want to have a graphic only with the cumulative incidence
-#p_epi <- plot_prcc_epi_multi_color_only_inccum(epi_prcc_df, 4, "Au bout d'un an sans vaccination pour ")
+#p_epi <- plot_prcc_epi_multi_color_only_inccum(epi_prcc_df, 4)
 #p_epi
 #ggsave(paste0("figures/figure2_only_inccum.png"), plot = p_epi, width = 18, height = 6)
 
