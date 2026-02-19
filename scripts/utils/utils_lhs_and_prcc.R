@@ -68,14 +68,14 @@ output_labeller = c("prc_red_inccumI" = "Relative reduction of \ncumulative inci
                     "inccumIr" = "Cumulative incidence of \nresistant infections",
                     "prop_inccumIr" = "Proportion of cumulative \nincidence of infections \ndue to resistant infections",
                     "prc_red_prop_inccumIr" = "Relative change of \nproportion of cumulative \nincidence of infections \ndue to resistant infections",
-                    "prc_red_prevC" = "Relative reduction of \nprevalence of all colonizations",
-                    "prc_red_prevCs" = "Relative reduction of \nprevalence of sensitive colonization",
-                    "prc_red_prevCr" = "Relative reduction of \nprevalence of resistant colonization",
-                    "prevC" = "Prevalence of \n all colonizations",
-                    "prevCs" = "Prevalence of \nsensitive colonization",
-                    "prevCr" = "Prevalence of \nresistant colonization",
-                    "prop_prevCr" = "Proportion of prevalence \nof colonization \ndue to resistant colonization",
-                    "prc_red_prop_prevCr" = "Relative change of \nproportion of prevalence \nof colonization \ndue to resistant colonization",
+                    "prc_red_prevC" = "Relative reduction of \nprevalence of all colonisations",
+                    "prc_red_prevCs" = "Relative reduction of \nprevalence of sensitive colonisation",
+                    "prc_red_prevCr" = "Relative reduction of \nprevalence of resistant colonisation",
+                    "prevC" = "Prevalence of \n all colonisations",
+                    "prevCs" = "Prevalence of \nsensitive colonisation",
+                    "prevCr" = "Prevalence of \nresistant colonisation",
+                    "prop_prevCr" = "Proportion of prevalence \nof colonisation \ndue to resistant colonisation",
+                    "prc_red_prop_prevCr" = "Relative change of \nproportion of prevalence \nof colonisation \ndue to resistant colonisation",
                     "Coexistence condition" = "Coexistence condition"
 
                     )
@@ -167,7 +167,7 @@ plot_prcc_epi_multi_color <- function(epi_prcc_df, column_nbr, chosen_output_lab
     scale_fill_manual(values = chosen_param_category_colors) +
     scale_x_discrete(labels=chosen_param_labeller)+
     labs(
-      title = "Prevalence of colonization",
+      title = "Prevalence of colonisation",
       x = "Parameters",#"Variables d'entrée",
       y = "PRCC coefficient", #"Coefficient PRCC",
       fill = "Parameter category:"

@@ -102,12 +102,13 @@ geom_vrefs <- function(x = c(30), linetype = "dashed", color = "grey") {
 }
 
 vaccine_labeller <- c(
-  "va" = "v[a]",
-  "vi" = "V[v[i]]",
-  "va_vd" = "v[a]~','~v[d]",
-  "va_vi" = "v[a]~','~v[i]",
-  "vd_vi" = "v[d]~','~v[i]",
-  "va_vd_vi" = "v[a]~','~v[d]~','~v[i]"
+  "va" = "V[a]",
+  "vd" = "V[d]",
+  "vi" = "V[i]",
+  "va_vd" = "V[a~','~d]",
+  "va_vi" = "V[a~','~i]",
+  "vd_vi" = "V[d~','~i]",
+  "va_vd_vi" = "V[a~','~d~','~i]"
 )
 
 
@@ -115,7 +116,7 @@ vaccine_labeller <- c(
 # Plot vaccine metric for each vaccine type 
 plot_vaccine_metric <- function(data,
                                 metric_name_to_plot,
-                                population_to_plot = c("Total population","Vaccinated", "Non vaccinated"),
+                                population_to_plot = c("Total population","Vaccinated", "Non-vaccinated"),
                                 vaccine_effects_to_plot = c(0.3, 0.6, 0.9),
                                 y_label,
                                 chosen_shape,
@@ -160,11 +161,12 @@ plot_vaccine_metric <- function(data,
 plot_vaccine_metric_both_bacteria <- function(data1,
                                               data2,
                                               metric_name_to_plot,
-                                              population_to_plot = c("Total population","Vaccinated", "Non vaccinated"),
+                                              population_to_plot = c("Total population","Vaccinated", "Non-vaccinated"),
                                               vaccine_effects_to_plot = c(0.3, 0.6, 0.9),
                                               y_label,
                                               chosen_shapes,
                                               chosen_palette,
+                                              chosen_vaccine_labeller = vaccine_labeller,
                                               ylim_values = NULL,
                                               hrefs,
                                               vrefs,
@@ -205,7 +207,10 @@ plot_vaccine_metric_both_bacteria <- function(data1,
     geom_vrefs(x = vrefs)+
     geom_point(aes(y = median, color = color_group, fill = color_group, shape = color_group),size = 2)+
     geom_line(aes(y = median, color = color_group)) +
-    {if (length(metric_name_to_plot)>1) facet_nested(population ~ name_renamed) else facet_nested(~ name_renamed)}+
+    {if (length(metric_name_to_plot)>1) 
+      facet_nested(population ~ name_renamed, 
+                   labeller = labeller(name_renamed = as_labeller(chosen_vaccine_labeller, default = label_parsed))) 
+      else facet_nested(~ name_renamed, labeller = labeller(name_renamed = as_labeller(chosen_vaccine_labeller, default = label_parsed)))}+
     {if(logscale) scale_y_log10(minor_breaks = minor_breaks_log())}+
     scale_x_continuous(breaks = c(10, 30, 50, 70, 90))+
     scale_color_manual(values = chosen_palette)+
@@ -246,10 +251,10 @@ output_labeller = c("prc_red_inccumI" = "Cumulative incidence \nof all infection
                     "prc_red_inccumIs" = "Cumulative incidence \nof sensitive infections",
                     "prc_red_inccumIr" = "Cumulative incidence \nof resistant infections",
                     "prc_red_prop_inccumIr" = "Proportion of cumulative \nincidence of infections \ndue to resistant infections",
-                    "prc_red_prevC" = "Prevalence of \nall colonizations",
-                    "prc_red_prevCs" = "Prevalence of \nsensitive colonization",
-                    "prc_red_prevCr" = "Prevalence of \nresistant colonization",
-                    "prc_red_prop_prevCr" = "Proportion of prevalence \nof colonization \ndue to resistant colonization"
+                    "prc_red_prevC" = "Prevalence of \nall colonisations",
+                    "prc_red_prevCs" = "Prevalence of \nsensitive colonisation",
+                    "prc_red_prevCr" = "Prevalence of \nresistant colonisation",
+                    "prc_red_prop_prevCr" = "Proportion of prevalence \nof colonisation \ndue to resistant colonisation"
                     
                     
 )
