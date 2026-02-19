@@ -5,12 +5,12 @@ library(deSolve)
 library(furrr)
 library(stringr)
 
+source(here::here("scripts", "model.R"))
+source(here::here("scripts","utils", "functions.R"))
+
 n_cores = parallel::detectCores() - 1
 plan(multisession, workers = n_cores)
 
-
-source(here::here("scripts", "model.R"))
-source(here::here("scripts","utils", "functions.R"))
 
 set.seed(123)  # global seed for reproducibility
 
@@ -21,23 +21,20 @@ population_size = 100000
 
 ## Choose bacteria 
 # S_aureus
-#bacteria = "S_aureus"
-#folder_name = "S_aureus"
-#file_name  = "S_aureus_params10.csv"
+bacteria = "S_aureus"
+folder_name = "S_aureus"
+file_name  = "S_aureus_params10.csv"
+transmission_by_infected = FALSE
 
 # E_coli
-bacteria = "E_coli"
-folder_name = "E_coli"
-file_name = "E_coli_params_primavera2.csv"
+# bacteria = "E_coli"
+# folder_name = "E_coli"
+# file_name = "E_coli_params_primavera2.csv"
+# transmission_by_infected = TRUE # if transmission is allowed, it equals transmission by colonized individuals
 
 ## Choose number of bacteria to generate
-n <- 50
+n <- 500
 
-## Is transmission by infected individuals allowed ? 
-# For S_aureus no, for E_coli yes
-# if transmission is allowed, it equals transmission by colonized individuals
-#transmission_by_infected = FALSE
-transmission_by_infected = TRUE
 
 #### Define bacteria ####
 Bacteria_params = read.csv(here::here("files",file_name)) 
@@ -71,7 +68,7 @@ if(bacteria == "S_aureus"){
   )
 }
 
-df_bacteria <- add_variability(Bacteria_params, cols_to_noise, n ,0.05) 
+df_bacteria <- add_variability(Bacteria_params, cols_to_noise, n ,0.1) 
 
 df_bacteria <- set_resistant_and_sensitive_param_equal(df_bacteria, c("dpr", "ar", "time_until_recovery_without_ATB_r"))
 
@@ -150,12 +147,12 @@ results_to_plot <- results_with_outputs %>%
   compute_statistics(starts_with(c("prc_red_", "averted_")))%>%
   mutate(
     population = case_when(
-      str_detect(metric_name, "non_vaccinated") ~ "Non vaccinated",
+      str_detect(metric_name, "non_vaccinated") ~ "Non-vaccinated",
       str_detect(metric_name, "_vaccinated") ~ "Vaccinated",
       TRUE ~ "Total population"
     )
   ) %>%
-  mutate(population = factor(population, levels = c("Total population", "Vaccinated", "Non vaccinated")))
+  mutate(population = factor(population, levels = c("Total population", "Vaccinated", "Non-vaccinated")))
 
 # save results_to_plot
 save(results_to_plot, file = here::here("files",folder_name,"results_to_plot.RData"))

@@ -7,12 +7,13 @@ library(purrr)
 library(furrr)
 library(tidyr)
 
-n_cores = parallel::detectCores() - 1
-plan(multisession, workers = n_cores)
-
 source(here::here("scripts","utils","utils_lhs_and_prcc.R"))
 source(here::here("scripts","utils","functions.R"))
 source(here::here("scripts","model.R"))
+
+
+n_cores = parallel::detectCores() - 1
+plan(multisession, workers = n_cores)
 
 
 ###############################################################################
@@ -26,7 +27,7 @@ Bacteria_params = read.csv(here::here("files","S_aureus_params10.csv"))
 
 # list of parameter distributions
 dist <- function(p){
-  qunif(p, min = 1-0.05, max = 1 + 0.05)
+  qunif(p, min = 1-0.1, max = 1 + 0.1)
 }
 param_distributions = list("betaC" = function(p) Bacteria_params$betaC * dist(p),
                            "f"     = function(p) Bacteria_params$f * dist(p),
@@ -133,10 +134,11 @@ epi_prcc_df <- compute_prcc_epi_multi_outputs(inputs, outputs, outputs_of_intere
 
 epi_prcc_df_combined <- bind_rows(epi_prcc_df, epi_prcc_df_condition)
 
-p_epi_combined <- plot_prcc_epi_multi_color_only_inccum_or_prev(epi_prcc_df_combined , 2, c("Coexistence condition","prop_prevCr") )
+p_epi_combined <- plot_prcc_epi_multi_color_only_inccum_or_prev(epi_prcc_df_combined , 2, c("Coexistence condition","prop_prevCr") ) +
+  theme(legend.key.spacing.y = unit(0.5, "cm"))
 p_epi_combined
 
-ggsave(paste0("figures/why_keep_f_constant_Saureus.png"), plot = p_epi_combined, width = 12, height = 5)
+ggsave(paste0("figures/why_keep_f_constant_Saureus.png"), plot = p_epi_combined, width = 11, height = 5)
 
 ###############################################################################
 # 2. E. coli
@@ -162,7 +164,7 @@ cols_to_noise <- c(
 
 # Define distribution function
 dist <- function(p){
-  qunif(p, min = 1-0.05, max = 1 + 0.05)
+  qunif(p, min = 1-0.1, max = 1 + 0.1)
 }
 
 # List of distributions
@@ -260,8 +262,9 @@ epi_prcc_df <- compute_prcc_epi_multi_outputs(inputs, outputs, outputs_of_intere
 
 epi_prcc_df_combined <- bind_rows(epi_prcc_df, epi_prcc_df_condition)
 
-p_epi_combined <- plot_prcc_epi_multi_color_only_inccum_or_prev(epi_prcc_df_combined , 2, c("Coexistence condition","prop_prevCr") )
+p_epi_combined <- plot_prcc_epi_multi_color_only_inccum_or_prev(epi_prcc_df_combined , 2, c("Coexistence condition","prop_prevCr") )  +
+  theme(legend.key.spacing.y = unit(0.5, "cm"))
 p_epi_combined
 
-ggsave(paste0("figures/why_keep_f_constant_Ecoli.png"), plot = p_epi_combined, width = 12, height = 5)
+ggsave(paste0("figures/why_keep_f_constant_Ecoli.png"), plot = p_epi_combined, width = 11, height = 5)
 
