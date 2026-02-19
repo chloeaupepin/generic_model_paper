@@ -200,7 +200,7 @@ plot_prcc_epi_multi_color_only_inccum_or_prev <- function(epi_prcc_df, column_nb
     facet_wrap(~output, ncol = column_nbr, 
                labeller = as_labeller(chosen_output_labeller))+
     scale_fill_manual(values = chosen_param_category_colors, 
-                      labels = c("bacteria", "bystander\nantibiotic\nexposure", "specific\nantibiotic\nexposure")) +
+                      labels = c("bacteria", "bystander\nantibiotic\nexposure", "specific\nantibiotic\nexposure", "vaccine")) +
     scale_x_discrete(labels=chosen_param_labeller)+
     labs(
       x = "Parameters",#"Variables d'entrée",

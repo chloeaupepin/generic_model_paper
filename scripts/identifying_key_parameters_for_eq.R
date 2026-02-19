@@ -14,6 +14,8 @@ source(here::here("scripts","model.R"))
 n_cores = parallel::detectCores() - 1
 plan(multisession, workers = n_cores)
 
+number_of_samples <- 5000
+set.seed(1234)
 
 #### Define parameter distributions ####
 
@@ -40,8 +42,6 @@ params_fixed_values = data.frame(
 
 #### Create LHS dataframe ####
 
-number_of_samples <- 5000
-set.seed(1234)
 
 lhs_df <- generate_lhs(number_of_samples, param_distributions, params_fixed_values)
 
@@ -87,19 +87,22 @@ ggsave(paste0("figures/figure2.png"), plot = p_epi, width = 14, height = 9)
 # The code below allows you to have some parts of same graphic separately
 # Only with the cumulative incidence of all infections
 p_epi <- plot_prcc_epi_multi_color_only_inccum_or_prev(epi_prcc_df, 4, 
-                                                       cols_choice = c("inccumI"))
+                                                       cols_choice = c("inccumI"))+
+  theme(legend.key.spacing.y = unit(0.5, "cm"))
 p_epi
 ggsave(paste0("figures/figure2_only_inccumI.png"), plot = p_epi, width = 7, height = 5)
 
 # Only with the cumulative incidence of sensitive, resistant infections and proportion
 p_epi <- plot_prcc_epi_multi_color_only_inccum_or_prev(epi_prcc_df, 4, 
-                                                       cols_choice = c("inccumIs","inccumIr", "prop_inccumIr"))
+                                                       cols_choice = c("inccumIs","inccumIr", "prop_inccumIr"))+
+  theme(legend.key.spacing.y = unit(0.5, "cm"))
 p_epi
 ggsave(paste0("figures/figure2_only_inccumIs_Ir_prop.png"), plot = p_epi, width = 14, height = 5)
 
 # Run the code below if you want to have a graphic only with the cumulative incidence
 p_epi <- plot_prcc_epi_multi_color_only_inccum_or_prev(epi_prcc_df, 4, 
-                                                       cols_choice = c("prop_inccumIr"))
+                                                       cols_choice = c("prop_inccumIr"))+
+  theme(legend.key.spacing.y = unit(0.5, "cm"))
 p_epi
 ggsave(paste0("figures/figure2_only_prop_inccum.png"), plot = p_epi, width = 7, height = 5)
 
