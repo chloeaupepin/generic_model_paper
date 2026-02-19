@@ -34,6 +34,17 @@ plot_histogram_eq_results(eq_results_Ecoli,c(0.9,1),c(0,0.2) )
 
 plot_histogram_eq_results_two_bacteria(eq_results_Saureus, eq_results_Ecoli)
 
+View(eq_results_Ecoli %>%
+       mutate(total_colonized = (eq_Csnv + eq_Crnv)/100000*100,
+              resistance_ratio = eq_Crnv / (eq_Csnv + eq_Crnv)*100,
+              incidenceI = as*eq_Csnv + ar*eq_Crnv) %>%
+       pivot_longer(cols = c(total_colonized, resistance_ratio, incidenceI), names_to = "metric", values_to = "value") %>%
+       group_by(metric) %>%
+       summarise(
+         min = round(min(value),4),
+         max = round(max(value),4),
+       ))
+
 
 #### Plot vaccination impact analysis ####
 
@@ -60,6 +71,19 @@ for(folder_name in folder_names){
                       vrefs = c(30),
                       ylim_values = c(-100, 1))
   ggsave(here::here("figures",folder_name,"prc_red_inccumI.png"), width = 12, height = 7)
+  
+  plot_vaccine_metric(data = chosen_results_to_plot,
+                      metric_name_to_plot = c("prc_red_inccumI", 
+                                              "prc_red_inccumI_non_vaccinated", 
+                                              "prc_red_inccumI_vaccinated"),
+                      vaccine_effects_to_plot = c(0.3),
+                      y_label = "Relative change due to vaccination (%)",
+                      chosen_shape = chosen_shape,
+                      chosen_palette = chosen_palette,
+                      hrefs = c(0, -50),
+                      vrefs = c(30),
+                      ylim_values = c(-100, 1))
+  ggsave(here::here("figures",folder_name,"prc_red_inccumI_1.png"), width = 12, height = 7)
   
 
   plot_vaccine_metric(data = chosen_results_to_plot,
