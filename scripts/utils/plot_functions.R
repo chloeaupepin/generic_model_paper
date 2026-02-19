@@ -101,6 +101,17 @@ geom_vrefs <- function(x = c(30), linetype = "dashed", color = "grey") {
   lapply(x, function(xval) geom_vline(xintercept = xval, linetype = linetype, color = color))
 }
 
+vaccine_labeller <- c(
+  "va" = "v[a]",
+  "vi" = "V[v[i]]",
+  "va_vd" = "v[a]~','~v[d]",
+  "va_vi" = "v[a]~','~v[i]",
+  "vd_vi" = "v[d]~','~v[i]",
+  "va_vd_vi" = "v[a]~','~v[d]~','~v[i]"
+)
+
+
+
 # Plot vaccine metric for each vaccine type 
 plot_vaccine_metric <- function(data,
                                 metric_name_to_plot,
@@ -109,6 +120,7 @@ plot_vaccine_metric <- function(data,
                                 y_label,
                                 chosen_shape,
                                 chosen_palette,
+                                chosen_vaccine_labeller = vaccine_labeller,
                                 ylim_values = NULL,
                                 hrefs,
                                 vrefs){
@@ -126,7 +138,10 @@ plot_vaccine_metric <- function(data,
     geom_point(aes(y = median, color = varying_param, fill = varying_param), 
                shape = chosen_shape, size = 2)+
     geom_line(aes(y = median, color = varying_param)) +
-    {if (length(metric_name_to_plot)>1) facet_nested(population ~ name_renamed) else facet_nested(~ name_renamed)}+
+    {if (length(metric_name_to_plot)>1) 
+      facet_nested(population ~ name_renamed, 
+                   labeller = labeller(name_renamed = as_labeller(chosen_vaccine_labeller, default = label_parsed))) 
+      else facet_nested(~ name_renamed, labeller = labeller(name_renamed = as_labeller(chosen_vaccine_labeller, default = label_parsed)))}+
     scale_x_continuous(breaks = c(10, 30, 50, 70, 90))+
     scale_color_manual(values = chosen_palette)+
     scale_fill_manual(values = chosen_palette)+
