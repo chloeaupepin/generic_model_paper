@@ -123,3 +123,8 @@ p_epi <- plot_prcc_epi_multi_color_only_inccum_or_prev(epi_prcc_df, 4)+
 p_epi
 ggsave(paste0("figures/figure3_only_inccum.png"), plot = p_epi, width = 18, height = 6)
 
+# Run the code below if you want to have a graphic only with the cumulative incidence
+p_epi <- plot_prcc_epi_multi_color_only_inccum_or_prev(epi_prcc_df, 4, cols_choice = c("prc_red_prevC","prc_red_prevCs","prc_red_prevCr","prc_red_prop_prevCr"))+
+  theme(legend.key.spacing.y = unit(0.5, "cm"))
+p_epi
+ggsave(paste0("figures/figure3_only_prev.png"), plot = p_epi, width = 18, height = 6)

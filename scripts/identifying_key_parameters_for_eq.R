@@ -85,6 +85,21 @@ p_epi
 ggsave(paste0("figures/figure2.png"), plot = p_epi, width = 14, height = 9)
 
 # The code below allows you to have some parts of same graphic separately
+# Only with all cumulative infections
+p_epi <- plot_prcc_epi_multi_color_only_inccum_or_prev(epi_prcc_df, 4, 
+                                                       cols_choice = c("inccumI","inccumIs","inccumIr", "prop_inccumIr"))+
+  theme(legend.key.spacing.y = unit(0.5, "cm"))
+p_epi
+ggsave(paste0("figures/figure2_only_inccum.png"), plot = p_epi, width = 16, height = 5)
+
+# Only with all prevalences
+p_epi <- plot_prcc_epi_multi_color_only_inccum_or_prev(epi_prcc_df, 4, 
+                                                       cols_choice = c("prevC","prevCs","prevCr","prop_prevCr"))+
+  theme(legend.key.spacing.y = unit(0.5, "cm"))
+p_epi
+ggsave(paste0("figures/figure2_only_prev.png"), plot = p_epi, width = 16, height = 5)
+
+
 # Only with the cumulative incidence of all infections
 p_epi <- plot_prcc_epi_multi_color_only_inccum_or_prev(epi_prcc_df, 4, 
                                                        cols_choice = c("inccumI"))+
