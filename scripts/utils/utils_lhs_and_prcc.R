@@ -184,7 +184,8 @@ plot_prcc_epi_multi_color <- function(epi_prcc_df, column_nbr, chosen_output_lab
   return(p_epi)
 }
 
-plot_prcc_epi_multi_color_only_inccum_or_prev <- function(epi_prcc_df, column_nbr,cols_choice = c("prc_red_inccumI","prc_red_inccumIs","prc_red_inccumIr","inccumI","inccumIs","inccumIr","prop_inccumIr","prc_red_prop_inccumIr") ,chosen_output_labeller = output_labeller,
+plot_prcc_epi_multi_color_only_inccum_or_prev <- function(epi_prcc_df, column_nbr,
+                                                          cols_choice = c("prc_red_inccumI","prc_red_inccumIs","prc_red_inccumIr","inccumI","inccumIs","inccumIr","prop_inccumIr","prc_red_prop_inccumIr") ,chosen_output_labeller = output_labeller,
                                                   chosen_param_category_colors = param_category_colors,chosen_param_labeller = param_labeller){
   
   epi_prcc_df <- prepare_for_prcc_plot(epi_prcc_df)
@@ -198,7 +199,8 @@ plot_prcc_epi_multi_color_only_inccum_or_prev <- function(epi_prcc_df, column_nb
     coord_flip() +
     facet_wrap(~output, ncol = column_nbr, 
                labeller = as_labeller(chosen_output_labeller))+
-    scale_fill_manual(values = chosen_param_category_colors) +
+    scale_fill_manual(values = chosen_param_category_colors, 
+                      labels = c("bacteria", "bystander\nantibiotic\nexposure", "specific\nantibiotic\nexposure")) +
     scale_x_discrete(labels=chosen_param_labeller)+
     labs(
       x = "Parameters",#"Variables d'entrée",

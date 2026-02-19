@@ -7,12 +7,13 @@ library(purrr)
 library(furrr)
 library(tidyr)
 
-n_cores = parallel::detectCores() - 1
-plan(multisession, workers = n_cores)
-
 source(here::here("scripts","utils","utils_lhs_and_prcc.R"))
 source(here::here("scripts","utils","functions.R"))
 source(here::here("scripts","model.R"))
+
+n_cores = parallel::detectCores() - 1
+plan(multisession, workers = n_cores)
+
 
 #### Define parameter distributions ####
 
@@ -80,11 +81,25 @@ save(epi_prcc_df, file = here::here("files",paste0("prcc_for_eq_",number_of_samp
 load(file = here::here("files",paste0("prcc_for_eq_",number_of_samples,".data")))
 
 p_epi <- plot_prcc_epi_multi_color(epi_prcc_df, 4)
-#p_epi
+p_epi
 ggsave(paste0("figures/figure2.png"), plot = p_epi, width = 14, height = 9)
 
+# The code below allows you to have some parts of same graphic separately
+# Only with the cumulative incidence of all infections
+p_epi <- plot_prcc_epi_multi_color_only_inccum_or_prev(epi_prcc_df, 4, 
+                                                       cols_choice = c("inccumI"))
+p_epi
+ggsave(paste0("figures/figure2_only_inccumI.png"), plot = p_epi, width = 7, height = 5)
+
+# Only with the cumulative incidence of sensitive, resistant infections and proportion
+p_epi <- plot_prcc_epi_multi_color_only_inccum_or_prev(epi_prcc_df, 4, 
+                                                       cols_choice = c("inccumIs","inccumIr", "prop_inccumIr"))
+p_epi
+ggsave(paste0("figures/figure2_only_inccumIs_Ir_prop.png"), plot = p_epi, width = 14, height = 5)
+
 # Run the code below if you want to have a graphic only with the cumulative incidence
-#p_epi <- plot_prcc_epi_multi_color_only_inccum(epi_prcc_df, 4)
-#p_epi
-#ggsave(paste0("figures/figure2_only_inccum.png"), plot = p_epi, width = 18, height = 6)
+p_epi <- plot_prcc_epi_multi_color_only_inccum_or_prev(epi_prcc_df, 4, 
+                                                       cols_choice = c("prop_inccumIr"))
+p_epi
+ggsave(paste0("figures/figure2_only_prop_inccum.png"), plot = p_epi, width = 7, height = 5)
 
