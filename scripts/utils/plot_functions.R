@@ -324,7 +324,7 @@ plot_R0 <- function(data,
       facet_nested(metric_name ~ name_renamed, 
                    labeller = labeller(name_renamed = as_labeller(chosen_vaccine_labeller, default = label_parsed))) 
       else facet_nested(~ name_renamed, labeller = labeller(name_renamed = as_labeller(chosen_vaccine_labeller, default = label_parsed)))}+
-    scale_x_continuous(breaks = c(0,10, 30, 50, 70, 90,100), minor_breaks = c(20, 40, 60, 80))+
+    scale_x_continuous(breaks = c(10, 30, 50, 70, 90))+
     scale_color_manual(values = chosen_palette)+
     scale_fill_manual(values = chosen_palette)+
     labs(x = "Vaccine coverage (%)",

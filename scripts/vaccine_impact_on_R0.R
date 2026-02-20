@@ -6,6 +6,7 @@ library(ggplot2)
 library(ggh4x)
 library(scales)
 library(furrr)
+library(ggrepel)
 
 source(here::here("scripts","utils", "functions.R"))
 source(here::here("scripts", "utils", "plot_functions.R"))
@@ -19,14 +20,14 @@ N = 100000
 
 ## Choose bacteria 
 # S_aureus
-# bacteria = "S_aureus"
-# folder_name = "S_aureus"
-# file_name  = "S_aureus_params10.csv"
+bacteria = "S_aureus"
+folder_name = "S_aureus"
+file_name  = "S_aureus_params10.csv"
 
 # E_coli
-bacteria = "E_coli"
-folder_name = "E_coli"
-file_name = "E_coli_params_primavera3.csv"
+# bacteria = "E_coli"
+# folder_name = "E_coli"
+# file_name = "E_coli_params_primavera3.csv"
 
 #### Load previous analysis equilibrium ####
 
@@ -59,6 +60,19 @@ results <- results %>%
 
 results <- clean_vaccine_related_parameters(results)
 
+# Find best vaccine coverage
+results_best_Vperc <- results %>%
+  #filter(name == "vftc_vfd_vfi", vftcs == 0.9,  bacteria_id == 0, Vperc == 0) %>%
+  apply_function_on_df(vaccine_coverage_threshold_for_R0, "best_Vperc")%>%
+  mutate(best_Vperc = unlist(best_Vperc))
+
+results_best_Vperc_stats <- results_best_Vperc %>%
+  group_by(name_renamed, varying_param) %>%
+  summarise(median = median(best_Vperc),
+            q025 = quantile(best_Vperc, 0.025, na.rm = TRUE),
+            q975 = quantile(best_Vperc, 0.975, na.rm = TRUE),
+            .groups = "drop")
+
 # Compute statistics
 results_stats <- compute_statistics(results, c("R0", "R0s", "R0r", "R0s_R0r"))
 
@@ -73,8 +87,10 @@ plot_R0(data = results_stats,
         chosen_shape = chosen_shape,
         chosen_palette = chosen_palette,
         hrefs = c(1),
-        vrefs = c())
-ggsave(here::here("figures",folder_name,"R0.png"), width = 12, height = 5)
+        vrefs = c()) +
+  geom_point(data = results_best_Vperc_stats %>% filter(median > 0, median < 1), mapping = aes(x = median*100, y = 1, color = varying_param), shape = 8,size = 2, show.legend = FALSE)+
+  geom_label_repel(data = results_best_Vperc_stats %>% filter(median > 0, median < 1), mapping = aes(x = median*100, y = 1, label = paste0(round(median*100),"%"), color = varying_param), size = 4, show.legend = F)
+ggsave(here::here("figures",folder_name,"R0.png"), width = 14, height = 4)
 
 plot_R0(data = results_stats,
         metric_name_to_plot = c("R0s_R0r"),

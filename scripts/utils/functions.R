@@ -87,6 +87,61 @@ SCISsrV.reprod_nbrs <- function(param){
   
 }
 
+
+vaccine_coverage_threshold_for_R0 <- function(param){
+  with(as.list(c(param)), {
+    lambdaA = prob_bystander_exposure * 1/time_until_decolo_by_bystander_ATB*(1-prob_minority_strain_when_colonised)
+    phiA = prob_bystander_exposure * 1/time_until_decolo_by_bystander_ATB*prob_minority_strain_when_colonised
+    
+    lambdaA_I = (1-prob_specific_exposure) * prob_bystander_exposure * 1/time_until_decolo_by_bystander_ATB*(1-prob_minority_strain_when_infected)
+    phiA_I = (1-prob_specific_exposure) * prob_bystander_exposure * 1/time_until_decolo_by_bystander_ATB*prob_minority_strain_when_infected
+    
+    if(!("gammaA_s" %in% names(param))){
+      gammaA_s = prob_specific_exposure * 1/time_until_decolo_by_specific_ATB*(1-prob_minority_strain_when_infected)
+    }
+    if(!("psiA" %in% names(param))){
+      psiA = prob_specific_exposure * 1/time_until_decolo_by_specific_ATB*prob_minority_strain_when_infected
+    }
+    if(!("gammaA_r" %in% names(param))){
+      gammaA_r = prob_specific_exposure_r * 1/time_until_decolo_by_specific_ATB_r
+    }
+    
+    etas = (1-prob_specific_exposure) * 1/time_until_recovery_without_ATB_s
+    etar = (1-prob_specific_exposure_r) * 1/time_until_recovery_without_ATB_r
+    
+    Hcsnv = 1/dps+lambdaA+phiA+as
+    Hcsv = 1/dps*1/(1-vfds)+lambdaA+phiA+as*(1-vfis)
+    Hisnv = etas+lambdaA_I+gammaA_s+psiA+phiA_I
+    Hisv = etas*1/(1-vfrs)+lambdaA_I+gammaA_s+psiA+phiA_I
+    Hcrnv = 1/dpr+ar
+    Hcrv = 1/dpr*1/(1-vfdr)+ar*(1-vfir)
+    Hirnv = etar+gammaA_r
+    Hirv = etar*1/(1-vfrr)+gammaA_r
+    
+    detsnv = Hcsnv*Hisnv-as*(etas+lambdaA_I*(1-eps))
+    detsv = Hcsv*Hisv-as*(1-vfis)*(etas*1/(1-vfrs)+lambdaA_I*(1-eps))
+    detrnv = Hcrnv*Hirnv-ar*etar
+    detrv = Hcrv*Hirv-ar*(1-vfir)*etar*1/(1-vfrr)
+    
+    k = (betaC*Hisnv + betaI*as)/detsnv
+    l = (1-vftcs)*(betaC*Hisv + betaI*as*(1-vfis))/detsv
+    m = (1-vftcs)*(betaC*Hisnv + betaI*as)/detsnv * (betaC*Hisv + betaI*as*(1-vfis))/detsv
+    # print(k)
+    # print(l)
+    # print(m)
+    # 
+    # print((k*l+k-l-m)^2 - 4*(1-k)*(m-k*l))
+    # print((m-k*l))
+    # 
+    # Vperc1 = (-sqrt((k*l+k-l-m)^2 - 4*(1-k)*(m-k*l))-k*l-k+l+m)/(2*(m-k*l))
+    # Vperc2 = (sqrt((k*l+k-l-m)^2 - 4*(1-k)*(m-k*l))-k*l-k+l+m)/(2*(m-k*l))
+    
+    Vperc = (l-m)/(l^2-m)
+      
+    # return(tibble("Vperc1"=Vperc1, "Vperc2"=Vperc2))
+    return(Vperc)
+  })
+}
 #### Compute antibiotic associated flux ####
 
 compute_antibiotic_associated_flux <- function(data, with_specific_flux=T){
