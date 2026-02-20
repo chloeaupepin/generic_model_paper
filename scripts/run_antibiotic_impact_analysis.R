@@ -19,14 +19,14 @@ population_size = 100000
 
 ## Choose bacteria 
 # S_aureus
-bacteria = "S_aureus"
-folder_name = "S_aureus"
-file_name  = "S_aureus_params10.csv"
+# bacteria = "S_aureus"
+# folder_name = "S_aureus"
+# file_name  = "S_aureus_params10.csv"
 
 # E_coli
-# bacteria = "E_coli"
-# folder_name = "E_coli"
-# file_name = "E_coli_params_primavera2.csv"
+bacteria = "E_coli"
+folder_name = "E_coli"
+file_name = "E_coli_params_primavera3.csv"
 
 #### Load previous analysis equilibrium ####
 
