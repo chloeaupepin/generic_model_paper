@@ -4,16 +4,11 @@
 SCISsrV.reprod_nbrs <- function(param){
   with(as.list(c(param)), {
     
-    #vftcr = vftcs
-    #vfir = vfis
-    #vfdr = vfds
-    #vfrr = vfrs
-    
     lambdaA = prob_bystander_exposure * 1/time_until_decolo_by_bystander_ATB*(1-prob_minority_strain_when_colonised)
     phiA = prob_bystander_exposure * 1/time_until_decolo_by_bystander_ATB*prob_minority_strain_when_colonised
     
-    lambdaA_I = prob_bystander_exposure * 1/time_until_decolo_by_bystander_ATB*(1-prob_minority_strain_when_infected)
-    phiA_I = prob_bystander_exposure * 1/time_until_decolo_by_bystander_ATB*prob_minority_strain_when_infected
+    lambdaA_I = (1-prob_specific_exposure) * prob_bystander_exposure * 1/time_until_decolo_by_bystander_ATB*(1-prob_minority_strain_when_infected)
+    phiA_I = (1-prob_specific_exposure) * prob_bystander_exposure * 1/time_until_decolo_by_bystander_ATB*prob_minority_strain_when_infected
     
     if(!("gammaA_s" %in% names(param))){
       gammaA_s = prob_specific_exposure * 1/time_until_decolo_by_specific_ATB*(1-prob_minority_strain_when_infected)
@@ -29,39 +24,37 @@ SCISsrV.reprod_nbrs <- function(param){
     etar = (1-prob_specific_exposure_r) * 1/time_until_recovery_without_ATB_r
     
     Hcsnv = 1/dps+lambdaA+phiA+as
-    Hcsv = 1/dps*(1+vfds)+lambdaA+phiA+as*(1-vfis)
+    Hcsv = 1/dps*1/(1-vfds)+lambdaA+phiA+as*(1-vfis)
     Hisnv = etas+lambdaA_I+gammaA_s+psiA+phiA_I
-    Hisv = etas*(1+vfrs)+lambdaA_I+gammaA_s+psiA+phiA_I
+    Hisv = etas*1/(1-vfrs)+lambdaA_I+gammaA_s+psiA+phiA_I
     Hcrnv = 1/dpr+ar
-    Hcrv = 1/dpr*(1+vfdr)+ar*(1-vfir)
+    Hcrv = 1/dpr*1/(1-vfdr)+ar*(1-vfir)
     Hirnv = etar+gammaA_r
-    Hirv = etar*(1+vfrr)+gammaA_r
+    Hirv = etar*1/(1-vfrr)+gammaA_r
     
-    #Nnv = Snv0+Csnv0+Crnv0+Isnv0 + Irnv0
-    #Nv = Sv0+Csv0+Crv0 + Isv0 + Irv0
-    Pnv = Nnv/(Nnv+Nv)
-    Pv = Nv/(Nnv+Nv)
+    Pnv = 1-Vperc
+    Pv = Vperc
     
     detsnv = Hcsnv*Hisnv-as*(etas+lambdaA_I*(1-eps))
-    detsv = Hcsv*Hisv-as*(1-vfis)*(etas+lambdaA_I*(1-eps))
+    detsv = Hcsv*Hisv-as*(1-vfis)*(etas*1/(1-vfrs)+lambdaA_I*(1-eps))
     detrnv = Hcrnv*Hirnv-ar*etar
-    detrv = Hcrv*Hirv-ar*(1-vfir)*etar
+    detrv = Hcrv*Hirv-ar*(1-vfir)*etar*1/(1-vfrr)
     
-    X_1 = matrix(c(Hisnv/detsnv, 0 , (etas+lambdaA_I*(1-eps))/detsnv, 0,
-                   0, Hisv/detsv, 0, (etas+lambdaA_I*(1-eps))/detsv,
+    X_inv = matrix(c(Hisnv/detsnv, 0 , (etas+lambdaA_I*(1-eps))/detsnv, 0,
+                   0, Hisv/detsv, 0, (etas*1/(1-vfrs)+lambdaA_I*(1-eps))/detsv,
                    as/detsnv, 0, Hcsnv/detsnv, 0,
                    0, as*(1-vfis)/detsv,0,Hcsv/detsv), nrow=4, byrow = TRUE)
     
-    Y_1 = matrix(c(Hirnv/detrnv, 0 , etar/detrnv, 0,
-                   0, Hirv/detrv, 0, etar/detrv,
+    Y_inv = matrix(c(Hirnv/detrnv, 0 , etar/detrnv, 0,
+                   0, Hirv/detrv, 0, etar*1/(1-vfrr)/detrv,
                    ar/detrnv, 0, Hcrnv/detrnv, 0,
                    0, ar*(1-vfir)/detrv,0,Hcrv/detrv), nrow=4, byrow = TRUE)
     
     Z = diag(x=c(phiA,phiA,psiA+phiA_I,psiA+phiA_I),nrow = 4,ncol=4)
     
-    Y_1ZX_1 = Y_1 %*% Z %*% X_1
+    Y_invZX_inv = Y_inv %*% Z %*% X_inv
     
-    Vm <- rbind(cbind(X_1,matrix(0,nrow=4,ncol=4)), cbind(Y_1ZX_1, Y_1))
+    V_inv <- - rbind(cbind(X_inv,matrix(0,nrow=4,ncol=4)), cbind(Y_invZX_inv, Y_inv))
     Fm <- matrix(c(betaC*Pnv, betaC*Pnv, betaI*Pnv, betaI*Pnv, 0, 0, 0, 0,
                    betaC*(1-vftcs)*Pv,betaC*(1-vftcs)*Pv,betaI*(1-vftis)*Pv, betaI*(1-vftis)*Pv, 0,0,0,0,
                    0,0,0,0,0,0,0,0,
@@ -71,7 +64,7 @@ SCISsrV.reprod_nbrs <- function(param){
                    0,0,0,0,0,0,0,0,
                    0,0,0,0,0,0,0,0), nrow = 8, byrow = TRUE)
     
-    G = Fm %*% Vm
+    G = - Fm %*% V_inv
     
     rownames(G) <- c("de type Csnv","de type Csv","de type Isnv","de type Isv",
                      "de type Crnv","de type Crv","de type Irnv","de type Irv")

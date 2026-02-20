@@ -296,3 +296,44 @@ plot_antibiotic_metric_both_bacteria <- function(data1,
   return(p)
 }
 
+# Plot R0 for each vaccine type 
+plot_R0 <- function(data,
+                    metric_name_to_plot,
+                    vaccine_effects_to_plot = c(0.3, 0.6, 0.9),
+                    y_label,
+                    chosen_shape,
+                    chosen_palette,
+                    chosen_vaccine_labeller = vaccine_labeller,
+                    ylim_values = NULL,
+                    hrefs,
+                    vrefs){
+  p <- data %>%
+    filter(metric_name %in% metric_name_to_plot) %>%
+    filter(varying_param %in% vaccine_effects_to_plot) %>%
+    ggplot(aes(x = Vperc*100)) +
+    geom_ribbon(aes(ymin = q025, ymax = q975,
+                    fill = varying_param,
+                    group = varying_param),
+                alpha = 0.2) +
+    geom_hrefs(y = hrefs)+
+    geom_vrefs(x = vrefs)+
+    geom_point(aes(y = median, color = varying_param, fill = varying_param), 
+               shape = chosen_shape, size = 2)+
+    geom_line(aes(y = median, color = varying_param)) +
+    {if (length(metric_name_to_plot)>1) 
+      facet_nested(metric_name ~ name_renamed, 
+                   labeller = labeller(name_renamed = as_labeller(chosen_vaccine_labeller, default = label_parsed))) 
+      else facet_nested(~ name_renamed, labeller = labeller(name_renamed = as_labeller(chosen_vaccine_labeller, default = label_parsed)))}+
+    scale_x_continuous(breaks = c(0,10, 30, 50, 70, 90,100), minor_breaks = c(20, 40, 60, 80))+
+    scale_color_manual(values = chosen_palette)+
+    scale_fill_manual(values = chosen_palette)+
+    labs(x = "Vaccine coverage (%)",
+         y = y_label,
+         color = "Vaccine efficacy",
+         fill = "Vaccine efficacy")+
+    personal_theme + 
+    theme(legend.position = "bottom")+
+    {if (!is.null(ylim_values)) ylim(ylim_values[1], ylim_values[2]) else NULL}
+  
+  return(p)
+}
