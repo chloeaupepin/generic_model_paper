@@ -20,14 +20,14 @@ N = 100000
 
 ## Choose bacteria 
 # S_aureus
-bacteria = "S_aureus"
-folder_name = "S_aureus"
-file_name  = "S_aureus_params10.csv"
+# bacteria = "S_aureus"
+# folder_name = "S_aureus"
+# file_name  = "S_aureus_params10.csv"
 
 # E_coli
-# bacteria = "E_coli"
-# folder_name = "E_coli"
-# file_name = "E_coli_params_primavera3.csv"
+bacteria = "E_coli"
+folder_name = "E_coli"
+file_name = "E_coli_params_primavera4.csv"
 
 #### Load previous analysis equilibrium ####
 
@@ -43,8 +43,15 @@ vaccine_scenarios_complete_df <- bind_rows(
   expand.grid("Vperc" = c(0,0.1,0.3,0.5,0.7,0.9,1),"vftcs" = c(0.3,0.6,0.9)) %>% mutate("vftcr" = vftcs, "vfis"=vftcs,"vfir"=vftcs,"vfds"=0,"vfdr"=0,"vfrs" = 0, "vfrr" = 0, name = "vftc_vfi"),
   expand.grid("Vperc" = c(0,0.1,0.3,0.5,0.7,0.9,1),"vfds" = c(0.3,0.6,0.9)) %>% mutate("vfdr" = vfds, "vfis"=vfds,"vfir"=vfds,"vftcs"=0, "vftcr"=0,"vfrs"=0, "vfrr"=0, name = "vfd_vfi"),
   expand.grid("Vperc" = c(0,0.1,0.3,0.5,0.7,0.9,1),"vftcs" = c(0.3,0.6,0.9)) %>% mutate("vftcr" = vftcs, "vfds"=vftcs,"vfdr"=vftcs, "vfis"=vftcs,"vfir"=vftcs,"vfrs"=0, "vfrr"=0, name = "vftc_vfd_vfi")
-) %>% mutate(vaccine_id = row_number()) %>%
-  mutate(vftis = 0, vftir = 0)
+) %>% mutate(vaccine_id = row_number()) 
+
+if(transmission_by_infected){
+  vaccine_scenarios_complete_df <- vaccine_scenarios_complete_df %>%
+    mutate(vftis = vftcs, vftir = vftcr)
+} else {
+  vaccine_scenarios_complete_df <- vaccine_scenarios_complete_df %>%
+    mutate(vftis = 0, vftir = 0)
+}
 
 df <- add_vaccine_parameters(eq_results, vaccine_scenarios_complete_df)
 

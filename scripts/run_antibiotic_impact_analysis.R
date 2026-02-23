@@ -26,7 +26,7 @@ population_size = 100000
 # E_coli
 bacteria = "E_coli"
 folder_name = "E_coli"
-file_name = "E_coli_params_primavera3.csv"
+file_name = "E_coli_params_primavera4.csv"
 
 #### Load previous analysis equilibrium ####
 
