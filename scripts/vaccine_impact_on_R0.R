@@ -23,11 +23,13 @@ N = 100000
 # bacteria = "S_aureus"
 # folder_name = "S_aureus"
 # file_name  = "S_aureus_params10.csv"
+#transmission_by_infected = F
 
 # E_coli
 bacteria = "E_coli"
 folder_name = "E_coli"
 file_name = "E_coli_params_primavera4.csv"
+transmission_by_infected = T
 
 #### Load previous analysis equilibrium ####
 

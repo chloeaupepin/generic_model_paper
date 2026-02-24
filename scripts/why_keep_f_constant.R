@@ -146,7 +146,7 @@ ggsave(paste0("figures/why_keep_f_constant_Saureus.png"), plot = p_epi_combined,
 
 
 #### Define parameter distributions ####
-Bacteria_params = read.csv(here::here("files","E_coli_params_primavera2.csv")) 
+Bacteria_params = read.csv(here::here("files","E_coli_params_primavera4.csv")) 
 
 # List of columns to transform
 cols_to_noise <- c(	
