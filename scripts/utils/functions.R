@@ -125,7 +125,7 @@ vaccine_coverage_threshold_for_R0 <- function(param){
     
     k = (betaC*Hisnv + betaI*as)/detsnv
     l = (1-vftcs)*(betaC*Hisv + betaI*as*(1-vfis))/detsv
-    m = (1-vftcs)*(betaC*Hisnv + betaI*as)/detsnv * (betaC*Hisv + betaI*as*(1-vfis))/detsv
+    # m = (1-vftcs)*(betaC*Hisnv + betaI*as)/detsnv * (betaC*Hisv + betaI*as*(1-vfis))/detsv
     # print(k)
     # print(l)
     # print(m)
@@ -136,7 +136,7 @@ vaccine_coverage_threshold_for_R0 <- function(param){
     # Vperc1 = (-sqrt((k*l+k-l-m)^2 - 4*(1-k)*(m-k*l))-k*l-k+l+m)/(2*(m-k*l))
     # Vperc2 = (sqrt((k*l+k-l-m)^2 - 4*(1-k)*(m-k*l))-k*l-k+l+m)/(2*(m-k*l))
     
-    Vperc = (l-m)/(l^2-m)
+    Vperc = (1-k)/(l-k)
       
     # return(tibble("Vperc1"=Vperc1, "Vperc2"=Vperc2))
     return(Vperc)
