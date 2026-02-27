@@ -180,6 +180,10 @@ filter_coexistence_condition <- function(data){
     filter(coexistence_condition & non_disparition_condition)
 }
 
+
+
+
+
 #### Fix resistant parameters equal to sensitive ####
 
 set_resistant_and_sensitive_param_equal <- function(data, res_param_names){
@@ -238,9 +242,82 @@ compute_equilibrium <- function(data,population_size = 100000){
       eq_Csnv = -E*eq_Crnv,
       eq_Isnv = as/His*eq_Csnv,
       eq_Irnv = ar/(etar+gammaA_r)*eq_Crnv + (psiA + phiA_I)/(etar+gammaA_r)*eq_Isnv
-    )%>%
-    select(-N, -His, -E, -E1, -E2, -G) 
+    )
 }
+
+check_eq_stability <- function(...){
+  
+  param <- list(...)
+  
+  with(param, {
+    
+    J = matrix(c(-(betaC*eq_Csnv + betaI*eq_Isnv)/N - f*(betaC*eq_Crnv + betaI*eq_Irnv)/N,
+                 -betaC*eq_Snv/N + 1/dps +lambdaA,
+                 -f*betaC*eq_Snv/N + 1/dpr,
+                 -betaI*eq_Snv/N + lambdaA_I + gammaA_s,
+                 -f*betaI*eq_Snv/N + gammaA_r,
+                 
+                 (betaC*eq_Csnv + betaI*eq_Isnv)/N,
+                 betaC*eq_Snv/N - 1/dps - lambdaA - as - phiA,
+                 0,
+                 betaI*eq_Snv/N + etas,
+                 0,
+                 
+                 f*(betaC*eq_Crnv + betaI*eq_Irnv)/N,
+                 phiA,
+                 f*betaC*eq_Snv/N - 1/dpr - ar,
+                 0,
+                 f*betaI*eq_Snv/N + etar,
+                 
+                 0,
+                 as,
+                 0,
+                 -etas - lambdaA_I - gammaA_s - psiA - phiA_I,
+                 0,
+                 
+                 0,
+                 0,
+                 ar,
+                 psiA + phiA_I,
+                 -etar - gammaA_r
+                 ), nrow=5, byrow = TRUE)
+    
+    
+    J = matrix(c(betaC*eq_Snv/N - (betaC*eq_Csnv + betaI*eq_Isnv)/N - 1/dps - lambdaA - as - phiA,
+                 - (betaC*eq_Csnv + betaI*eq_Isnv)/N,
+                 betaI*eq_Snv/N + etas- (betaC*eq_Csnv + betaI*eq_Isnv)/N,
+                 - (betaC*eq_Csnv + betaI*eq_Isnv)/N,
+                 
+                 
+                 phiA - f*(betaC*eq_Crnv + betaI*eq_Irnv)/N,
+                 f*betaC*eq_Snv/N - f*(betaC*eq_Crnv + betaI*eq_Irnv)/N - 1/dpr - ar,
+                 - f*(betaC*eq_Crnv + betaI*eq_Irnv)/N,
+                 f*betaI*eq_Snv/N - f*(betaC*eq_Crnv + betaI*eq_Irnv)/N + etar,
+                 
+                 
+                 as,
+                 0,
+                 -etas - lambdaA_I - gammaA_s - psiA - phiA_I,
+                 0,
+                 
+                 
+                 0,
+                 ar,
+                 psiA + phiA_I,
+                 -etar - gammaA_r
+    ), nrow=4, byrow = TRUE)
+    
+    eig = eigen(J)$values
+    eig_neg = all(Re(eig) < 0)
+    # print(eig)
+    # print(eig_neg)
+    
+    #return(tibble("eig_neg"=eig_neg))
+    #return(tibble("J" = as_tibble(J), "eig"= as_tibble(eig)) )
+    return(tibble("eig_max"=max(eig)))
+  })
+}
+
 
 #### Simulations ####
 
@@ -462,9 +539,17 @@ compute_outputs <- function(sim, population_size = 100000, factor = 100000){
            )
   
   # Compute proportion of resistant infections among infections in cumulative incidences
+  results <- results %>%
+    mutate(res_1y_wov_prop_inccumIr = (res_1y_wov_inccumIrnv_sel)/res_1y_wov_inccumI,
+           res_1y_wv_prop_inccumIr = (res_1y_wv_inccumIrnv_sel + res_1y_wv_inccumIrv_sel)/res_1y_wv_inccumI,
+           res_1y_wv_prop_inccumIr_non_vaccinated = (res_1y_wv_inccumIrnv_sel)/res_1y_wv_inccumI_non_vaccinated,
+           res_1y_wv_prop_inccumIr_vaccinated = (res_1y_wv_inccumIrv_sel)/res_1y_wv_inccumI_vaccinated
+    )
+  
   
   # Compute proportion of resistant colonisation among colonisation in prevalences at the end of the year
   results <- results %>%
+    mutate(res_1y_wv_prevC =( res_1y_wv_Crnv + res_1y_wv_Csnv + res_1y_wv_Crv  + res_1y_wv_Csv)/population_size) %>%
     mutate(res_1y_wov_prop_prevCIr = (res_1y_wov_Crnv+res_1y_wov_Irnv)/(res_1y_wov_Crnv + res_1y_wov_Irnv + res_1y_wov_Csnv + res_1y_wov_Isnv),
            res_1y_wv_prop_prevCIr = (res_1y_wv_Crnv+res_1y_wv_Irnv + res_1y_wv_Crv+res_1y_wv_Irv)/(res_1y_wv_Crnv + res_1y_wv_Irnv + res_1y_wv_Csnv + res_1y_wv_Isnv + res_1y_wv_Crv + res_1y_wv_Irv + res_1y_wv_Csv + res_1y_wv_Isv),
            res_1y_wv_prop_prevCIr_non_vaccinated = (res_1y_wv_Crnv+res_1y_wv_Irnv)/(res_1y_wv_Crnv + res_1y_wv_Irnv + res_1y_wv_Csnv + res_1y_wv_Isnv),
@@ -483,7 +568,10 @@ compute_outputs <- function(sim, population_size = 100000, factor = 100000){
            prc_red_prop_prevCIr_vaccinated = prc_red(res_1y_wov_prop_prevCIr,res_1y_wv_prop_prevCIr_vaccinated ))%>%
     mutate(prc_red_prop_prevCr = prc_red(res_1y_wov_prop_prevCr,res_1y_wv_prop_prevCr ),
            prc_red_prop_prevCr_non_vaccinated = prc_red(res_1y_wov_prop_prevCr,res_1y_wv_prop_prevCr_non_vaccinated ),
-           prc_red_prop_prevCr_vaccinated = prc_red(res_1y_wov_prop_prevCr,res_1y_wv_prop_prevCr_vaccinated ))
+           prc_red_prop_prevCr_vaccinated = prc_red(res_1y_wov_prop_prevCr,res_1y_wv_prop_prevCr_vaccinated ))%>%
+    mutate(prc_red_prop_inccumIr = prc_red(res_1y_wov_prop_inccumIr,res_1y_wv_prop_inccumIr ),
+           prc_red_prop_inccumIr_non_vaccinated = prc_red(res_1y_wov_prop_inccumIr,res_1y_wv_prop_inccumIr_non_vaccinated ),
+           prc_red_prop_inccumIr_vaccinated = prc_red(res_1y_wov_prop_inccumIr,res_1y_wv_prop_inccumIr_vaccinated ))
   
   # Compute reduction change in prevalences
   results <- results %>%

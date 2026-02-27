@@ -166,6 +166,17 @@ plot_vaccine_metric(data = chosen_results_to_plot,
                     vrefs = c(30))
 ggsave(here::here("figures",folder_name,paste0("prc_red_prop_prevCr.png")), width = 12, height = 7)
 
+plot_vaccine_metric(data = chosen_results_to_plot,
+                    metric_name_to_plot = c("prc_red_prop_inccumIr", 
+                                            "prc_red_prop_inccumIr_non_vaccinated", 
+                                            "prc_red_prop_inccumIr_vaccinated"),
+                    y_label = "Relative change due to vaccination (%)",
+                    chosen_shape = chosen_shape,
+                    chosen_palette = chosen_palette,
+                    hrefs = c(0),
+                    vrefs = c(30))
+ggsave(here::here("figures",folder_name,paste0("prc_red_prop_inccumIr.png")), width = 12, height = 7)
+
 
 plot_vaccine_metric(data = results_to_plot,
                     metric_name_to_plot = c("averted_inccumI"),

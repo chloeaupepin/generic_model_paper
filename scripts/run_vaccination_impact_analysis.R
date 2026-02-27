@@ -21,10 +21,10 @@ population_size = 100000
 
 ## Choose bacteria 
 # S_aureus
-# bacteria = "S_aureus"
-# folder_name = "S_aureus"
-# file_name  = "S_aureus_params10.csv"
-# transmission_by_infected = FALSE
+bacteria = "S_aureus"
+folder_name = "S_aureus"
+file_name  = "S_aureus_params10.csv"
+transmission_by_infected = FALSE
 
 # E_coli
 bacteria = "E_coli"
@@ -99,6 +99,12 @@ df_bacteria <- filter_coexistence_condition(df_bacteria)
 # Compute equilibrium with analytical expressions 
 eq_results <- compute_equilibrium(df_bacteria, population_size)
 
+# Check stability of equilibrium
+eq_results <- eq_results %>%
+  mutate(stability = pmap(., check_eq_stability)) %>%
+  unnest_wider(stability) 
+  
+
 create_folder(file.path(getwd(),"files",folder_name))
 save(eq_results, file = here::here("files",folder_name,"equilibrium_results.RData"))
 
@@ -134,6 +140,22 @@ if(transmission_by_infected){
 # Add vaccine parameters to each parameter set
 df_for_vaccine_simulations <- add_vaccine_parameters(results_1y_wov, vaccine_scenarios_complete_df)
 
+df_for_vaccine_simulations_test <- df_for_vaccine_simulations %>%
+  mutate(coexistence_condition_vaccine = f <= (1/(dpr*(1-vfdr)) + ar*(1-vfir) - etar * ar*(1-vfir) / (etar + gammaA_r)) /(1/(dps*(1-vfds)) + lambdaA + as*(1-vfis) - etas * as*(1-vfis) / (etas + lambdaA_I + gammaA_s + psiA + phiA_I)+phiA)*(betaC + betaI*as*(1-vfis)/(etas + lambdaA_I + gammaA_s + psiA + phiA_I))/(betaC + betaI*ar*(1-vfir)/(etar + gammaA_r))) %>%
+  mutate(non_disparition_condition_vaccine = (1-vftcs)*(betaC + betaI*as*(1-vfis)/(etas + lambdaA_I + gammaA_s + psiA + phiA_I)) >= 1/(dps*(1-vfds)) + lambdaA + as*(1-vfis) - etas * as*(1-vfis) / (etas + lambdaA_I + gammaA_s + psiA + phiA_I)+phiA)%>%
+  mutate(
+    eq_Sv = N/(betaC*(1-vftcs) + betaI*(1-vftcs)*as*(1-vfis)/His)*(1/(dps*(1-vfds)) + lambdaA + as*(1-vfis) - etas*as*(1-vfis)/His + phiA),
+    E1v = f*eq_Sv/N*(betaC*(1-vftcr) + betaI*(1-vftcr)*ar*(1-vfir)/(etar+gammaA_r))-1/(dpr*(1-vfdr))- ar*(1-vfir) + etar*ar*(1-vfir)/(etar+gammaA_r),
+    E2v = (betaI*(1-vftcr)*f*eq_Sv/N +etar)*(psiA + phiA_I)/(etar+gammaA_r)*as*(1-vfis)/His +phiA,
+    Ev = E1v/E2v,
+    Gv = 1+ ar*(1-vfir)/(etar+gammaA_r)-Ev*(1+as*(1-vfis)/His*(1+(psiA + phiA_I)/(etar+gammaA_r))),
+    eq_Crv = (N-eq_Sv)/Gv,
+    eq_Csv = -Ev*eq_Crv
+  )%>%
+  mutate(test1 = 1/(1-E),
+         test2 = 1/(1-Ev)) %>%
+  mutate(test = test2 - test1)
+
 # Simulate one year with vaccine for each parameter set
 results <- df_for_vaccine_simulations %>%
   apply_function_on_df(simulate_1y_with_vaccine, "res_1y_wv") %>%
@@ -154,7 +176,7 @@ save(results_with_outputs, file = here::here("files",folder_name,"results_with_o
 
 # Compute statistics
 results_to_plot <- results_with_outputs %>%
-  compute_statistics(starts_with(c("prc_red_", "averted_")))%>%
+  compute_statistics(starts_with(c("res_1y_wv_prevC","prc_red_", "averted_")))%>%
   mutate(
     population = case_when(
       str_detect(metric_name, "non_vaccinated") ~ "Non-vaccinated",
