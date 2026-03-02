@@ -26,8 +26,8 @@ This folder contains usefull functions to use for all other scripts
 - [model.R](.scripts/model.R) : R code containing model equations.
 
 #### Identifying key parameters 
-- [identifying_key_parameters_for_eq.R](.scripts/identifying_key_parameters_for_eq.R) : R code to identify key bacterial and antibiotic parameters on equilibria.
-- [identifying_key_parameters_for_vaccine_impact.R](.scripts/identifying_key_parameters_for_vaccine_impact.R) : R code to identify key bacterial, antibiotic and vaccine parameters on differences induced by vaccines on different outputs.
+- [identifying_key_parameters_for_eq.R](./scripts/identifying_key_parameters_for_eq.R) : R code to identify key bacterial and antibiotic parameters on equilibria.
+- [identifying_key_parameters_for_vaccine_impact.R](./scripts/identifying_key_parameters_for_vaccine_impact.R) : R code to identify key bacterial, antibiotic and vaccine parameters on differences induced by vaccines on different outputs.
 
 #### Case studies 
 - [find_model_parameters_S_aureus.R](./scripts/find_model_parameters_S_aureus.R) : R code to optimise 3 model parameters to _S. aureus _ caracteristics. 
