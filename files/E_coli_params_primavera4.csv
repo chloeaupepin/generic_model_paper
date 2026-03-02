@@ -1,0 +1,2 @@
+"betaC","f","as","time_until_recovery_without_ATB_s","time_until_recovery_without_ATB_r","dps","dpr","prob_bystander_exposure","time_until_decolo_by_bystander_ATB","prob_minority_strain_when_colonised","eps","prob_specific_exposure","prob_specific_exposure_r","gammaA_s","psiA","gammaA_r","prob_minority_strain_when_infected","thetasr","thetars","ar","betaI"
+0.0620455177754369,0.855696736827502,0.000168421052507174,28,28,365,365,0.00173,10,0.1,1,0.8,0.8,0.381428571428571,0.000714285714285714,0.380555555555556,0.1,0,0,0.000168421052507174,0.0620455177754369
