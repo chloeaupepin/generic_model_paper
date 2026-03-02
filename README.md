@@ -19,5 +19,25 @@ install.packages(c("dplyr", "here", "purrr", "tidyr", "deSolve", "furrr", "strin
 
 ### Scripts description
 
+#### Folder utils
+This folder contains usefull functions to use for all other scripts
+
+#### Model
+- [model.R](.scripts/model.R) : R code containing model equations.
+
 #### Identifying key parameters 
-- [identifying_key_parameters_for_eq.R](.scripts/identifying_key_parameters_for_eq.R) : R code to identify key bacterial and antibiotic parameters on equilibria.  
+- [identifying_key_parameters_for_eq.R](.scripts/identifying_key_parameters_for_eq.R) : R code to identify key bacterial and antibiotic parameters on equilibria.
+- [identifying_key_parameters_for_vaccine_impact.R](.scripts/identifying_key_parameters_for_vaccine_impact.R) : R code to identify key bacterial, antibiotic and vaccine parameters on differences induced by vaccines on different outputs.
+
+#### Case studies 
+- [find_model_parameters_S_aureus.R](./scripts/find_model_parameters_S_aureus.R) : R code to optimise 3 model parameters to _S. aureus _ caracteristics. 
+- [find_model_parameters_E_coli.R](./scripts/find_model_parameters_E_coli.R) : R code to optimise 3 model parameters to _E. coli _ caracteristics.
+- [why_keep_f_constant.R](./scripts/why_keep_f_constant.R) : R code to explain why the relative fitness isn't varied during the case studies analyses
+- [run_vaccination_impact_analysis.R](./scripts/run_vaccination_impact_analysis.R) : R code to generate vaccination impact on both bacteria
+- [run_antibiotic_impact_analysis.R](./scripts/run_antibiotic_impact_analysis.R) : R code to generate antibiotic reduction impact on both bacteria
+- [vaccine_impact_on_R0.R](./scripts/vaccine_impact_on_R0.R) : R code to generate vaccination impact on reproduction numbers
+
+#### Plots
+- [generate_plots.R](./scripts/generate_plots.R) : R code to generate plots
+
+  
