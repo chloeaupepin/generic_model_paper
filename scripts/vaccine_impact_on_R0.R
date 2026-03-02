@@ -9,6 +9,7 @@ library(furrr)
 library(ggrepel)
 
 source(here::here("scripts","utils", "functions.R"))
+source(here::here("scripts", "utils", "utils_R0.R"))
 source(here::here("scripts", "utils", "plot_functions.R"))
 
 n_cores = parallel::detectCores() - 1
