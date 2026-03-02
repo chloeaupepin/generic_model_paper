@@ -27,36 +27,36 @@ load(here::here("files", "E_coli", "results_to_plot_antibiotic.RData"))
 results_to_plot_antibiotic_Ecoli <- results_to_plot_antibiotic
 
 #### Plot equilibrium results description ####
-# Saureus like
-plot_histogram_eq_results(eq_results_Saureus,c(0.2,0.4),c(0,0.15) )
-
-View(eq_results_Saureus %>%
-       mutate(total_colonized = (eq_Csnv + eq_Crnv)/100000*100,
-              resistance_ratio = eq_Crnv / (eq_Csnv + eq_Crnv)*100,
-              incidenceI = as*eq_Csnv + ar*eq_Crnv) %>%
-       pivot_longer(cols = c(total_colonized, resistance_ratio, incidenceI), names_to = "metric", values_to = "value") %>%
-       group_by(metric) %>%
-       summarise(
-         min = round(min(value),4),
-         max = round(max(value),4),
-       ))
-
-# Ecoli like
-plot_histogram_eq_results(eq_results_Ecoli,c(0.9,1),c(0,0.2) )
-
-View(eq_results_Ecoli %>%
-       mutate(total_colonized = (eq_Csnv + eq_Crnv)/100000*100,
-              resistance_ratio = eq_Crnv / (eq_Csnv + eq_Crnv)*100,
-              incidenceI = as*eq_Csnv + ar*eq_Crnv) %>%
-       pivot_longer(cols = c(total_colonized, resistance_ratio, incidenceI), names_to = "metric", values_to = "value") %>%
-       group_by(metric) %>%
-       summarise(
-         min = round(min(value),4),
-         max = round(max(value),4),
-       ))
+# # Saureus like
+# plot_histogram_eq_results(eq_results_Saureus,c(0.2,0.4),c(0,0.15) )
+# 
+# View(eq_results_Saureus %>%
+#        mutate(total_colonized = (eq_Csnv + eq_Crnv)/100000*100,
+#               resistance_ratio = eq_Crnv / (eq_Csnv + eq_Crnv)*100,
+#               incidenceI = as*eq_Csnv + ar*eq_Crnv) %>%
+#        pivot_longer(cols = c(total_colonized, resistance_ratio, incidenceI), names_to = "metric", values_to = "value") %>%
+#        group_by(metric) %>%
+#        summarise(
+#          min = round(min(value),4),
+#          max = round(max(value),4),
+#        ))
+# 
+# # Ecoli like
+# plot_histogram_eq_results(eq_results_Ecoli,c(0.9,1),c(0,0.2) )
+# 
+# View(eq_results_Ecoli %>%
+#        mutate(total_colonized = (eq_Csnv + eq_Crnv)/100000*100,
+#               resistance_ratio = eq_Crnv / (eq_Csnv + eq_Crnv)*100,
+#               incidenceI = as*eq_Csnv + ar*eq_Crnv) %>%
+#        pivot_longer(cols = c(total_colonized, resistance_ratio, incidenceI), names_to = "metric", values_to = "value") %>%
+#        group_by(metric) %>%
+#        summarise(
+#          min = round(min(value),4),
+#          max = round(max(value),4),
+#        ))
 
 # Combined
-plot_histogram_eq_results_two_bacteria(eq_results_Saureus, eq_results_Ecoli)
+# plot_histogram_eq_results_two_bacteria(eq_results_Saureus, eq_results_Ecoli)
 
 
 
@@ -80,6 +80,7 @@ plot_vaccine_metric(data = chosen_results_to_plot,
                     vrefs = c(30),
                     ylim_values = c(-100, 1))
 ggsave(here::here("figures",folder_name,"prc_red_inccumI.png"), width = 12, height = 7)
+ggsave(here::here("figures","figure4_S_aureus.png"), width = 12, height = 7)
 
 plot_vaccine_metric(data = chosen_results_to_plot,
                     metric_name_to_plot = c("prc_red_inccumI", 
@@ -106,6 +107,7 @@ plot_vaccine_metric(data = chosen_results_to_plot,
                     vrefs = c(30),
                     ylim_values = c(-100, 1))
 ggsave(here::here("figures",folder_name,"prc_red_inccumIr.png"), width = 12, height = 7)
+ggsave(here::here("figures","figureS4_S_aureus.png"), width = 12, height = 7)
 
 plot_vaccine_metric(data = chosen_results_to_plot,
                     metric_name_to_plot = c("prc_red_inccumIs", 
@@ -129,6 +131,7 @@ plot_vaccine_metric(data = chosen_results_to_plot,
                     hrefs = c(0, -50),
                     vrefs = c(30))
 ggsave(here::here("figures",folder_name,"prc_red_prevC.png"), width = 12, height = 7)
+ggsave(here::here("figures","figureS5_S_aureus.png"), width = 12, height = 7)
 
 plot_vaccine_metric(data = chosen_results_to_plot,
                     metric_name_to_plot = c("prc_red_prevCr", 
@@ -165,6 +168,7 @@ plot_vaccine_metric(data = chosen_results_to_plot,
                     hrefs = c(0),
                     vrefs = c(30))
 ggsave(here::here("figures",folder_name,paste0("prc_red_prop_prevCr.png")), width = 12, height = 7)
+ggsave(here::here("figures","figure6_S_aureus.png"), width = 12, height = 7)
 
 plot_vaccine_metric(data = chosen_results_to_plot,
                     metric_name_to_plot = c("prc_red_prop_inccumIr", 
@@ -233,6 +237,7 @@ plot_vaccine_metric(data = chosen_results_to_plot,
                     vrefs = c(30),
                     ylim_values = c(-100, 1))
 ggsave(here::here("figures",folder_name,"prc_red_inccumI.png"), width = 12, height = 7)
+ggsave(here::here("figures","figure4_E_coli.png"), width = 12, height = 7)
 
 plot_vaccine_metric(data = chosen_results_to_plot,
                     metric_name_to_plot = c("prc_red_inccumI", 
@@ -259,6 +264,7 @@ plot_vaccine_metric(data = chosen_results_to_plot,
                     vrefs = c(30),
                     ylim_values = c(-100, 1))
 ggsave(here::here("figures",folder_name,"prc_red_inccumIr.png"), width = 12, height = 7)
+ggsave(here::here("figures","figureS4_E_coli.png"), width = 12, height = 7)
 
 plot_vaccine_metric(data = chosen_results_to_plot,
                     metric_name_to_plot = c("prc_red_inccumIs", 
@@ -282,6 +288,7 @@ plot_vaccine_metric(data = chosen_results_to_plot,
                     hrefs = c(0, -50),
                     vrefs = c(30))
 ggsave(here::here("figures",folder_name,"prc_red_prevC.png"), width = 12, height = 7)
+ggsave(here::here("figures","figureS5_E_coli.png"), width = 12, height = 7)
 
 plot_vaccine_metric(data = chosen_results_to_plot,
                     metric_name_to_plot = c("prc_red_prevCr", 
@@ -318,6 +325,7 @@ plot_vaccine_metric(data = chosen_results_to_plot,
                     hrefs = c(0),
                     vrefs = c(30))
 ggsave(here::here("figures",folder_name,paste0("prc_red_prop_prevCr.png")), width = 12, height = 7)
+ggsave(here::here("figures","figure6_E_coli.png"), width = 12, height = 7)
 
 
 plot_vaccine_metric(data = results_to_plot,
@@ -368,7 +376,6 @@ plot_antibiotic_metric_both_bacteria(data1 = results_to_plot_antibiotic_Saureus,
                                      data2 = results_to_plot_antibiotic_Ecoli,
                                      metric_name_to_plot = c("prc_red_inccumI", "prc_red_prop_prevCr"),
                                      chosen_shapes = shapes)
-ggsave(here::here("figures","figure7.png"), width = 10, height = 5)
 
 
 plot_antibiotic_metric_both_bacteria(data1 = results_to_plot_antibiotic_Saureus,
@@ -385,29 +392,4 @@ plot_antibiotic_metric_both_bacteria(data1 = results_to_plot_antibiotic_Saureus,
 
 ggsave(paste0("figures/figure7.png"), width = 12, height = 7)
 
-
-#### Create figure files ####
-
-wd = getwd()
-
-# Create figure 4 files
-file.copy(from = file.path(wd, "figures", "S_aureus", "prc_red_inccumI.png"),
-          to = file.path(wd, "figures", "figure4_Saureus.png"))
-
-file.copy(from = file.path(wd, "figures", "E_coli", "prc_red_inccumI.png"),
-          to = file.path(wd, "figures", "figure4_E_coli.png"))
-
-# Create figure 6 files
-file.copy(from = file.path(wd, "figures", "S_aureus", "prc_red_prop_prevCr.png"),
-          to = file.path(wd, "figures", "figure6_Saureus.png"))
-
-file.copy(from = file.path(wd, "figures", "E_coli", "prc_red_prop_prevCr.png"),
-          to = file.path(wd, "figures", "figure6_E_coli.png"))
-
-# Create figure S1 files
-file.copy(from = file.path(wd, "figures", "S_aureus", "prc_red_inccumIr.png"),
-          to = file.path(wd, "figures", "figureS1_Saureus.png"))
-
-file.copy(from = file.path(wd, "figures", "E_coli", "prc_red_inccumIr.png"),
-          to = file.path(wd, "figures", "figureS1_E_coli.png"))
 
