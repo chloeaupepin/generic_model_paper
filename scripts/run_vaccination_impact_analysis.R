@@ -176,7 +176,7 @@ save(results_with_outputs, file = here::here("files",folder_name,"results_with_o
 
 # Compute statistics
 results_to_plot <- results_with_outputs %>%
-  compute_statistics(starts_with(c("res_1y_wv_prevC","prc_red_", "averted_")))%>%
+  compute_statistics(starts_with(c("res_1y_wv_prevC","res_1y_wv_inccumI","prc_red_", "averted_")))%>%
   mutate(
     population = case_when(
       str_detect(metric_name, "non_vaccinated") ~ "Non-vaccinated",

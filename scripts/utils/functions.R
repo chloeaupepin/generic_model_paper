@@ -523,7 +523,11 @@ compute_outputs <- function(sim, population_size = 100000, factor = 100000){
     mutate(res_1y_wov_inccumI = res_1y_wov_inccumIrnv_sel+res_1y_wov_inccumIsnv,
            res_1y_wv_inccumI_non_vaccinated = res_1y_wv_inccumIrnv_sel + res_1y_wv_inccumIsnv,
            res_1y_wv_inccumI_vaccinated = res_1y_wv_inccumIrv_sel + res_1y_wv_inccumIsv,
-           res_1y_wv_inccumI = res_1y_wv_inccumI_non_vaccinated + res_1y_wv_inccumI_vaccinated)
+           res_1y_wv_inccumI = res_1y_wv_inccumI_non_vaccinated + res_1y_wv_inccumI_vaccinated)%>%
+    mutate(res_1y_wov_inccumI_old = res_1y_wov_inccumIrnv+res_1y_wov_inccumIsnv,
+           res_1y_wv_inccumI_old_non_vaccinated = res_1y_wv_inccumIrnv + res_1y_wv_inccumIsnv,
+           res_1y_wv_inccumI_old_vaccinated = res_1y_wv_inccumIrv + res_1y_wv_inccumIsv,
+           res_1y_wv_inccumI_old = res_1y_wv_inccumI_old_non_vaccinated + res_1y_wv_inccumI_old_vaccinated)
   
   # Compute reduction change in cumulative incidences
   results<- results %>%
@@ -540,10 +544,15 @@ compute_outputs <- function(sim, population_size = 100000, factor = 100000){
   
   # Compute proportion of resistant infections among infections in cumulative incidences
   results <- results %>%
-    mutate(res_1y_wov_prop_inccumIr = (res_1y_wov_inccumIrnv_sel)/res_1y_wov_inccumI,
-           res_1y_wv_prop_inccumIr = (res_1y_wv_inccumIrnv_sel + res_1y_wv_inccumIrv_sel)/res_1y_wv_inccumI,
-           res_1y_wv_prop_inccumIr_non_vaccinated = (res_1y_wv_inccumIrnv_sel)/res_1y_wv_inccumI_non_vaccinated,
-           res_1y_wv_prop_inccumIr_vaccinated = (res_1y_wv_inccumIrv_sel)/res_1y_wv_inccumI_vaccinated
+    mutate(res_1y_wov_prop_inccumIr_sel = (res_1y_wov_inccumIrnv_sel)/res_1y_wov_inccumI,
+           res_1y_wv_prop_inccumIr_sel = (res_1y_wv_inccumIrnv_sel + res_1y_wv_inccumIrv_sel)/res_1y_wv_inccumI,
+           res_1y_wv_prop_inccumIr_sel_non_vaccinated = (res_1y_wv_inccumIrnv_sel)/res_1y_wv_inccumI_non_vaccinated,
+           res_1y_wv_prop_inccumIr_sel_vaccinated = (res_1y_wv_inccumIrv_sel)/res_1y_wv_inccumI_vaccinated
+    )%>%
+    mutate(res_1y_wov_prop_inccumIr = (res_1y_wov_inccumIrnv)/(res_1y_wov_inccumIrnv+res_1y_wov_inccumIsnv),
+           res_1y_wv_prop_inccumIr = (res_1y_wv_inccumIrnv + res_1y_wv_inccumIrv)/(res_1y_wv_inccumIrnv + res_1y_wv_inccumIsnv + res_1y_wv_inccumIrv + res_1y_wv_inccumIsv),
+           res_1y_wv_prop_inccumIr_non_vaccinated = (res_1y_wv_inccumIrnv)/( res_1y_wv_inccumIrnv + res_1y_wv_inccumIsnv),
+           res_1y_wv_prop_inccumIr_vaccinated = (res_1y_wv_inccumIrv)/(res_1y_wv_inccumIrv + res_1y_wv_inccumIsv)
     )
   
   
@@ -569,6 +578,9 @@ compute_outputs <- function(sim, population_size = 100000, factor = 100000){
     mutate(prc_red_prop_prevCr = prc_red(res_1y_wov_prop_prevCr,res_1y_wv_prop_prevCr ),
            prc_red_prop_prevCr_non_vaccinated = prc_red(res_1y_wov_prop_prevCr,res_1y_wv_prop_prevCr_non_vaccinated ),
            prc_red_prop_prevCr_vaccinated = prc_red(res_1y_wov_prop_prevCr,res_1y_wv_prop_prevCr_vaccinated ))%>%
+    mutate(prc_red_prop_inccumIr_sel = prc_red(res_1y_wov_prop_inccumIr_sel,res_1y_wv_prop_inccumIr_sel ),
+           prc_red_prop_inccumIr_sel_non_vaccinated = prc_red(res_1y_wov_prop_inccumIr_sel,res_1y_wv_prop_inccumIr_sel_non_vaccinated ),
+           prc_red_prop_inccumIr_sel_vaccinated = prc_red(res_1y_wov_prop_inccumIr_sel,res_1y_wv_prop_inccumIr_sel_vaccinated ))%>%
     mutate(prc_red_prop_inccumIr = prc_red(res_1y_wov_prop_inccumIr,res_1y_wv_prop_inccumIr ),
            prc_red_prop_inccumIr_non_vaccinated = prc_red(res_1y_wov_prop_inccumIr,res_1y_wv_prop_inccumIr_non_vaccinated ),
            prc_red_prop_inccumIr_vaccinated = prc_red(res_1y_wov_prop_inccumIr,res_1y_wv_prop_inccumIr_vaccinated ))
