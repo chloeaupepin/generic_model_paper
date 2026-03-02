@@ -30,8 +30,8 @@ This folder contains usefull functions to use for all other scripts
 - [identifying_key_parameters_for_vaccine_impact.R](./scripts/identifying_key_parameters_for_vaccine_impact.R) : R code to identify key bacterial, antibiotic and vaccine parameters on differences induced by vaccines on different outputs.
 
 #### Case studies 
-- [find_model_parameters_S_aureus.R](./scripts/find_model_parameters_S_aureus.R) : R code to optimise 3 model parameters to _S. aureus _ caracteristics. 
-- [find_model_parameters_E_coli.R](./scripts/find_model_parameters_E_coli.R) : R code to optimise 3 model parameters to _E. coli _ caracteristics.
+- [find_model_parameters_S_aureus.R](./scripts/find_model_parameters_S_aureus.R) : R code to optimise 3 model parameters to _S. aureus_ caracteristics. 
+- [find_model_parameters_E_coli.R](./scripts/find_model_parameters_E_coli.R) : R code to optimise 3 model parameters to _E. coli_ caracteristics.
 - [why_keep_f_constant.R](./scripts/why_keep_f_constant.R) : R code to explain why the relative fitness isn't varied during the case studies analyses
 - [run_vaccination_impact_analysis.R](./scripts/run_vaccination_impact_analysis.R) : R code to generate vaccination impact on both bacteria
 - [run_antibiotic_impact_analysis.R](./scripts/run_antibiotic_impact_analysis.R) : R code to generate antibiotic reduction impact on both bacteria
@@ -40,4 +40,22 @@ This folder contains usefull functions to use for all other scripts
 #### Plots
 - [generate_plots.R](./scripts/generate_plots.R) : R code to generate plots
 
-  
+### Executing order
+
+#### Step 1 : identification of key parameters
+For figures 2, 3, S2 and S3, run [identifying_key_parameters_for_eq.R](./scripts/identifying_key_parameters_for_eq.R) and [identifying_key_parameters_for_vaccine_impact.R](./scripts/identifying_key_parameters_for_vaccine_impact.R) 
+
+#### Step 2 : find model parameters 
+Run [find_model_parameters_S_aureus.R](./scripts/find_model_parameters_S_aureus.R) to obtain _S. aureus_ parameters (stored in file [S_aureus_params10.csv](./files/S_aureus_params10.csv)
+
+Run [find_model_parameters_E_coli.R](./scripts/find_model_parameters_E_coli.R) to obtain _E. coli_ parameters (stored in file [E_coli_params_primavera4.csv](./files/E_coli_params_primavera4.csv)
+
+#### Step 3 : Run analyses 
+
+First start by running [run_vaccination_impact_analysis.R](./scripts/run_vaccination_impact_analysis.R), then [run_antibiotic_impact_analysis.R](./scripts/run_antibiotic_impact_analysis.R) and finally [vaccine_impact_on_R0.R](./scripts/vaccine_impact_on_R0.R). 
+Comment and decomment the corresponding line codes to havec the results for _S. aureus_ or  _E. coli_
+
+Respecting this order is mandatory because equilibrium computations from the first script and stored in the [files](./files) folder are reused for the next two scripts. 
+
+#### Step 4 : Generate plots
+Run [generate_plots.R](./scripts/generate_plots.R) to generate all plots which are saved in the [figures](./figures) folder. 
