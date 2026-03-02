@@ -23,7 +23,7 @@ install.packages(c("dplyr", "here", "purrr", "tidyr", "deSolve", "furrr", "strin
 This folder contains usefull functions to use for all other scripts
 
 #### Model
-- [model.R](.scripts/model.R) : R code containing model equations.
+- [model.R](./scripts/model.R) : R code containing model equations.
 
 #### Identifying key parameters 
 - [identifying_key_parameters_for_eq.R](./scripts/identifying_key_parameters_for_eq.R) : R code to identify key bacterial and antibiotic parameters on equilibria.
