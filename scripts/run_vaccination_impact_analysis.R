@@ -20,6 +20,7 @@ set.seed(123)  # global seed for reproducibility
 population_size = 100000
 
 ## Choose bacteria 
+# Comment or uncomment 4 line codes below and rerun everything for each bacteria 
 # S_aureus
 bacteria = "S_aureus"
 folder_name = "S_aureus"
@@ -27,10 +28,10 @@ file_name  = "S_aureus_params10.csv"
 transmission_by_infected = FALSE
 
 # E_coli
-bacteria = "E_coli"
-folder_name = "E_coli"
-file_name = "E_coli_params_primavera4.csv"
-transmission_by_infected = TRUE # if transmission is allowed, it equals transmission by colonized individuals
+# bacteria = "E_coli"
+# folder_name = "E_coli"
+# file_name = "E_coli_params_primavera4.csv"
+# transmission_by_infected = TRUE # if transmission is allowed, it equals transmission by colonized individuals
 
 ## Choose number of bacteria to generate
 n <- 500
