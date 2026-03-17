@@ -171,6 +171,16 @@ ggsave(here::here("figures",folder_name,paste0("prc_red_prop_prevCr.png")), widt
 ggsave(here::here("figures","figure6_S_aureus.png"), width = 12, height = 7)
 
 plot_vaccine_metric(data = chosen_results_to_plot,
+                    metric_name_to_plot = c("prc_red_prop_prevCr"),
+                    y_label = "Relative change due to vaccination (%)",
+                    chosen_shape = chosen_shape,
+                    chosen_palette = chosen_palette,
+                    hrefs = c(0),
+                    vrefs = c(30))
+ggsave(here::here("figures",folder_name,paste0("prc_red_prop_prevCr_total.png")), width = 14, height = 5)
+
+
+plot_vaccine_metric(data = chosen_results_to_plot,
                     metric_name_to_plot = c("prc_red_prop_inccumIr", 
                                             "prc_red_prop_inccumIr_non_vaccinated", 
                                             "prc_red_prop_inccumIr_vaccinated"),
@@ -326,6 +336,15 @@ plot_vaccine_metric(data = chosen_results_to_plot,
                     vrefs = c(30))
 ggsave(here::here("figures",folder_name,paste0("prc_red_prop_prevCr.png")), width = 12, height = 7)
 ggsave(here::here("figures","figure6_E_coli.png"), width = 12, height = 7)
+
+plot_vaccine_metric(data = chosen_results_to_plot,
+                    metric_name_to_plot = c("prc_red_prop_prevCr"),
+                    y_label = "Relative change due to vaccination (%)",
+                    chosen_shape = chosen_shape,
+                    chosen_palette = chosen_palette,
+                    hrefs = c(0),
+                    vrefs = c(30))
+ggsave(here::here("figures",folder_name,paste0("prc_red_prop_prevCr_total.png")), width = 14, height = 5)
 
 
 plot_vaccine_metric(data = results_to_plot,

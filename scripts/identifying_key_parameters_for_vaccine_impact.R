@@ -128,3 +128,16 @@ p_epi <- plot_prcc_epi_multi_color_only_inccum_or_prev(epi_prcc_df, 4, cols_choi
   theme(legend.key.spacing.y = unit(0.5, "cm"))
 p_epi
 ggsave(paste0("figures/figure3_only_prev.png"), plot = p_epi, width = 18, height = 6)
+
+p_epi <- plot_prcc_epi_multi_color_only_inccum_or_prev(epi_prcc_df, 4, 
+                                                       cols_choice = c("prc_red_inccumI"))+
+  theme(legend.key.spacing.y = unit(0.5, "cm"))
+p_epi
+ggsave(paste0("figures/figure3_only_inccumI.png"), plot = p_epi, width = 7, height = 5)
+
+# Only with the cumulative incidence of sensitive, resistant infections and proportion
+p_epi <- plot_prcc_epi_multi_color_only_inccum_or_prev(epi_prcc_df, 4, 
+                                                       cols_choice = c("prc_red_inccumIs","prc_red_inccumIr", "prc_red_prop_inccumIr"))+
+  theme(legend.key.spacing.y = unit(0.5, "cm"))
+p_epi
+ggsave(paste0("figures/figure3_only_inccumIs_Ir_prop.png"), plot = p_epi, width = 14, height = 5)
