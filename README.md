@@ -1,5 +1,7 @@
 # Generic_model_paper
 
+This repository contains the code associated to the paper "Quantifying the impact of bacterial vaccines against antibiotic resistance: accounting for transmission and selection dynamics" (Chloé Aupépin, Lulla Opatowski, Stéphane Loisel, Laura Temime, Quentin Leclerc).
+
 ## Overview
 Vaccines are a new potential tool to act against antimicrobial resistance (AMR). Here we construct a generic model paper to investigate the impacts of vaccines on AMR. 
 
