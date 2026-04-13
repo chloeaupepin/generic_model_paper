@@ -388,6 +388,17 @@ plot_vaccine_metric_both_bacteria(data1 = results_to_plot_Saureus,
                                   logscale = T)
 ggsave(here::here("figures","figure5.png"), width = 14, height = 5)
 
+plot_vaccine_metric_both_bacteria(data1 = results_to_plot_Saureus,
+                                  data2 = results_to_plot_Ecoli,
+                                  metric_name_to_plot = c("prc_red_prop_prevCr"),
+                                  y_label = "Relative change due to vaccination (%)",
+                                  chosen_shapes = shapes,
+                                  chosen_palette = palette_combined_named,
+                                  hrefs = c(),
+                                  vrefs = c(30),
+                                  logscale = F)
+ggsave(here::here("figures","prop_combined.png"), width = 14, height = 5)
+
 
 #### Plot combined antibiotic impact ####
 
