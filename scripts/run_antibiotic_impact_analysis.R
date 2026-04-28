@@ -22,7 +22,7 @@ population_size = 100000
 # S_aureus
 bacteria = "S_aureus"
 folder_name = "S_aureus"
-file_name  = "S_aureus_params10.csv"
+file_name  = "S_aureus_params_eu.csv"
 
 # E_coli
 # bacteria = "E_coli"

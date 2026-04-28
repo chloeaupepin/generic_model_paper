@@ -93,7 +93,7 @@ check_result <- function(x) {
 
 S_aureus <- list("prop_col" = 0.3,
                  "prop_col_res_carriers" = 0.1,
-                 "inc_inf" = 22.7/365,
+                 "inc_inf" = 37.9/365,
                  #"inc_inf_s" = 22.7/365, #5,
                  #"inc_inf_r" = 0.18/365, #5,
                  "carriage_dur_s" = 98,
@@ -141,7 +141,7 @@ valeur_cible_Cr = S_aureus$prop_col_res_carriers
 
 #### Optimise parameters ####
 
-params_to_find_init_values = list(betaC = 0.014, f = 0.98, as = 0.000004)
+params_to_find_init_values = list(betaC = 0.015, f = 0.99, as = 0.000004)
 #eval_model(params_to_find_init_values)
 
 res <- nlminb(start = params_to_find_init_values,
@@ -156,4 +156,4 @@ eval_model(res$par)
 
 S_aureus_params = as.list(c(res$par, params_fixed_values, list("ar" = res$par[["as"]])))
 
-write.csv(S_aureus_params,file = here("files","S_aureus_params10.csv"),row.names=FALSE)
+write.csv(S_aureus_params,file = here("files","S_aureus_params_eu.csv"),row.names=FALSE)
