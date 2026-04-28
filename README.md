@@ -53,9 +53,9 @@ Run [find_model_parameters_E_coli.R](./scripts/find_model_parameters_E_coli.R) t
 #### Step 3 : Run analyses 
 
 First start by running [run_vaccination_impact_analysis.R](./scripts/run_vaccination_impact_analysis.R), then [run_antibiotic_impact_analysis.R](./scripts/run_antibiotic_impact_analysis.R) and finally [vaccine_impact_on_R0.R](./scripts/vaccine_impact_on_R0.R). 
-Comment and decomment the corresponding line codes to havec the results for _S. aureus_ or  _E. coli_
+Comment and decomment the corresponding line codes to have the results for _S. aureus_ or  _E. coli_.
 
-Respecting this order is mandatory because equilibrium computations from the first script and stored in the [files](./files) folder are reused for the next two scripts. 
+Respecting this order is mandatory because equilibrium computations from the first script are stored in the [files](./files) folder and reused for the next two scripts. 
 
 #### Step 4 : Generate plots
 Run [generate_plots.R](./scripts/generate_plots.R) to generate all plots which are saved in the [figures](./figures) folder. 

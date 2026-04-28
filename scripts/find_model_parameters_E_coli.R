@@ -128,5 +128,5 @@ eval_model_coli(res$par)
 
 E_coli_params = as.list(c(res$par, params_fixed_values, list("ar" = res$par[["as"]]), list("betaI" = res$par[["betaC"]])))
 
-write.csv(E_coli_params,file = here::here("case_studies","data","E_coli_params_primavera4.csv"),row.names=FALSE)
+write.csv(E_coli_params,file = here::here("files","E_coli_params_primavera4.csv"),row.names=FALSE)
 
