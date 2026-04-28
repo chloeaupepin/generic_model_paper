@@ -11,7 +11,10 @@ Vaccines are a new potential tool to act against antimicrobial resistance (AMR).
 - [figures](./figures): figures in the manuscript and supplementary
 
 ## Installation guide
-Users should install the following packages, from an `R` terminal:
+Users should install R 4.4.2 (with the associated Rtools if using a windows environment) and RStudio, and download this repository git.
+Users should then open RStudio and create a new project from an existing directory and choose the folder just downloaded as the existing directory.
+
+Once the project is created and opened, users should install the following packages, from an `R` terminal:
 
 ```
 install.packages(c("dplyr", "here", "purrr", "tidyr", "deSolve", "furrr", "stringr", "ggplot2", "ggh4x", "scales","lhs","patchwork", "ggrepel", "parallel", "epiR"))
