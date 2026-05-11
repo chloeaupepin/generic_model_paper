@@ -66,16 +66,16 @@ output_labeller = c("prc_red_inccumI" = "Relative reduction of \ncumulative inci
                     "inccumI" = "Cumulative incidence of \nall infections",
                     "inccumIs" = "Cumulative incidence of \nsensitive infections",
                     "inccumIr" = "Cumulative incidence of \nresistant infections",
-                    "prop_inccumIr" = "Proportion of cumulative \nincidence of infections \ndue to resistant infections",
-                    "prc_red_prop_inccumIr" = "Relative change of \nproportion of cumulative \nincidence of infections \ndue to resistant infections",
+                    "prop_inccumIr" = "Proportion of resistance \namong total infections",
+                    "prc_red_prop_inccumIr" = "Relative change of \nproportion of resistance \namong total infections",
                     "prc_red_prevC" = "Relative reduction of \nprevalence of all colonisations",
                     "prc_red_prevCs" = "Relative reduction of \nprevalence of sensitive colonisation",
                     "prc_red_prevCr" = "Relative reduction of \nprevalence of resistant colonisation",
                     "prevC" = "Prevalence of \n all colonisations",
                     "prevCs" = "Prevalence of \nsensitive colonisation",
                     "prevCr" = "Prevalence of \nresistant colonisation",
-                    "prop_prevCr" = "Proportion of prevalence \nof colonisation \ndue to resistant colonisation",
-                    "prc_red_prop_prevCr" = "Relative change of \nproportion of prevalence \nof colonisation \ndue to resistant colonisation",
+                    "prop_prevCr" = "Proportion of resistance \namong carriers",
+                    "prc_red_prop_prevCr" = "Relative change of \nproportion of resistance \namong carriers",
                     "Coexistence condition" = "Coexistence condition"
 
                     )

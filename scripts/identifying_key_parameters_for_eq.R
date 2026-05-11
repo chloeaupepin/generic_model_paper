@@ -80,9 +80,9 @@ save(epi_prcc_df, file = here::here("files",paste0("prcc_for_eq_",number_of_samp
 
 load(file = here::here("files",paste0("prcc_for_eq_",number_of_samples,".data")))
 
-p_epi <- plot_prcc_epi_multi_color(epi_prcc_df, 4)
-p_epi
-ggsave(paste0("figures/figure2.png"), plot = p_epi, width = 14, height = 9)
+# p_epi <- plot_prcc_epi_multi_color(epi_prcc_df, 4)
+# p_epi
+# ggsave(paste0("figures/figure2.png"), plot = p_epi, width = 14, height = 9)
 
 # The code below allows you to have some parts of same graphic separately
 # Only with all cumulative infections

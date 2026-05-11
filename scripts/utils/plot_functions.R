@@ -250,11 +250,11 @@ prepare_for_antibiotic_metric_plot <- function(data, output_order){
 output_labeller = c("prc_red_inccumI" = "Cumulative incidence \nof all infections",
                     "prc_red_inccumIs" = "Cumulative incidence \nof sensitive infections",
                     "prc_red_inccumIr" = "Cumulative incidence \nof resistant infections",
-                    "prc_red_prop_inccumIr" = "Proportion of cumulative \nincidence of infections \ndue to resistant infections",
+                    "prc_red_prop_inccumIr" = "Proportion of resistance \namong total infections",
                     "prc_red_prevC" = "Prevalence of \nall colonisations",
                     "prc_red_prevCs" = "Prevalence of \nsensitive colonisation",
                     "prc_red_prevCr" = "Prevalence of \nresistant colonisation",
-                    "prc_red_prop_prevCr" = "Proportion of prevalence \nof colonisation \ndue to resistant colonisation"
+                    "prc_red_prop_prevCr" = "Proportion of resistance \namong carriers"
                     
                     
 )
