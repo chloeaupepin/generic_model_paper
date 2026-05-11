@@ -22,10 +22,10 @@ N = 100000
 ## Choose bacteria 
 # Comment or uncomment line codes below and rerun everything for each bacteria 
 # S_aureus
-bacteria = "S_aureus"
-folder_name = "S_aureus"
-file_name  = "S_aureus_params_eu_with_J01CR.csv"
-transmission_by_infected = F
+# bacteria = "S_aureus"
+# folder_name = "S_aureus"
+# file_name  = "S_aureus_params_eu_with_J01CR.csv"
+# transmission_by_infected = F
 
 # E_coli
 # bacteria = "E_coli"
@@ -35,7 +35,9 @@ transmission_by_infected = F
 
 #### Load previous analysis equilibrium ####
 
+cat("Loading equilibrium results...")
 load(here::here("files",folder_name,"equilibrium_results.RData"))
+cat("done\n")
 
 #### Add vaccination scenario ####
 # Choose vaccination scenario
@@ -111,5 +113,5 @@ plot_R0(data = results_stats,
         hrefs = c(0),
         vrefs = c())
 ggsave(here::here("figures",folder_name,"diff_R0s_R0r.png"), width = 12, height = 5)
-
+cat("Plots saved")
 

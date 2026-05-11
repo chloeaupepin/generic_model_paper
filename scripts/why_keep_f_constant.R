@@ -22,7 +22,7 @@ plan(multisession, workers = n_cores)
 
 
 #### Define parameter distributions ####
-Bacteria_params = read.csv(here::here("files","S_aureus_params_eu_with_J01CR.csv")) 
+Bacteria_params = read.csv(here::here("files",file_name_S_aureus)) 
 
 
 # list of parameter distributions
@@ -146,7 +146,7 @@ ggsave(paste0("figures/why_keep_f_constant_Saureus.png"), plot = p_epi_combined,
 
 
 #### Define parameter distributions ####
-Bacteria_params = read.csv(here::here("files","E_coli_params_primavera4.csv")) 
+Bacteria_params = read.csv(here::here("files",file_name_E_coli)) 
 
 # List of columns to transform
 cols_to_noise <- c(	

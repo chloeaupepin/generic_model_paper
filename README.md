@@ -56,9 +56,7 @@ Run [find_model_parameters_S_aureus.R](./scripts/find_model_parameters_S_aureus.
 Run [find_model_parameters_E_coli.R](./scripts/find_model_parameters_E_coli.R) to obtain _E. coli_ parameters (stored in file [E_coli_params_primavera4.csv](./files/E_coli_params_primavera4.csv)
 
 #### Step 3 : Run analyses 
-
-First start by running [run_vaccination_impact_analysis.R](./scripts/run_vaccination_impact_analysis.R), then [run_antibiotic_impact_analysis.R](./scripts/run_antibiotic_impact_analysis.R) and finally [vaccine_impact_on_R0.R](./scripts/vaccine_impact_on_R0.R). 
-Comment and decomment the corresponding line codes to have the results for _S. aureus_ or  _E. coli_.
+To run all analyses use the file [run_case_study_analyses.R](./scripts/run_case_study_analyses.R) which calls [run_vaccination_impact_analysis.R](./scripts/run_vaccination_impact_analysis.R), then [run_antibiotic_impact_analysis.R](./scripts/run_antibiotic_impact_analysis.R) and finally [vaccine_impact_on_R0.R](./scripts/vaccine_impact_on_R0.R). 
 
 Respecting this order is mandatory because equilibrium computations from the first script are stored in the [files](./files) folder and reused for the next two scripts. 
 

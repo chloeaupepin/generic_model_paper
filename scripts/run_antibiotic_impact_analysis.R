@@ -20,9 +20,9 @@ population_size = 100000
 ## Choose bacteria 
 # Comment or uncomment line codes below and rerun everything for each bacteria 
 # S_aureus
-bacteria = "S_aureus"
-folder_name = "S_aureus"
-file_name  = "S_aureus_params_eu_with_J01CR.csv"
+# bacteria = "S_aureus"
+# folder_name = "S_aureus"
+# file_name  = "S_aureus_params_eu_with_J01CR.csv"
 
 # E_coli
 # bacteria = "E_coli"
@@ -30,20 +30,21 @@ file_name  = "S_aureus_params_eu_with_J01CR.csv"
 # file_name = "E_coli_params_primavera4.csv"
 
 #### Load previous analysis equilibrium ####
-
+cat("Loading equilibrium results...")
 load(here::here("files",folder_name,"equilibrium_results.RData"))
-
+cat("done\n")
 #### Simulate different antibiotic scenarios ####
 # Simulate 1 year without vaccine for each parameter set at equilibrium
-
+cat("Simulating 1 year without change in antibiotic...")
 results_1y_wov <- eq_results %>%
   apply_function_on_df(simulate_1y_without_vaccine, "res_1y_wov") %>%
   unnest_wider(res_1y_wov, names_sep = "_")
-
+cat("done\n")
 # Choose antibiotic scenario
 antibiotic_scenarios_df <- tibble(prob_bystander_exposure_multiplier = c(0.9, 0.7, 0.5, 0.3,0.1)) %>%
   mutate(scenario_id = row_number())
 
+cat("Simulating 1 year with changes in antibiotic...")
 
 # Add antibiotic parameters to each parameter set
 df_for_antibiotic_simulations <- results_1y_wov %>%
@@ -99,6 +100,7 @@ results_to_plot_antibiotic <- results_with_outputs_antibiotic %>%
 
 
 save(results_to_plot_antibiotic, file = here::here("files",folder_name,"results_to_plot_antibiotic.RData"))
+cat("done and saved")
 
 
 

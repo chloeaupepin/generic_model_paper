@@ -22,16 +22,16 @@ population_size = 100000
 ## Choose bacteria 
 # Comment or uncomment 4 line codes below and rerun everything for each bacteria 
 # S_aureus
-bacteria = "S_aureus"
-folder_name = "S_aureus"
-file_name  = "S_aureus_params_eu_with_J01CR.csv"
-transmission_by_infected = FALSE
+# bacteria = "S_aureus"
+# folder_name = "S_aureus"
+# file_name  = "S_aureus_params_eu_with_J01CR.csv"
+# transmission_by_infected = FALSE
 
 # E_coli
-# bacteria = "E_coli"
-# folder_name = "E_coli"
-# file_name = "E_coli_params_primavera4.csv"
-# transmission_by_infected = TRUE # if transmission is allowed, it equals transmission by colonized individuals
+bacteria = "E_coli"
+folder_name = "E_coli"
+file_name = "E_coli_params_primavera5.csv"
+transmission_by_infected = TRUE # if transmission is allowed, it equals transmission by colonized individuals
 
 ## Choose number of bacteria to generate
 n <- 500
@@ -96,6 +96,7 @@ df_bacteria <- filter_coexistence_condition(df_bacteria)
 
 
 #### Run analysis equilibrium ####
+cat("Computing coexistence equilibrium...")
 
 # Compute equilibrium with analytical expressions 
 eq_results <- compute_equilibrium(df_bacteria, population_size)
@@ -109,22 +110,29 @@ eq_results <- eq_results %>%
 create_folder(file.path(getwd(),"files",folder_name))
 save(eq_results, file = here::here("files",folder_name,"equilibrium_results.RData"))
 
+cat("done and equilibrium results saved\n")
+
+
 #### Simulation de un an sans vaccin et un an avec vaccin ####
 # Simulate 1 year without vaccine for each parameter set at equilibrium
+cat("Computing 1 year without vaccination...")
 
 results_1y_wov <- eq_results %>%
   apply_function_on_df(simulate_1y_without_vaccine, "res_1y_wov") %>%
   unnest_wider(res_1y_wov, names_sep = "_")
 
+cat("done\n")
+
+cat("Computing 1 year with vaccination...")
 # Choose vaccination scenario
 vaccine_scenarios_complete_df <- bind_rows(
-  expand.grid("Vperc" = c(0.1,0.3,0.5,0.7,0.9),"vftcs" = c(0.3,0.6,0.7,0.9)) %>% mutate("vftcr" = vftcs, "vfds"=0,"vfdr"=0,"vfis"=0,"vfir"=0,"vfrs" = 0, "vfrr" = 0,name = "vftc"),
-  expand.grid("Vperc" = c(0.1,0.3,0.5,0.7,0.9),"vfds" = c(0.3,0.6,0.7,0.9)) %>% mutate("vfdr" = vfds, "vftcs"=0, "vftcr"=0,"vfis"=0,"vfir"=0,"vfrs" = 0, "vfrr" = 0,name = "vfd"),
-  expand.grid("Vperc" = c(0.1,0.3,0.5,0.7,0.9),"vfis" = c(0.3,0.6,0.7,0.9)) %>% mutate("vfir" = vfis,"vftcs"=0, "vftcr"=0, "vfds"=0, "vfdr"=0, "vfrs"=0, "vfrr"=0, name = "vfi"),
-  expand.grid("Vperc" = c(0.1,0.3,0.5,0.7,0.9),"vftcs" = c(0.3,0.6,0.7,0.9)) %>% mutate("vftcr" = vftcs, "vfds"=vftcs,"vfdr"=vftcs,"vfis"=0,"vfir"=0,"vfrs" = 0, "vfrr" = 0, name = "vftc_vfd"),
-  expand.grid("Vperc" = c(0.1,0.3,0.5,0.7,0.9),"vftcs" = c(0.3,0.6,0.7,0.9)) %>% mutate("vftcr" = vftcs, "vfis"=vftcs,"vfir"=vftcs,"vfds"=0,"vfdr"=0,"vfrs" = 0, "vfrr" = 0, name = "vftc_vfi"),
-  expand.grid("Vperc" = c(0.1,0.3,0.5,0.7,0.9),"vfds" = c(0.3,0.6,0.7,0.9)) %>% mutate("vfdr" = vfds, "vfis"=vfds,"vfir"=vfds,"vftcs"=0, "vftcr"=0,"vfrs"=0, "vfrr"=0, name = "vfd_vfi"),
-  expand.grid("Vperc" = c(0.1,0.3,0.5,0.7,0.9),"vftcs" = c(0.3,0.6,0.7,0.9)) %>% mutate("vftcr" = vftcs, "vfds"=vftcs,"vfdr"=vftcs, "vfis"=vftcs,"vfir"=vftcs,"vfrs"=0, "vfrr"=0, name = "vftc_vfd_vfi")
+  expand.grid("Vperc" = c(0.1,0.3,0.5,0.7,0.9),"vftcs" = c(0.3,0.6,0.9)) %>% mutate("vftcr" = vftcs, "vfds"=0,"vfdr"=0,"vfis"=0,"vfir"=0,"vfrs" = 0, "vfrr" = 0,name = "vftc"),
+  expand.grid("Vperc" = c(0.1,0.3,0.5,0.7,0.9),"vfds" = c(0.3,0.6,0.9)) %>% mutate("vfdr" = vfds, "vftcs"=0, "vftcr"=0,"vfis"=0,"vfir"=0,"vfrs" = 0, "vfrr" = 0,name = "vfd"),
+  expand.grid("Vperc" = c(0.1,0.3,0.5,0.7,0.9),"vfis" = c(0.3,0.6,0.9)) %>% mutate("vfir" = vfis,"vftcs"=0, "vftcr"=0, "vfds"=0, "vfdr"=0, "vfrs"=0, "vfrr"=0, name = "vfi"),
+  expand.grid("Vperc" = c(0.1,0.3,0.5,0.7,0.9),"vftcs" = c(0.3,0.6,0.9)) %>% mutate("vftcr" = vftcs, "vfds"=vftcs,"vfdr"=vftcs,"vfis"=0,"vfir"=0,"vfrs" = 0, "vfrr" = 0, name = "vftc_vfd"),
+  expand.grid("Vperc" = c(0.1,0.3,0.5,0.7,0.9),"vftcs" = c(0.3,0.6,0.9)) %>% mutate("vftcr" = vftcs, "vfis"=vftcs,"vfir"=vftcs,"vfds"=0,"vfdr"=0,"vfrs" = 0, "vfrr" = 0, name = "vftc_vfi"),
+  expand.grid("Vperc" = c(0.1,0.3,0.5,0.7,0.9),"vfds" = c(0.3,0.6,0.9)) %>% mutate("vfdr" = vfds, "vfis"=vfds,"vfir"=vfds,"vftcs"=0, "vftcr"=0,"vfrs"=0, "vfrr"=0, name = "vfd_vfi"),
+  expand.grid("Vperc" = c(0.1,0.3,0.5,0.7,0.9),"vftcs" = c(0.3,0.6,0.9)) %>% mutate("vftcr" = vftcs, "vfds"=vftcs,"vfdr"=vftcs, "vfis"=vftcs,"vfir"=vftcs,"vfrs"=0, "vfrr"=0, name = "vftc_vfd_vfi")
 ) %>% mutate(vaccine_id = row_number()) 
 
 
@@ -189,3 +197,4 @@ results_to_plot <- results_with_outputs %>%
 
 # save results_to_plot
 save(results_to_plot, file = here::here("files",folder_name,"results_to_plot.RData"))
+cat("...done and results saved")
