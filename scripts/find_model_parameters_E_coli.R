@@ -96,12 +96,12 @@ params_fixed_values = list(time_until_recovery_without_ATB_s = 28,
                            prob_specific_exposure = 0.8,
                            prob_specific_exposure_r = 0.8,
                            # gammaA_S = prop_first_line/temps_first_line + prop_second_line/temps_second_line*(1-prop_min) 
-                           gammaA_s = 0.75/2+0.05/7*(1-0.1), 
+                           gammaA_s = 0.64/2+0.16/7*(1-0.1), 
                            # ANTIBIO SECOND LINE DOIT SELECTIONNER POUR LA RESISTANCE
                            # psiA = prop_second_line/temps_second_line*prop_min 
-                           psiA = 0.05/7*0.1, 
+                           psiA = 0.16/7*0.1, 
                            # gammaA_R = prop_first_line/temps_first_line + prop_second_line/temps_second_line
-                           gammaA_r = 0.75/2+0.05/9, 
+                           gammaA_r = 0.64/2+0.16/9, 
                            prob_minority_strain_when_infected = 0.1,
                            thetasr = 0,
                            thetars = 0
@@ -128,5 +128,5 @@ eval_model_coli(res$par)
 
 E_coli_params = as.list(c(res$par, params_fixed_values, list("ar" = res$par[["as"]]), list("betaI" = res$par[["betaC"]])))
 
-write.csv(E_coli_params,file = here::here("files","E_coli_params_primavera4.csv"),row.names=FALSE)
+write.csv(E_coli_params,file = here::here("files","E_coli_params_primavera5.csv"),row.names=FALSE)
 
