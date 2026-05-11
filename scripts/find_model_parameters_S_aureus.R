@@ -122,7 +122,7 @@ params_fixed_values = list(betaI = 0,
                            time_until_recovery_without_ATB_r = S_aureus$inf_dur_without_abx_r,
                            dps = S_aureus$carriage_dur_s,
                            dpr = S_aureus$carriage_dur_r,
-                           prob_bystander_exposure = 0.06/1000,
+                           prob_bystander_exposure = (0.06+4.7)/1000,
                            time_until_decolo_by_bystander_ATB = 10,
                            prob_minority_strain_when_colonised = 0.1,
                            eps = 1,
@@ -141,19 +141,78 @@ valeur_cible_Cr = S_aureus$prop_col_res_carriers
 
 #### Optimise parameters ####
 
-params_to_find_init_values = list(betaC = 0.015, f = 0.99, as = 0.000004)
-#eval_model(params_to_find_init_values)
+# params_to_find_init_values = list(betaC = 0.015, f = 0.85, as = 0.000004)
+# eval_model(params_to_find_init_values)
+# 
+# res <- nlminb(start = params_to_find_init_values,
+#               objective = eval_model,
+#               lower = c(0.005,0.8,0.000001),
+#               upper = c(0.05,1,0.00001))
+# print(res$par)
+# check <- check_result(res$par)
+# eval_model(res$par)
 
-res <- nlminb(start = params_to_find_init_values,
-              objective = eval_model,
-              lower = c(0.005,0.95,0.000001),
-              upper = c(0.05,1,0.00001))
-print(res$par)
-check <- check_result(res$par)
-eval_model(res$par)
+#### Optimise parameters with multiple start ####
+
+# Bounds
+lower <- c(betaC = 0.005, f = 0.8, as = 0.000001)
+upper <- c(betaC = 0.05,  f = 1,   as = 0.00001)
+
+# Number of points by dimension
+n_grid <- 5
+
+# Grid creation
+grid <- expand.grid(
+  betaC = seq(lower["betaC"], upper["betaC"], length.out = n_grid),
+  f     = seq(lower["f"],     upper["f"],     length.out = n_grid),
+  as    = seq(lower["as"],    upper["as"],    length.out = n_grid)
+)
+
+# Total number of combinations
+n_starts <- nrow(grid)
+
+# Storage
+results <- vector("list", n_starts)
+
+for (i in 1:n_starts) {
+  start_vals <- as.numeric(grid[i, ])
+  names(start_vals) <- names(lower)
+  
+  res <- nlminb(
+    start = start_vals,
+    objective = eval_model,
+    lower = lower,
+    upper = upper
+  )
+  
+  results[[i]] <- list(
+    par = res$par,
+    obj = res$objective,
+    convergence = res$convergence,
+    start = start_vals
+  )
+}
+
+results_df <- data.frame(do.call(rbind, lapply(results, function(x) {
+  c(x$start, x$par, obj = x$obj, conv = x$convergence)
+})))
+
+# Best parameters
+best_index <- which.min(sapply(results, function(x) x$obj))
+best <- results[[best_index]]
+
+cat("Best start point:\n")
+print(best$start)
+
+cat("Optimised parameters:\n")
+print(best$par)
+
+# Vérification
+check <- check_result(best$par)
+eval_model(best$par)
 
 #### Save results #### 
 
-S_aureus_params = as.list(c(res$par, params_fixed_values, list("ar" = res$par[["as"]])))
+S_aureus_params = as.list(c(best$par, params_fixed_values, list("ar" = best$par[["as"]])))
 
-write.csv(S_aureus_params,file = here("files","S_aureus_params_eu.csv"),row.names=FALSE)
+write.csv(S_aureus_params,file = here("files","S_aureus_params_eu_with_J01CR.csv"),row.names=FALSE)

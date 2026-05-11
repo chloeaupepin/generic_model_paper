@@ -24,7 +24,7 @@ N = 100000
 # S_aureus
 bacteria = "S_aureus"
 folder_name = "S_aureus"
-file_name  = "S_aureus_params_eu.csv"
+file_name  = "S_aureus_params_eu_with_J01CR.csv"
 transmission_by_infected = F
 
 # E_coli

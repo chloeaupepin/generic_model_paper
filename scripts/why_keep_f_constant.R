@@ -22,7 +22,7 @@ plan(multisession, workers = n_cores)
 
 
 #### Define parameter distributions ####
-Bacteria_params = read.csv(here::here("files","S_aureus_params_eu.csv")) 
+Bacteria_params = read.csv(here::here("files","S_aureus_params_eu_with_J01CR.csv")) 
 
 
 # list of parameter distributions
