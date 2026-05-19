@@ -96,12 +96,12 @@ params_fixed_values = list(time_until_recovery_without_ATB_s = 28,
                            prob_specific_exposure = 0.8,
                            prob_specific_exposure_r = 0.8,
                            # gammaA_S = prop_first_line/temps_first_line + prop_second_line/temps_second_line*(1-prop_min) 
-                           gammaA_s = 0.64/2+0.16/7*(1-0.1), 
+                           gammaA_s = 0.6/2+0.2/7*(1-0.1), 
                            # ANTIBIO SECOND LINE DOIT SELECTIONNER POUR LA RESISTANCE
                            # psiA = prop_second_line/temps_second_line*prop_min 
-                           psiA = 0.16/7*0.1, 
+                           psiA = 0.2/7*0.1, 
                            # gammaA_R = prop_first_line/temps_first_line + prop_second_line/temps_second_line
-                           gammaA_r = 0.64/2+0.16/9, 
+                           gammaA_r = 0.6/2+0.2/9, 
                            prob_minority_strain_when_infected = 0.1,
                            thetasr = 0,
                            thetars = 0
