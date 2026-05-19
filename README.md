@@ -15,6 +15,7 @@ Vaccines are a new potential tool to act against antimicrobial resistance (AMR).
 This code has been tested with a computer with the following specs: 
 - RAM 64GB
 - CPU 12-cores, 4.10 GHz (24 logical processors)
+
 Users should be aware that sufficient parallelisation is needed to ensure a rapid total run time. 
 
 This code has been tested on the following systems: Windows 11 Professionnel
