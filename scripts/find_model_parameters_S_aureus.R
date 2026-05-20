@@ -201,15 +201,11 @@ results_df <- data.frame(do.call(rbind, lapply(results, function(x) {
 best_index <- which.min(sapply(results, function(x) x$obj))
 best <- results[[best_index]]
 
-cat("Best start point:\n")
-print(best$start)
+cat("Optimised parameters:\n", paste0(names(best$par)," = ", best$par, "\n"))
 
-cat("Optimised parameters:\n")
-print(best$par)
-
-# Vérification
+# Check
 check <- check_result(best$par)
-eval_model(best$par)
+cat("Error =",eval_model(best$par))
 
 #### Save results #### 
 

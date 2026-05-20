@@ -112,21 +112,77 @@ valeur_cible_C = 0.95
 valeur_cible_Cr = 0.06
 
 #### Optimise parameters ####
+# 
+# params_to_find_init_values = list(betaC = 0.1, f = 0.87, as = 0.000004)
+# #eval_model_coli(params_to_find_init_values)
+# 
+# res <- nlminb(start = params_to_find_init_values,
+#               objective = eval_model_coli,
+#               lower = c(0.01,0.85,0.000001),#c(0.1,0.95,0.000001,0.000001), #
+#               upper = c(0.5,0.99,0.0005))#c(0.5,1,0.0005,0.0005)) #
+# print(res$par)
+# check <- check_result_coli(res$par)
+# eval_model_coli(res$par)
 
-params_to_find_init_values = list(betaC = 0.1, f = 0.87, as = 0.000004)
-#eval_model_coli(params_to_find_init_values)
+#### Optimise parameters with multiple start ####
 
-res <- nlminb(start = params_to_find_init_values,
-              objective = eval_model_coli,
-              lower = c(0.01,0.85,0.000001),#c(0.1,0.95,0.000001,0.000001), #
-              upper = c(0.5,0.99,0.0005))#c(0.5,1,0.0005,0.0005)) #
-print(res$par)
-check <- check_result_coli(res$par)
-eval_model_coli(res$par)
+# Bounds
+lower <- c(betaC = 0.01, f = 0.8, as = 0.000001)
+upper <- c(betaC = 0.5,  f = 1,   as = 0.0005)
+
+# Number of points by dimension
+n_grid <- 10
+
+# Grid creation
+grid <- expand.grid(
+  betaC = seq(lower["betaC"], upper["betaC"], length.out = n_grid),
+  f     = seq(lower["f"],     upper["f"],     length.out = n_grid),
+  as    = seq(lower["as"],    upper["as"],    length.out = n_grid)
+)
+
+# Total number of combinations
+n_starts <- nrow(grid)
+
+# Storage
+results <- vector("list", n_starts)
+
+for (i in 1:n_starts) {
+  start_vals <- as.numeric(grid[i, ])
+  names(start_vals) <- names(lower)
+  
+  res <- nlminb(
+    start = start_vals,
+    objective = eval_model_coli,
+    lower = lower,
+    upper = upper
+  )
+  
+  results[[i]] <- list(
+    par = res$par,
+    obj = res$objective,
+    convergence = res$convergence,
+    start = start_vals
+  )
+}
+
+results_df <- data.frame(do.call(rbind, lapply(results, function(x) {
+  c(x$start, x$par, obj = x$obj, conv = x$convergence)
+})))
+
+# Best parameters
+best_index <- which.min(sapply(results, function(x) x$obj))
+best <- results[[best_index]]
+
+cat("Optimised parameters:\n", paste0(names(best$par)," = ", best$par, "\n"))
+
+# Check
+check <- check_result_coli(best$par)
+cat("Error =",eval_model_coli(best$par))
+
 
 #### Save results #### 
 
-E_coli_params = as.list(c(res$par, params_fixed_values, list("ar" = res$par[["as"]]), list("betaI" = res$par[["betaC"]])))
+E_coli_params = as.list(c(best$par, params_fixed_values, list("ar" = best$par[["as"]]), list("betaI" = best$par[["betaC"]])))
 
 write.csv(E_coli_params,file = here::here("files","E_coli_params_primavera5.csv"),row.names=FALSE)
 
