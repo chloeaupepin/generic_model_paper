@@ -38,7 +38,7 @@ eval_model_coli <- function(x) {
   })
 }
 
-# Compute equilibrium value (possibility to compare afterwarsds with target value)
+# Compute equilibrium value (possibility to compare afterwards with target value)
 check_result_coli <- function(x) {
   names(x) <- params_to_find
   with(as.list(c(x, params_fixed_values,list("ar" = x[["as"]]), list("betaI" = x[["betaC"]]))), { 
@@ -184,5 +184,5 @@ cat("Error =",eval_model_coli(best$par))
 
 E_coli_params = as.list(c(best$par, params_fixed_values, list("ar" = best$par[["as"]]), list("betaI" = best$par[["betaC"]])))
 
-write.csv(E_coli_params,file = here::here("files","E_coli_params_primavera5.csv"),row.names=FALSE)
+write.csv(E_coli_params,file = here::here("files","E_coli_params.csv"),row.names=FALSE)
 

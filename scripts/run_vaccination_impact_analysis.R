@@ -28,10 +28,10 @@ population_size = 100000
 # transmission_by_infected = FALSE
 
 # E_coli
-bacteria = "E_coli"
-folder_name = "E_coli"
-file_name = "E_coli_params_primavera5.csv"
-transmission_by_infected = TRUE # if transmission is allowed, it equals transmission by colonized individuals
+# bacteria = "E_coli"
+# folder_name = "E_coli"
+# file_name = "E_coli_params_primavera5.csv"
+# transmission_by_infected = TRUE # if transmission is allowed, it equals transmission by colonized individuals
 
 ## Choose number of bacteria to generate
 n <- 500
@@ -133,7 +133,16 @@ vaccine_scenarios_complete_df <- bind_rows(
   expand.grid("Vperc" = c(0.1,0.3,0.5,0.7,0.9),"vftcs" = c(0.3,0.6,0.9)) %>% mutate("vftcr" = vftcs, "vfis"=vftcs,"vfir"=vftcs,"vfds"=0,"vfdr"=0,"vfrs" = 0, "vfrr" = 0, name = "vftc_vfi"),
   expand.grid("Vperc" = c(0.1,0.3,0.5,0.7,0.9),"vfds" = c(0.3,0.6,0.9)) %>% mutate("vfdr" = vfds, "vfis"=vfds,"vfir"=vfds,"vftcs"=0, "vftcr"=0,"vfrs"=0, "vfrr"=0, name = "vfd_vfi"),
   expand.grid("Vperc" = c(0.1,0.3,0.5,0.7,0.9),"vftcs" = c(0.3,0.6,0.9)) %>% mutate("vftcr" = vftcs, "vfds"=vftcs,"vfdr"=vftcs, "vfis"=vftcs,"vfir"=vftcs,"vfrs"=0, "vfrr"=0, name = "vftc_vfd_vfi")
-) %>% mutate(vaccine_id = row_number()) 
+) %>% mutate(vaccine_id = row_number())
+
+if(bacteria == "E_coli"){
+  vaccine_scenarios_complete_df <- vaccine_scenarios_complete_df %>%
+    bind_rows(tibble("Vperc" = c(0.7, 0.7), 
+                     "vftcs" = c(0.7,0),"vfds" = c(0.7, 0), "vfis" = c(0.7, 0.7), "vfrs" = c(0,0),
+                     "vftcr" = c(0.7,0),"vfdr" = c(0.7, 0), "vfir" = c(0.7, 0.7), "vfrr" = c(0,0),
+                     "name" = c("vftc_vfd_vfi", "vfi"), 
+                     "vaccine_id" =c(max(vaccine_scenarios_complete_df$vaccine_id)+1,max(vaccine_scenarios_complete_df$vaccine_id)+2) ))
+}
 
 
 if(transmission_by_infected){

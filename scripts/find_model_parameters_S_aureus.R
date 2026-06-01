@@ -122,7 +122,7 @@ params_fixed_values = list(betaI = 0,
                            time_until_recovery_without_ATB_r = S_aureus$inf_dur_without_abx_r,
                            dps = S_aureus$carriage_dur_s,
                            dpr = S_aureus$carriage_dur_r,
-                           prob_bystander_exposure = (0.06+4.7)/1000,
+                           prob_bystander_exposure = (0.06+4.7)/1000, #0.06/1000 #value 0.06 only for S_aureus_params_eu.csv
                            time_until_decolo_by_bystander_ATB = 10,
                            prob_minority_strain_when_colonised = 0.1,
                            eps = 1,

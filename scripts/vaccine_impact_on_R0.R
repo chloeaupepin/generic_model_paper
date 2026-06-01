@@ -90,8 +90,8 @@ results_best_Vperc_stats <- results_best_Vperc %>%
 results_stats <- compute_statistics(results, c("R0", "R0s", "R0r", "R0s_R0r"))
 
 #### Plots ####
-chosen_palette = colors_and_shapes[[folder_name]]$palette
-chosen_shape = colors_and_shapes[[folder_name]]$shape
+chosen_palette = colors_and_shapes[[bacteria]]$palette
+chosen_shape = colors_and_shapes[[bacteria]]$shape
 
 
 plot_R0(data = results_stats,

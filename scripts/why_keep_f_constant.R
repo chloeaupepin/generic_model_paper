@@ -138,7 +138,7 @@ p_epi_combined <- plot_prcc_epi_multi_color_only_inccum_or_prev(epi_prcc_df_comb
   theme(legend.key.spacing.y = unit(0.5, "cm"))
 p_epi_combined
 
-ggsave(paste0("figures/why_keep_f_constant_Saureus.png"), plot = p_epi_combined, width = 11, height = 5)
+ggsave(paste0("figures/",folder_name_S_aureus,"/why_keep_f_constant_Saureus.png"), plot = p_epi_combined, width = 11, height = 5)
 
 ###############################################################################
 # 2. E. coli
@@ -266,5 +266,5 @@ p_epi_combined <- plot_prcc_epi_multi_color_only_inccum_or_prev(epi_prcc_df_comb
   theme(legend.key.spacing.y = unit(0.5, "cm"))
 p_epi_combined
 
-ggsave(paste0("figures/why_keep_f_constant_Ecoli.png"), plot = p_epi_combined, width = 11, height = 5)
+ggsave(paste0("figures/",folder_name_E_coli,"/why_keep_f_constant_Ecoli.png"), plot = p_epi_combined, width = 11, height = 5)
 
