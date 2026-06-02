@@ -159,7 +159,7 @@ lower <- c(betaC = 0.005, f = 0.8, as = 0.000001)
 upper <- c(betaC = 0.05,  f = 1,   as = 0.00001)
 
 # Number of points by dimension
-n_grid <- 5
+n_grid <- 10
 
 # Grid creation
 grid <- expand.grid(
