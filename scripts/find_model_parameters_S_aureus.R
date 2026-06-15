@@ -103,7 +103,7 @@ S_aureus <- list("prop_col" = 0.3,
                  "prop_inf_abx_treated_s" = 1, #O.75
                  "prop_inf_abx_treated_r" = 1, #O.75
                  "inf_dur_with_abx_s" = 14,
-                 "inf_dur_with_abx_r" = 28)
+                 "inf_dur_with_abx_r" = 14)
 
 params_to_find = c("betaC","f","as")
 
