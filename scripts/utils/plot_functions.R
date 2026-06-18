@@ -254,7 +254,7 @@ output_labeller = c("prc_red_inccumI" = "Cumulative incidence \nof all infection
                     "prc_red_prevC" = "Prevalence of \nall colonisations",
                     "prc_red_prevCs" = "Prevalence of \nsensitive colonisation",
                     "prc_red_prevCr" = "Prevalence of \nresistant colonisation",
-                    "prc_red_prop_prevCr" = "Proportion of resistance \namong carriers"
+                    "prc_red_prop_prevCr" = "Proportion of resistance \namong colonised"
                     
                     
 )

@@ -74,8 +74,8 @@ output_labeller = c("prc_red_inccumI" = "Relative reduction of \ncumulative inci
                     "prevC" = "Prevalence of \n all colonisations",
                     "prevCs" = "Prevalence of \nsensitive colonisation",
                     "prevCr" = "Prevalence of \nresistant colonisation",
-                    "prop_prevCr" = "Proportion of resistance \namong carriers",
-                    "prc_red_prop_prevCr" = "Relative change of \nproportion of resistance \namong carriers",
+                    "prop_prevCr" = "Proportion of resistance \namong colonised",
+                    "prc_red_prop_prevCr" = "Relative change of \nproportion of resistance \namong colonised",
                     "Coexistence condition" = "Coexistence condition"
 
                     )
