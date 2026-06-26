@@ -35,7 +35,7 @@ compute_antibiotic_associated_flux <- function(data, with_specific_flux=T){
            lambdaA_I = (1-prob_specific_exposure) * prob_bystander_exposure * 1/time_until_decolo_by_bystander_ATB*(1-prob_minority_strain_when_infected),
            phiA_I = (1-prob_specific_exposure) * prob_bystander_exposure * 1/time_until_decolo_by_bystander_ATB*prob_minority_strain_when_infected,
            
-           etas = (1-prob_specific_exposure) * 1/time_until_recovery_without_ATB_s,
+           etas = (1-prob_specific_exposure) *(1-prob_bystander_exposure)* 1/time_until_recovery_without_ATB_s,
            etar = (1-prob_specific_exposure_r) * 1/time_until_recovery_without_ATB_r)
 }
 

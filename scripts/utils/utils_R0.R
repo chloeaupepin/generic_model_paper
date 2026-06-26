@@ -22,7 +22,7 @@ SCISsrV.reprod_nbrs <- function(param){
       gammaA_r = prob_specific_exposure_r * 1/time_until_decolo_by_specific_ATB_r
     }
     
-    etas = (1-prob_specific_exposure) * 1/time_until_recovery_without_ATB_s
+    etas = (1-prob_specific_exposure)*(1-prob_bystander_exposure) * 1/time_until_recovery_without_ATB_s
     etar = (1-prob_specific_exposure_r) * 1/time_until_recovery_without_ATB_r
     
     Hcsnv = 1/dps+lambdaA+phiA+as
@@ -108,7 +108,7 @@ vaccine_coverage_threshold_for_R0 <- function(param){
       gammaA_r = prob_specific_exposure_r * 1/time_until_decolo_by_specific_ATB_r
     }
     
-    etas = (1-prob_specific_exposure) * 1/time_until_recovery_without_ATB_s
+    etas = (1-prob_specific_exposure) *(1-prob_bystander_exposure)* 1/time_until_recovery_without_ATB_s
     etar = (1-prob_specific_exposure_r) * 1/time_until_recovery_without_ATB_r
     
     Hcsnv = 1/dps+lambdaA+phiA+as

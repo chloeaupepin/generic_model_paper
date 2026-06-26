@@ -19,7 +19,7 @@ eval_model <- function(x) {
     psiA = prob_specific_exposure * 1/time_until_decolo_by_specific_ATB*prob_minority_strain_when_infected
     
     gammaA_r = prob_specific_exposure_r * 1/time_until_decolo_by_specific_ATB_r
-    etas = (1-prob_specific_exposure) * 1/time_until_recovery_without_ATB_s
+    etas = (1-prob_specific_exposure) *(1-prob_bystander_exposure)* 1/time_until_recovery_without_ATB_s
     etar = (1-prob_specific_exposure_r) * 1/time_until_recovery_without_ATB_r
     
     N = 100000
@@ -59,7 +59,7 @@ check_result <- function(x) {
     psiA = prob_specific_exposure * 1/time_until_decolo_by_specific_ATB*prob_minority_strain_when_infected
     
     gammaA_r = prob_specific_exposure_r * 1/time_until_decolo_by_specific_ATB_r
-    etas = (1-prob_specific_exposure) * 1/time_until_recovery_without_ATB_s
+    etas = (1-prob_specific_exposure) *(1-prob_bystander_exposure)* 1/time_until_recovery_without_ATB_s
     etar = (1-prob_specific_exposure_r) * 1/time_until_recovery_without_ATB_r
     
     N = 100000

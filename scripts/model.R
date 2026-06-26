@@ -31,7 +31,7 @@ SCISsrV.model <- function(t, pop, param) {
     }
     
     # Recovery rates (when antibiotics aren't taken)
-    etas = (1-prob_specific_exposure) * 1/time_until_recovery_without_ATB_s
+    etas = (1-prob_specific_exposure) *(1-prob_bystander_exposure)* 1/time_until_recovery_without_ATB_s
     etar = (1-prob_specific_exposure_r) * 1/time_until_recovery_without_ATB_r
     
     # Equations of non-vaccinated compartments
