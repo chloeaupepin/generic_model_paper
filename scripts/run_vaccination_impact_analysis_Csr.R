@@ -1,0 +1,187 @@
+library(purrr)
+library(tidyr)
+library(dplyr)
+library(deSolve)
+library(furrr)
+library(stringr)
+
+source(here::here("scripts", "model.R"))
+source(here::here("scripts","utils", "functions_Csr.R"))
+
+n_cores = parallel::detectCores() - 3
+plan(multisession, workers = n_cores)
+
+
+set.seed(123)  # global seed for reproducibility
+
+#### Define settings ####
+
+## Population size
+population_size = 100000
+
+## Choose bacteria 
+# Comment or uncomment 4 line codes below and rerun everything for each bacteria 
+# S_aureus
+bacteria = "S_aureus"
+folder_name = "S_aureus"
+file_name  = "S_aureus_params_eu_with_J01CR.csv"
+transmission_by_infected = FALSE
+
+# E_coli
+# bacteria = "E_coli"
+# folder_name = "E_coli"
+# file_name = "E_coli_params_primavera5.csv"
+# transmission_by_infected = TRUE # if transmission is allowed, it equals transmission by colonized individuals
+
+## Choose number of bacteria to generate
+n <- 500
+
+
+#### Define bacteria ####
+Bacteria_params = read.csv(here::here("files",file_name)) 
+
+# cols_to_noise include bacteria parameters and antibiotic parameters
+# the relative fitness f isn't varied due to too much sensitivity of resistant proportion
+if(bacteria == "S_aureus"){
+  Bacteria_params$f = 0.94
+  Bacteria_params$sigmaC1 = 1
+  Bacteria_params$sigmaI1 = 1
+  
+  cols_to_noise <- c(	
+    "betaC","as","time_until_recovery_without_ATB_s","dps",
+    "prob_bystander_exposure",
+    "time_until_decolo_by_bystander_ATB",
+    "prob_minority_strain_when_colonised",
+    "prob_specific_exposure",
+    "time_until_decolo_by_specific_ATB",
+    "prob_minority_strain_when_infected",
+    "prob_specific_exposure_r",
+    "time_until_decolo_by_specific_ATB_r","f"
+  )
+} else {
+  cols_to_noise <- c(	
+    "betaC","as","time_until_recovery_without_ATB_s","dps",
+    "prob_bystander_exposure",
+    "time_until_decolo_by_bystander_ATB",
+    "prob_minority_strain_when_colonised",
+    "prob_specific_exposure",
+    "prob_minority_strain_when_infected",
+    "prob_specific_exposure_r",
+    "gammaA_s",
+    "psiA",
+    "gammaA_r"
+  )
+}
+
+df_bacteria <- add_variability(Bacteria_params, cols_to_noise, n ,0.05) 
+
+df_bacteria <- set_resistant_and_sensitive_param_equal(df_bacteria, c("dpr", "ar", "time_until_recovery_without_ATB_r"))
+
+
+if(transmission_by_infected){
+  df_bacteria <- df_bacteria %>%
+    mutate(betaI = betaC)
+} else {
+  df_bacteria <- df_bacteria %>%
+    mutate(betaI = 0)
+}
+
+
+df_bacteria <- df_bacteria %>%
+  mutate(prob_specific_exposure_r = pmin(1,prob_specific_exposure_r),
+         prob_specific_exposure = pmin(1,prob_specific_exposure),
+         prob_minority_strain_when_colonised = pmin(1,prob_minority_strain_when_colonised),
+         prob_minority_strain_when_infected = pmin(1,prob_minority_strain_when_infected),
+         prob_bystander_exposure = pmin(1,prob_bystander_exposure)
+  )
+
+#### Run analysis equilibrium ####
+
+# Compute equilibrium with analytical expressions 
+eq_results <- df_bacteria %>%
+  apply_function_on_df(simulate_eq_without_vaccine,"eq")%>%
+  unnest_wider(eq, names_sep = "_")
+
+eq_results_all <- eq_results
+
+eq_results <- eq_results %>%
+  mutate(prop_res = eq_Crnv/(eq_Csnv + eq_Csrnv + eq_Crnv)) %>%
+  filter(prop_res > 0.08 & prop_res < 0.12)
+
+#### Simulation de un an sans vaccin et un an avec vaccin ####
+# Simulate 1 year without vaccine for each parameter set at equilibrium
+
+results_1y_wov <- eq_results %>%
+  apply_function_on_df(simulate_1y_without_vaccine, "res_1y_wov") %>%
+  unnest_wider(res_1y_wov, names_sep = "_")
+
+results_1y_wov_all <- results_1y_wov
+
+results_1y_wov <- results_1y_wov_all %>%
+  mutate(diff = eq_Snv - res_1y_wov_Snv + eq_Csnv - res_1y_wov_Csnv  + eq_Csrnv - res_1y_wov_Csrnv + eq_Crnv - res_1y_wov_Crnv + eq_Isnv - res_1y_wov_Isnv  + eq_Isrnv - res_1y_wov_Isrnv + eq_Irnv - res_1y_wov_Irnv) %>%
+  filter(diff < 10-9)
+  # filter(eq_Snv == res_1y_wov_Snv, 
+  #        eq_Csnv == res_1y_wov_Csnv,eq_Csrnv == res_1y_wov_Csrnv, eq_Crnv == res_1y_wov_Crnv,
+  #        eq_Isnv == res_1y_wov_Isnv,eq_Isrnv == res_1y_wov_Isrnv, eq_Irnv == res_1y_wov_Irnv)
+
+# Choose vaccination scenario
+vaccine_scenarios_complete_df <- bind_rows(
+  expand.grid("Vperc" = c(0.1,0.3,0.5,0.7,0.9),"vftcs" = c(0.3,0.6,0.9)) %>% mutate("vftcr" = vftcs, "vfds"=0,"vfdr"=0,"vfis"=0,"vfir"=0,"vfrs" = 0, "vfrr" = 0,name = "vftc"),
+  expand.grid("Vperc" = c(0.1,0.3,0.5,0.7,0.9),"vfds" = c(0.3,0.6,0.9)) %>% mutate("vfdr" = vfds, "vftcs"=0, "vftcr"=0,"vfis"=0,"vfir"=0,"vfrs" = 0, "vfrr" = 0,name = "vfd"),
+  expand.grid("Vperc" = c(0.1,0.3,0.5,0.7,0.9),"vfis" = c(0.3,0.6,0.9)) %>% mutate("vfir" = vfis,"vftcs"=0, "vftcr"=0, "vfds"=0, "vfdr"=0, "vfrs"=0, "vfrr"=0, name = "vfi"),
+  expand.grid("Vperc" = c(0.1,0.3,0.5,0.7,0.9),"vftcs" = c(0.3,0.6,0.9)) %>% mutate("vftcr" = vftcs, "vfds"=vftcs,"vfdr"=vftcs,"vfis"=0,"vfir"=0,"vfrs" = 0, "vfrr" = 0, name = "vftc_vfd"),
+  expand.grid("Vperc" = c(0.1,0.3,0.5,0.7,0.9),"vftcs" = c(0.3,0.6,0.9)) %>% mutate("vftcr" = vftcs, "vfis"=vftcs,"vfir"=vftcs,"vfds"=0,"vfdr"=0,"vfrs" = 0, "vfrr" = 0, name = "vftc_vfi"),
+  expand.grid("Vperc" = c(0.1,0.3,0.5,0.7,0.9),"vfds" = c(0.3,0.6,0.9)) %>% mutate("vfdr" = vfds, "vfis"=vfds,"vfir"=vfds,"vftcs"=0, "vftcr"=0,"vfrs"=0, "vfrr"=0, name = "vfd_vfi"),
+  expand.grid("Vperc" = c(0.1,0.3,0.5,0.7,0.9),"vftcs" = c(0.3,0.6,0.9)) %>% mutate("vftcr" = vftcs, "vfds"=vftcs,"vfdr"=vftcs, "vfis"=vftcs,"vfir"=vftcs,"vfrs"=0, "vfrr"=0, name = "vftc_vfd_vfi")
+) %>% mutate(vaccine_id = row_number())
+
+if(bacteria == "E_coli"){
+  vaccine_scenarios_complete_df <- vaccine_scenarios_complete_df %>%
+    bind_rows(tibble("Vperc" = c(0.7, 0.7), 
+                     "vftcs" = c(0.7,0),"vfds" = c(0.7, 0), "vfis" = c(0.7, 0.7), "vfrs" = c(0,0),
+                     "vftcr" = c(0.7,0),"vfdr" = c(0.7, 0), "vfir" = c(0.7, 0.7), "vfrr" = c(0,0),
+                     "name" = c("vftc_vfd_vfi", "vfi"), 
+                     "vaccine_id" =c(max(vaccine_scenarios_complete_df$vaccine_id)+1,max(vaccine_scenarios_complete_df$vaccine_id)+2) ))
+}
+
+
+if(transmission_by_infected){
+  vaccine_scenarios_complete_df <- vaccine_scenarios_complete_df %>%
+    mutate(vftis = vftcs, vftir = vftcr)
+} else {
+  vaccine_scenarios_complete_df <- vaccine_scenarios_complete_df %>%
+    mutate(vftis = 0, vftir = 0)
+}
+
+
+
+# Add vaccine parameters to each parameter set
+df_for_vaccine_simulations <- add_vaccine_parameters(results_1y_wov, vaccine_scenarios_complete_df)
+
+# Simulate one year with vaccine for each parameter set
+results <- df_for_vaccine_simulations %>%
+  apply_function_on_df(simulate_1y_with_vaccine, "res_1y_wv") %>%
+  unnest_wider(res_1y_wv, names_sep = "_")
+
+
+#### Results manipulation ####
+# Compute resistance change
+results_with_outputs <- compute_outputs(results, population_size)
+
+results_with_outputs <- clean_vaccine_related_parameters(results_with_outputs)
+
+
+# Compute statistics
+results_to_plot <- results_with_outputs %>%
+  compute_statistics(starts_with(c("res_1y_wv_prevC","res_1y_wv_inccumI","prc_red_", "averted_")))%>%
+  mutate(
+    population = case_when(
+      str_detect(metric_name, "non_vaccinated") ~ "Non-vaccinated",
+      str_detect(metric_name, "_vaccinated") ~ "Vaccinated",
+      TRUE ~ "Total population"
+    )
+  ) %>%
+  mutate(population = factor(population, levels = c("Total population", "Vaccinated", "Non-vaccinated")))
+
+save(results_to_plot, file = here::here("files",folder_name,"results_to_plot_Csr.RData"))
+
