@@ -104,9 +104,9 @@ eq_results <- df_bacteria %>%
 
 eq_results_all <- eq_results
 
-eq_results <- eq_results %>%
+eq_results <- eq_results_all %>%
   mutate(prop_res = eq_Crnv/(eq_Csnv + eq_Csrnv + eq_Crnv)) %>%
-  filter(prop_res > 0.08 & prop_res < 0.12)
+  filter(prop_res > 0.08)
 
 #### Simulation de un an sans vaccin et un an avec vaccin ####
 # Simulate 1 year without vaccine for each parameter set at equilibrium

@@ -16,9 +16,9 @@ compute_equilibrium <- function(data,population_size = 100000){
       
       lambdaA_I = (1-prob_specific_exposure) * prob_bystander_exposure * 1/time_until_decolo_by_bystander_ATB,
       
-      gammaA_s = prob_specific_exposure * 1/time_until_decolo_by_specific_ATB,
-      
-      gammaA_r = prob_specific_exposure_r * 1/time_until_decolo_by_specific_ATB_r,
+      # gammaA_s = prob_specific_exposure * 1/time_until_decolo_by_specific_ATB,
+      # 
+      # gammaA_r = prob_specific_exposure_r * 1/time_until_decolo_by_specific_ATB_r,
       
       etas = (1-prob_specific_exposure) *(1-prob_bystander_exposure)* 1/time_until_recovery_without_ATB_s,
       etar = (1-prob_specific_exposure_r) * 1/time_until_recovery_without_ATB_r,
@@ -218,10 +218,10 @@ file_name  = "S_aureus_params_eu_with_J01CR_2.csv"
 transmission_by_infected = FALSE
 
 # E_coli
-# bacteria = "E_coli"
-# folder_name = "E_coli"
-# file_name = "E_coli_params_primavera5.csv"
-# transmission_by_infected = TRUE # if transmission is allowed, it equals transmission by colonized individuals
+bacteria = "E_coli"
+folder_name = "E_coli"
+file_name = "E_coli_params_2.csv"#"E_coli_params_primavera5.csv"
+transmission_by_infected = TRUE # if transmission is allowed, it equals transmission by colonized individuals
 
 ## Choose number of bacteria to generate
 n <- 500
@@ -281,7 +281,7 @@ df_bacteria <- df_bacteria %>%
          prob_bystander_exposure = pmin(1,prob_bystander_exposure)
   )
 
-df_bacteria <- filter_coexistence_condition(df_bacteria)
+# df_bacteria <- filter_coexistence_condition(df_bacteria)
 
 
 
@@ -298,7 +298,7 @@ eq_results <- compute_equilibrium(df_bacteria, population_size)
 #   
 # 
 # create_folder(file.path(getwd(),"files",folder_name))
-# save(eq_results, file = here::here("files",folder_name,"equilibrium_results.RData"))
+save(eq_results, file = here::here("files",folder_name,"equilibrium_results_2.RData"))
 
 cat("done and equilibrium results saved\n")
 

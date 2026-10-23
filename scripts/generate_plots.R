@@ -8,16 +8,17 @@ library(scales)
 source(here::here("scripts", "utils", "plot_functions.R"))
 
 #### Load datasets ####
-load(here::here("files","S_aureus","equilibrium_results.RData"))
+load(here::here("files","S_aureus","equilibrium_results_2.RData"))
 eq_results_Saureus <- eq_results
 
-load(here::here("files","E_coli","equilibrium_results.RData"))
+load(here::here("files","E_coli","equilibrium_results_2.RData"))
 eq_results_Ecoli <- eq_results
 
-load(here::here("files", "S_aureus", "results_to_plot.RData"))
+# load(here::here("files", "S_aureus", "results_to_plot_2.RData"))
+load(here::here("files", "S_aureus", "results_to_plot_Csr.RData"))
 results_to_plot_Saureus <- results_to_plot
 
-load(here::here("files", "E_coli", "results_to_plot.RData"))
+load(here::here("files", "E_coli", "results_to_plot_2.RData"))
 results_to_plot_Ecoli <- results_to_plot
 
 load(here::here("files", "S_aureus", "results_to_plot_antibiotic.RData"))
@@ -28,7 +29,7 @@ results_to_plot_antibiotic_Ecoli <- results_to_plot_antibiotic
 
 #### Plot equilibrium results description ####
 # # Saureus like
-# plot_histogram_eq_results(eq_results_Saureus,c(0.2,0.4),c(0,0.15) )
+plot_histogram_eq_results(eq_results_Saureus,c(0.2,0.4),c(0,0.15) )
 # 
 # View(eq_results_Saureus %>%
 #        mutate(total_colonized = (eq_Csnv + eq_Crnv)/100000*100,
@@ -42,7 +43,7 @@ results_to_plot_antibiotic_Ecoli <- results_to_plot_antibiotic
 #        ))
 # 
 # # Ecoli like
-# plot_histogram_eq_results(eq_results_Ecoli,c(0.9,1),c(0,0.2) )
+plot_histogram_eq_results(eq_results_Ecoli,c(0.9,1),c(0,0.2) )
 # 
 # View(eq_results_Ecoli %>%
 #        mutate(total_colonized = (eq_Csnv + eq_Crnv)/100000*100,
@@ -68,6 +69,7 @@ chosen_palette = colors_and_shapes[[folder_name]]$palette
 chosen_shape = colors_and_shapes[[folder_name]]$shape
 chosen_results_to_plot = results_to_plot_Saureus
 
+folder_name = "S_aureus_3"
 
 plot_vaccine_metric(data = chosen_results_to_plot,
                     metric_name_to_plot = c("prc_red_inccumI", 
@@ -235,6 +237,7 @@ folder_name = "E_coli"
 chosen_palette = colors_and_shapes[[folder_name]]$palette
 chosen_shape = colors_and_shapes[[folder_name]]$shape
 chosen_results_to_plot = results_to_plot_Ecoli
+folder_name = "E_coli_2"
 
 
 plot_vaccine_metric(data = chosen_results_to_plot,
@@ -387,7 +390,7 @@ plot_vaccine_metric_both_bacteria(data1 = results_to_plot_Saureus,
                                   hrefs = c(),
                                   vrefs = c(30),
                                   logscale = T)
-ggsave(here::here("figures","figure5.png"), width = 14, height = 5)
+ggsave(here::here("figures","figure5_2.png"), width = 14, height = 5)
 
 plot_vaccine_metric_both_bacteria(data1 = results_to_plot_Saureus,
                                   data2 = results_to_plot_Ecoli,
