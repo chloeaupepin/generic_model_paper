@@ -349,6 +349,36 @@ out %>%
   facet_wrap(~name, scales = "free_y")+
   theme_bw()
 
+out <- ode(
+  y = c(Snv = 80000,Csnv = 10000*0.9,Csrnv = 10000*0.1,Crnv = 10000,
+        Sv = 0,Csv = 0,Csrv =0,Crv = 0,
+        Isnv = 0,Isrnv = 0,Irnv = 0,
+        Isv = 0,Isrv = 0,Irv = 0),
+  times = seq(from=0,to=1000000,by=100),
+  func = SCISsrV.model_3,
+  parms = c(betaC = 0.01,#0.0152625495139866,
+            f = 0.9, #0.94,#0.915346433742047,
+            as = 1e-6,#3.46118721459732e-06,
+            ar = 1e-6, #3.46118721459732e-06,
+            betaI = 0, 
+            time_until_recovery_without_ATB_s = 50,
+            time_until_recovery_without_ATB_r = 50,
+            dps = 98,
+            dpr = 98,
+            prob_bystander_exposure = (0.06+4.7)/1000, #0.06/1000 #value 0.06 only for S_aureus_params_eu.csv
+            time_until_decolo_by_bystander_ATB = 10,
+            # prob_minority_strain_when_colonised = 0.1,
+            prob_specific_exposure = 1,
+            time_until_decolo_by_specific_ATB = 14,
+            # prob_minority_strain_when_infected = 0.1,
+            prob_specific_exposure_r = 1,
+            time_until_decolo_by_specific_ATB_r = 14,
+            sigmaC1 = 1, 
+            sigmaI1 = 1,
+            vftcs = 0, vftis = 0, vfds = 0, vfis = 0, vfrs = 0,
+            vftcr = 0, vftir = 0, vfdr = 0, vfir = 0, vfrr = 0)  
+) %>% as.data.frame()
+
 #### Simulation un an sans vaccin et un an avec vaccin ####
 
 params <- list(betaC = 0.0152625495139866,

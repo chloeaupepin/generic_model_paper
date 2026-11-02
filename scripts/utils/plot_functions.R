@@ -124,16 +124,17 @@ plot_vaccine_metric <- function(data,
                                 chosen_vaccine_labeller = vaccine_labeller,
                                 ylim_values = NULL,
                                 hrefs,
-                                vrefs){
+                                vrefs,
+                                with_ribbons = TRUE){
   p <- data %>%
     filter(metric_name %in% metric_name_to_plot, 
            population %in% population_to_plot) %>%
     filter(varying_param %in% vaccine_effects_to_plot) %>%
     ggplot(aes(x = Vperc*100)) +
-    geom_ribbon(aes(ymin = q025, ymax = q975,
+    {if (with_ribbons) geom_ribbon(aes(ymin = q025, ymax = q975,
                     fill = varying_param,
                     group = varying_param),
-                alpha = 0.2) +
+                alpha = 0.2)} +
     geom_hrefs(y = hrefs)+
     geom_vrefs(x = vrefs)+
     geom_point(aes(y = median, color = varying_param, fill = varying_param), 
@@ -157,6 +158,208 @@ plot_vaccine_metric <- function(data,
   return(p)
 }
 
+plot_vaccine_metric_sup <- function(data,
+                                    data_sup,
+                                metric_name_to_plot,
+                                population_to_plot = c("Total population","Vaccinated", "Non-vaccinated"),
+                                vaccine_effects_to_plot = c(0.3, 0.6, 0.9),
+                                y_label,
+                                chosen_shape,
+                                chosen_palette,
+                                chosen_vaccine_labeller = vaccine_labeller,
+                                ylim_values = NULL,
+                                hrefs,
+                                vrefs,
+                                with_ribbons = TRUE){
+  
+  data_to_plot <- data %>%
+    filter(metric_name %in% metric_name_to_plot, 
+           population %in% population_to_plot) %>%
+    filter(varying_param %in% vaccine_effects_to_plot)
+  
+  data_sup_to_plot <- data_sup %>%
+    filter(metric_name %in% metric_name_to_plot, 
+           population %in% population_to_plot) %>%
+    filter(varying_param %in% vaccine_effects_to_plot)
+  
+  data_combined <- data_to_plot %>%
+    left_join(data_sup_to_plot, by = c("name_renamed","Vperc","varying_param","metric_name","population"), suffix = c("",".sup")) %>%
+    pivot_longer(cols = c("median", "median.sup"), names_to = "Name",values_to = "Value")
+  
+  
+  p <- data_combined %>%
+    ggplot(aes(x = Vperc*100)) +
+    {if (with_ribbons) geom_ribbon(aes(ymin = q025, ymax = q975,
+                                       fill = varying_param,
+                                       group = varying_param),
+                                   alpha = 0.2)} +
+    geom_hrefs(y = hrefs)+
+    geom_vrefs(x = vrefs)+
+    geom_line(aes(y = Value, color = varying_param, linetype = Name), alpha = 0.6) +
+    geom_point(aes(y = Value, color = varying_param, fill = varying_param, shape = Name), size = 2, alpha = 0.6)+
+    {if (length(metric_name_to_plot)>1) 
+      facet_nested(population ~ name_renamed, 
+                   labeller = labeller(name_renamed = as_labeller(chosen_vaccine_labeller, default = label_parsed))) 
+      else facet_nested(~ name_renamed, labeller = labeller(name_renamed = as_labeller(chosen_vaccine_labeller, default = label_parsed)))}+
+    scale_x_continuous(breaks = c(10, 30, 50, 70, 90))+
+    scale_shape_manual(values = c(chosen_shape, 24),labels = c("Our model","Model with extra compartments"))+
+    scale_linetype_manual(values = c("dashed","solid"),labels = c("Our model","Model with extra compartments"))+
+    scale_color_manual(values = chosen_palette)+
+    scale_fill_manual(values = chosen_palette)+
+    labs(x = "Vaccine coverage (%)",
+         y = y_label,
+         color = "Vaccine efficacy",
+         fill = "Vaccine efficacy",
+         shape = "Simulation results for",
+         linetype = "Simulation results for")+
+    personal_theme + 
+    theme(legend.position = "bottom")+
+    {if (!is.null(ylim_values)) ylim(ylim_values[1], ylim_values[2]) else NULL}
+  
+  return(p)
+}
+
+plot_vaccine_metric_sup_diff <- function(data,
+                                    data_sup,
+                                    metric_name_to_plot,
+                                    population_to_plot = c("Total population","Vaccinated", "Non-vaccinated"),
+                                    vaccine_effects_to_plot = c(0.3, 0.6, 0.9),
+                                    y_label,
+                                    chosen_shape,
+                                    chosen_palette,
+                                    chosen_vaccine_labeller = vaccine_labeller,
+                                    ylim_values = NULL,
+                                    hrefs,
+                                    vrefs,
+                                    with_ribbons = TRUE){
+  
+  data_to_plot <- data %>%
+    filter(metric_name %in% metric_name_to_plot, 
+           population %in% population_to_plot) %>%
+    filter(varying_param %in% vaccine_effects_to_plot)
+  
+  data_sup_to_plot <- data_sup %>%
+    filter(metric_name %in% metric_name_to_plot, 
+           population %in% population_to_plot) %>%
+    filter(varying_param %in% vaccine_effects_to_plot)
+  
+  data_combined <- data_to_plot %>%
+    left_join(data_sup_to_plot, by = c("name_renamed","Vperc","varying_param","metric_name","population"), suffix = c("",".sup"))
+  
+  p <- data_combined %>%
+    ggplot(aes(x = factor(Vperc*100))) +
+    geom_col(aes(y = abs(median - median.sup), color = varying_param,fill = varying_param), position = "dodge")+
+    {if (length(metric_name_to_plot)>1) 
+      facet_nested(population ~ name_renamed, 
+                   labeller = labeller(name_renamed = as_labeller(chosen_vaccine_labeller, default = label_parsed))) 
+      else facet_nested(~ name_renamed, labeller = labeller(name_renamed = as_labeller(chosen_vaccine_labeller, default = label_parsed)))}+
+    scale_color_manual(values = chosen_palette)+
+    scale_fill_manual(values = chosen_palette)+
+    labs(x = "Vaccine coverage (%)",
+         y = y_label,
+         color = "Vaccine efficacy",
+         fill = "Vaccine efficacy")+
+    personal_theme + 
+    theme(legend.position = "bottom")+
+    {if (!is.null(ylim_values)) ylim(ylim_values[1], ylim_values[2]) else NULL}
+  
+  return(p)
+}
+
+plot_vaccine_metric_sup_col <- function(data,
+                                         data_sup,
+                                         metric_name_to_plot,
+                                         population_to_plot = c("Total population","Vaccinated", "Non-vaccinated"),
+                                         vaccine_effects_to_plot = c(0.6),
+                                         y_label,
+                                         chosen_shape,
+                                         chosen_palette,
+                                         chosen_vaccine_labeller = vaccine_labeller,
+                                         ylim_values = NULL,
+                                         hrefs,
+                                         vrefs,
+                                         with_ribbons = TRUE){
+  
+  data_to_plot <- data %>%
+    filter(metric_name %in% metric_name_to_plot, 
+           population %in% population_to_plot) %>%
+    filter(varying_param %in% vaccine_effects_to_plot)
+  
+  data_sup_to_plot <- data_sup %>%
+    filter(metric_name %in% metric_name_to_plot, 
+           population %in% population_to_plot) %>%
+    filter(varying_param %in% vaccine_effects_to_plot)
+  
+  data_combined <- data_to_plot %>%
+    left_join(data_sup_to_plot, by = c("name_renamed","Vperc","varying_param","metric_name","population"), suffix = c("",".sup")) %>%
+    pivot_longer(cols = c("median", "median.sup"), names_to = "Name",values_to = "Value")
+  
+  p <- data_combined %>%
+    ggplot(aes(x = factor(Vperc*100))) +
+    geom_col(aes(y = Value, color = Name,fill = Name), position = "dodge")+
+    {if (length(metric_name_to_plot)>1) 
+      facet_nested(population ~ name_renamed, 
+                   labeller = labeller(name_renamed = as_labeller(chosen_vaccine_labeller, default = label_parsed))) 
+      else facet_nested(~ name_renamed, labeller = labeller(name_renamed = as_labeller(chosen_vaccine_labeller, default = label_parsed)))}+
+    scale_color_manual(values = c(chosen_palette[2],chosen_palette[2]))+
+    scale_fill_manual(values = c(chosen_palette[2],"white"))+
+    labs(x = "Vaccine coverage (%)",
+         y = y_label,
+         color = "Vaccine efficacy",
+         fill = "Vaccine efficacy")+
+    personal_theme + 
+    theme(legend.position = "bottom")+
+    {if (!is.null(ylim_values)) ylim(ylim_values[1], ylim_values[2]) else NULL}
+  
+  return(p)
+}
+
+plot_vaccine_metric_sup_col_bis <- function(data,
+                                        data_sup,
+                                        metric_name_to_plot,
+                                        population_to_plot = c("Total population","Vaccinated", "Non-vaccinated"),
+                                        vaccine_effects_to_plot = c(0.6),
+                                        y_label,
+                                        chosen_shape,
+                                        chosen_palette,
+                                        chosen_vaccine_labeller = vaccine_labeller,
+                                        ylim_values = NULL,
+                                        hrefs,
+                                        vrefs,
+                                        with_ribbons = TRUE){
+  
+  data_to_plot <- data %>%
+    filter(metric_name %in% metric_name_to_plot, 
+           population %in% population_to_plot) %>%
+    filter(varying_param %in% vaccine_effects_to_plot)
+  
+  data_sup_to_plot <- data_sup %>%
+    filter(metric_name %in% metric_name_to_plot, 
+           population %in% population_to_plot) %>%
+    filter(varying_param %in% vaccine_effects_to_plot)
+  
+  data_combined <- data_to_plot %>%
+    left_join(data_sup_to_plot, by = c("name_renamed","Vperc","varying_param","metric_name","population"), suffix = c("",".sup")) %>%
+    pivot_longer(cols = c("median", "median.sup"), names_to = "Name",values_to = "Value")
+  
+  p <- data_combined %>%
+    ggplot(aes(x = factor(Vperc*100))) +
+    geom_point(aes(y = Value, shape = Name, color = varying_param), position = position_dodge(width=1))+
+    {if (length(metric_name_to_plot)>1) 
+      facet_nested(population ~ name_renamed, 
+                   labeller = labeller(name_renamed = as_labeller(chosen_vaccine_labeller, default = label_parsed))) 
+      else facet_nested(~ name_renamed, labeller = labeller(name_renamed = as_labeller(chosen_vaccine_labeller, default = label_parsed)))}+
+    labs(x = "Vaccine coverage (%)",
+         y = y_label
+         )+
+    personal_theme + 
+    scale_shape_manual(values = c(19,1))+
+    scale_color_manual(values = chosen_palette)+
+    theme(legend.position = "bottom")+
+    {if (!is.null(ylim_values)) ylim(ylim_values[1], ylim_values[2]) else NULL}
+  
+  return(p)
+}
 
 plot_vaccine_metric_both_bacteria <- function(data1,
                                               data2,
@@ -295,6 +498,53 @@ plot_antibiotic_metric_both_bacteria <- function(data1,
   
   return(p)
 }
+
+plot_antibiotic_metric_bacteria_sup <- function(data,data_sup,
+                                                 metric_name_to_plot,
+                                                 chosen_shapes,
+                                                chosen_palette,
+                                                 facet_cols = NULL,
+                                                 chosen_output_labeller = output_labeller){
+  
+  data_to_plot <- data %>%
+    mutate(Bacteria = "1") %>%
+    prepare_for_antibiotic_metric_plot(., output_order = names(chosen_output_labeller))
+  
+  data_sup_to_plot <- data_sup %>%
+    mutate(Bacteria = "1") %>%
+    prepare_for_antibiotic_metric_plot(., output_order = names(chosen_output_labeller))
+  
+  
+  data_combined <- data_to_plot %>%
+    left_join(data_sup_to_plot, by = c("scenario_id","metric_name"), suffix = c("",".sup")) %>%
+    pivot_longer(cols = c("median", "median.sup"), names_to = "Name",values_to = "Value")
+  
+  
+  p <- data_combined %>%
+    filter(metric_name %in% metric_name_to_plot) %>%
+    ggplot(aes(x=prc_red_prob_bystander_exposure)) + 
+    geom_hline(yintercept = 0, linetype="dashed", color = "black")+
+    geom_ribbon(aes(ymin = q025, ymax = q975),color = chosen_palette[2], fill = chosen_palette[2],
+                alpha = 0.2) +
+    geom_line(aes(y = Value, linetype = Name), color = chosen_palette[2]) +
+    geom_point(aes(y = Value,shape = Name),color = chosen_palette[2], fill = chosen_palette[2], size = 2)+
+    {if (length(metric_name_to_plot)>1) facet_wrap(~ metric_name, ncol = facet_cols, 
+                                                   labeller = as_labeller(chosen_output_labeller)) else NULL}+
+    scale_x_continuous(breaks = c(10, 30, 50, 70, 90))+
+    scale_shape_manual(values = c(chosen_shape, 24),labels = c("Our model","Model with extra compartments"))+
+    scale_linetype_manual(values = c("dashed","solid"),labels = c("Our model","Model with extra compartments"))+
+    labs(
+      x = "Reduction percentage of bystander antibiotic exposure (%)",
+      y = "Relative change due to\nbystander antibiotic reduction (%)",
+      shape = "Simulation results for",
+      linetype = "Simulation results for"
+    ) +
+    personal_theme +
+    theme(legend.position = "bottom")
+  
+  return(p)
+}
+
 
 # Plot R0 for each vaccine type 
 plot_R0 <- function(data,

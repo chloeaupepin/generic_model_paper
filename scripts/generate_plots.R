@@ -8,23 +8,26 @@ library(scales)
 source(here::here("scripts", "utils", "plot_functions.R"))
 
 #### Load datasets ####
-load(here::here("files","S_aureus","equilibrium_results_2.RData"))
+load(here::here("files","S_aureus","equilibrium_results.RData"))
 eq_results_Saureus <- eq_results
 
-load(here::here("files","E_coli","equilibrium_results_2.RData"))
+load(here::here("files","E_coli","equilibrium_results.RData"))
 eq_results_Ecoli <- eq_results
 
-# load(here::here("files", "S_aureus", "results_to_plot_2.RData"))
-load(here::here("files", "S_aureus", "results_to_plot_Csr.RData"))
+load(here::here("files", "S_aureus", "results_to_plot.RData"))
+# load(here::here("files", "S_aureus", "results_to_plot_Csr_nequal1.RData"))
 results_to_plot_Saureus <- results_to_plot
 
-load(here::here("files", "E_coli", "results_to_plot_2.RData"))
+load(here::here("files", "E_coli", "results_to_plot.RData"))
+# load(here::here("files", "E_coli", "results_to_plot_Csr_nequal1.RData"))
 results_to_plot_Ecoli <- results_to_plot
 
 load(here::here("files", "S_aureus", "results_to_plot_antibiotic.RData"))
+# load(here::here("files", "S_aureus", "results_to_plot_antibiotic_Csr_nequal1.RData"))
 results_to_plot_antibiotic_Saureus <- results_to_plot_antibiotic
 
 load(here::here("files", "E_coli", "results_to_plot_antibiotic.RData"))
+# load(here::here("files", "E_coli", "results_to_plot_antibiotic_Csr_nequal1.RData"))
 results_to_plot_antibiotic_Ecoli <- results_to_plot_antibiotic
 
 #### Plot equilibrium results description ####
@@ -69,7 +72,7 @@ chosen_palette = colors_and_shapes[[folder_name]]$palette
 chosen_shape = colors_and_shapes[[folder_name]]$shape
 chosen_results_to_plot = results_to_plot_Saureus
 
-folder_name = "S_aureus_3"
+# folder_name = "S_aureus_3_nequal1"
 
 plot_vaccine_metric(data = chosen_results_to_plot,
                     metric_name_to_plot = c("prc_red_inccumI", 
@@ -237,8 +240,9 @@ folder_name = "E_coli"
 chosen_palette = colors_and_shapes[[folder_name]]$palette
 chosen_shape = colors_and_shapes[[folder_name]]$shape
 chosen_results_to_plot = results_to_plot_Ecoli
-folder_name = "E_coli_2"
+# folder_name = "E_coli_2"
 
+# folder_name = "E_coli_2_nequal1"
 
 plot_vaccine_metric(data = chosen_results_to_plot,
                     metric_name_to_plot = c("prc_red_inccumI", 
@@ -390,7 +394,8 @@ plot_vaccine_metric_both_bacteria(data1 = results_to_plot_Saureus,
                                   hrefs = c(),
                                   vrefs = c(30),
                                   logscale = T)
-ggsave(here::here("figures","figure5_2.png"), width = 14, height = 5)
+ggsave(here::here("figures","figure5.png"), width = 14, height = 5)
+# ggsave(here::here("figures","figure5_2_nequal1.png"), width = 14, height = 5)
 
 plot_vaccine_metric_both_bacteria(data1 = results_to_plot_Saureus,
                                   data2 = results_to_plot_Ecoli,
@@ -402,6 +407,7 @@ plot_vaccine_metric_both_bacteria(data1 = results_to_plot_Saureus,
                                   vrefs = c(30),
                                   logscale = F)
 ggsave(here::here("figures","prop_combined.png"), width = 14, height = 5)
+# ggsave(here::here("figures","prop_combined_nequal1.png"), width = 14, height = 5)
 
 
 #### Plot combined antibiotic impact ####
@@ -425,5 +431,171 @@ plot_antibiotic_metric_both_bacteria(data1 = results_to_plot_antibiotic_Saureus,
                                      facet_cols = 4)
 
 ggsave(paste0("figures/figure7.png"), width = 12, height = 7)
+# ggsave(paste0("figures/figure7_Csr_nequal1.png"), width = 12, height = 7)
 
+#### Supplementary analysis : model with a new compartment ####
+load(here::here("files", "S_aureus", "results_to_plot_Csr_nequal1.RData"))
+results_to_plot_Saureus_sup <- results_to_plot
+
+load(here::here("files", "E_coli", "results_to_plot_Csr_nequal1.RData"))
+results_to_plot_Ecoli_sup <- results_to_plot
+
+load(here::here("files", "S_aureus", "results_to_plot_antibiotic_Csr_nequal1.RData"))
+results_to_plot_antibiotic_Saureus_sup <- results_to_plot_antibiotic
+
+load(here::here("files", "E_coli", "results_to_plot_antibiotic_Csr_nequal1.RData"))
+results_to_plot_antibiotic_Ecoli_sup <- results_to_plot_antibiotic
+
+
+folder_name = "S_aureus"
+chosen_palette = colors_and_shapes[[folder_name]]$palette
+chosen_shape = colors_and_shapes[[folder_name]]$shape
+
+plot_vaccine_metric_sup(data = results_to_plot_Saureus,
+                        data_sup = results_to_plot_Saureus_sup,
+                    metric_name_to_plot = c("prc_red_inccumI", 
+                                            "prc_red_inccumI_non_vaccinated", 
+                                            "prc_red_inccumI_vaccinated"),
+                    vaccine_effects_to_plot = c(0.3, 0.6, 0.9),
+                    y_label = "Relative change due to vaccination (%)",
+                    chosen_shape = chosen_shape,
+                    chosen_palette = chosen_palette,
+                    hrefs = c(0, -50),
+                    vrefs = c(30),
+                    ylim_values = c(-100, 1))
+ggsave(here::here("figures","extra","figure4_S_aureus.png"), width = 12, height = 7)
+
+plot_vaccine_metric_sup(data = results_to_plot_Saureus,
+                        data_sup = results_to_plot_Saureus_sup,
+                    metric_name_to_plot = c("prc_red_inccumIr", 
+                                            "prc_red_inccumIr_non_vaccinated", 
+                                            "prc_red_inccumIr_vaccinated"),
+                    y_label = "Relative change due to vaccination (%)",
+                    chosen_shape = chosen_shape,
+                    chosen_palette = chosen_palette,
+                    hrefs = c(0, -50),
+                    vrefs = c(30),
+                    ylim_values = c(-100, 1))
+ggsave(here::here("figures","extra","figureS4_S_aureus.png"), width = 12, height = 7)
+
+plot_vaccine_metric_sup(data = results_to_plot_Saureus,
+                        data_sup = results_to_plot_Saureus_sup,
+                        metric_name_to_plot = c("prc_red_prevC", 
+                                            "prc_red_prevC_non_vaccinated", 
+                                            "prc_red_prevC_vaccinated"),
+                    y_label = "Relative change due to vaccination (%)",
+                    chosen_shape = chosen_shape,
+                    chosen_palette = chosen_palette,
+                    hrefs = c(0, -50),
+                    vrefs = c(30))
+ggsave(here::here("figures","extra","figureS5_S_aureus.png"), width = 12, height = 7)
+
+plot_vaccine_metric_sup(data = results_to_plot_Saureus,
+                        data_sup = results_to_plot_Saureus_sup,
+                        metric_name_to_plot = c("prc_red_prop_prevCr", 
+                                            "prc_red_prop_prevCr_non_vaccinated", 
+                                            "prc_red_prop_prevCr_vaccinated"),
+                    y_label = "Relative change due to vaccination (%)",
+                    chosen_shape = chosen_shape,
+                    chosen_palette = chosen_palette,
+                    hrefs = c(0),
+                    vrefs = c(30))
+ggsave(here::here("figures","extra","figure6_S_aureus.png"), width = 12, height = 7)
+
+plot_vaccine_metric_sup(data = results_to_plot_Saureus,
+                        data_sup = results_to_plot_Saureus_sup,
+                        metric_name_to_plot = c("averted_inccumI"),
+                    y_label = "Number of new infections averted in a year\n(per 100 000 individuals)",
+                    chosen_shape = chosen_shape,
+                    chosen_palette = chosen_palette,
+                    hrefs = c(0),
+                    vrefs = c(30))
+ggsave(here::here("figures","extra","figure5_S_aureus.png"), width = 12, height = 5)
+
+plot_antibiotic_metric_bacteria_sup(data = results_to_plot_antibiotic_Saureus,
+                                     data_sup = results_to_plot_antibiotic_Saureus_sup,
+                                     metric_name_to_plot = c("prc_red_inccumI","prc_red_inccumIs","prc_red_inccumIr", "prc_red_prop_inccumIr",
+                                                             "prc_red_prevC", "prc_red_prevCr", "prc_red_prevCs", "prc_red_prop_prevCr"),
+                                     chosen_shapes = shapes,
+                                    chosen_palette = chosen_palette,
+                                     facet_cols = 4)
+
+ggsave(here::here("figures","extra","figure7_S_aureus.png"), width = 12, height = 7)
+
+
+
+folder_name = "E_coli"
+chosen_palette = colors_and_shapes[[folder_name]]$palette
+chosen_shape = colors_and_shapes[[folder_name]]$shape
+
+plot_vaccine_metric_sup(data = results_to_plot_Ecoli,
+                        data_sup = results_to_plot_Ecoli_sup,
+                        metric_name_to_plot = c("prc_red_inccumI", 
+                                                "prc_red_inccumI_non_vaccinated", 
+                                                "prc_red_inccumI_vaccinated"),
+                        vaccine_effects_to_plot = c(0.3, 0.6, 0.9),
+                        y_label = "Relative change due to vaccination (%)",
+                        chosen_shape = chosen_shape,
+                        chosen_palette = chosen_palette,
+                        hrefs = c(0, -50),
+                        vrefs = c(30),
+                        ylim_values = c(-100, 1))
+ggsave(here::here("figures","extra","figure4_E_coli.png"), width = 12, height = 7)
+
+plot_vaccine_metric_sup(data = results_to_plot_Ecoli,
+                        data_sup = results_to_plot_Ecoli_sup,
+                        metric_name_to_plot = c("prc_red_inccumIr", 
+                                                "prc_red_inccumIr_non_vaccinated", 
+                                                "prc_red_inccumIr_vaccinated"),
+                        y_label = "Relative change due to vaccination (%)",
+                        chosen_shape = chosen_shape,
+                        chosen_palette = chosen_palette,
+                        hrefs = c(0, -50),
+                        vrefs = c(30),
+                        ylim_values = c(-100, 1))
+ggsave(here::here("figures","extra","figureS4_E_coli.png"), width = 12, height = 7)
+
+plot_vaccine_metric_sup(data = results_to_plot_Ecoli,
+                        data_sup = results_to_plot_Ecoli_sup,
+                        metric_name_to_plot = c("prc_red_prevC", 
+                                                "prc_red_prevC_non_vaccinated", 
+                                                "prc_red_prevC_vaccinated"),
+                        y_label = "Relative change due to vaccination (%)",
+                        chosen_shape = chosen_shape,
+                        chosen_palette = chosen_palette,
+                        hrefs = c(0, -50),
+                        vrefs = c(30))
+ggsave(here::here("figures","extra","figureS5_E_coli.png"), width = 12, height = 7)
+
+plot_vaccine_metric_sup(data = results_to_plot_Ecoli,
+                        data_sup = results_to_plot_Ecoli_sup,
+                        metric_name_to_plot = c("prc_red_prop_prevCr", 
+                                                "prc_red_prop_prevCr_non_vaccinated", 
+                                                "prc_red_prop_prevCr_vaccinated"),
+                        y_label = "Relative change due to vaccination (%)",
+                        chosen_shape = chosen_shape,
+                        chosen_palette = chosen_palette,
+                        hrefs = c(0),
+                        vrefs = c(30))
+ggsave(here::here("figures","extra","figure6_E_coli.png"), width = 12, height = 7)
+
+plot_vaccine_metric_sup(data = results_to_plot_Ecoli,
+                        data_sup = results_to_plot_Ecoli_sup,
+                        metric_name_to_plot = c("averted_inccumI"),
+                        y_label = "Number of new infections averted in a year\n(per 100 000 individuals)",
+                        chosen_shape = chosen_shape,
+                        chosen_palette = chosen_palette,
+                        hrefs = c(0),
+                        vrefs = c(30))
+ggsave(here::here("figures","extra","figure5_E_coli.png"), width = 12, height = 5)
+
+plot_antibiotic_metric_bacteria_sup(data = results_to_plot_antibiotic_Ecoli,
+                                    data_sup = results_to_plot_antibiotic_Ecoli_sup,
+                                    metric_name_to_plot = c("prc_red_inccumI","prc_red_inccumIs","prc_red_inccumIr", "prc_red_prop_inccumIr",
+                                                            "prc_red_prevC", "prc_red_prevCr", "prc_red_prevCs", "prc_red_prop_prevCr"),
+                                    chosen_shapes = shapes,
+                                    chosen_palette = chosen_palette,
+                                    facet_cols = 4)
+
+ggsave(here::here("figures","extra","figure7_E_coli.png"), width = 12, height = 7)
 

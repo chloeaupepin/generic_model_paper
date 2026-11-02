@@ -28,13 +28,13 @@ file_name  = "S_aureus_params_eu_with_J01CR.csv"
 transmission_by_infected = FALSE
 
 # E_coli
-# bacteria = "E_coli"
-# folder_name = "E_coli"
-# file_name = "E_coli_params_primavera5.csv"
-# transmission_by_infected = TRUE # if transmission is allowed, it equals transmission by colonized individuals
+bacteria = "E_coli"
+folder_name = "E_coli"
+file_name = "E_coli_params.csv"
+transmission_by_infected = TRUE # if transmission is allowed, it equals transmission by colonized individuals
 
 ## Choose number of bacteria to generate
-n <- 500
+n <- 1
 
 
 #### Define bacteria ####
@@ -59,6 +59,10 @@ if(bacteria == "S_aureus"){
     "time_until_decolo_by_specific_ATB_r","f"
   )
 } else {
+  
+  Bacteria_params$sigmaC1 = 1.1e-1
+  Bacteria_params$sigmaI1 = 1.1e-1
+  
   cols_to_noise <- c(	
     "betaC","as","time_until_recovery_without_ATB_s","dps",
     "prob_bystander_exposure",
@@ -95,6 +99,10 @@ df_bacteria <- df_bacteria %>%
          prob_bystander_exposure = pmin(1,prob_bystander_exposure)
   )
 
+
+#Keep only first bacteria
+df_bacteria <- df_bacteria %>% filter(bacteria_id == 0)
+
 #### Run analysis equilibrium ####
 
 # Compute equilibrium with analytical expressions 
@@ -105,8 +113,15 @@ eq_results <- df_bacteria %>%
 eq_results_all <- eq_results
 
 eq_results <- eq_results_all %>%
-  mutate(prop_res = eq_Crnv/(eq_Csnv + eq_Csrnv + eq_Crnv)) %>%
+  mutate(prop_res = eq_Crnv/(eq_Csnv + eq_Csrnv + eq_Crnv)) 
+
+if(bacteria =="S. aureus"){
+  eq_results <- eq_results %>%
   filter(prop_res > 0.08)
+}
+
+save(eq_results, file = here::here("files",folder_name,"equilibrium_results_Csr_nequal1.RData"))
+
 
 #### Simulation de un an sans vaccin et un an avec vaccin ####
 # Simulate 1 year without vaccine for each parameter set at equilibrium
@@ -183,5 +198,5 @@ results_to_plot <- results_with_outputs %>%
   ) %>%
   mutate(population = factor(population, levels = c("Total population", "Vaccinated", "Non-vaccinated")))
 
-save(results_to_plot, file = here::here("files",folder_name,"results_to_plot_Csr.RData"))
+save(results_to_plot, file = here::here("files",folder_name,"results_to_plot_Csr_nequal1.RData"))
 
