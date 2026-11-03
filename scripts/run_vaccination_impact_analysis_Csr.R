@@ -45,7 +45,7 @@ Bacteria_params = read.csv(here::here("files",file_name))
 if(bacteria == "S_aureus"){
   Bacteria_params$f = 0.94
   Bacteria_params$sigmaC1 = 1
-  Bacteria_params$sigmaI1 = 1
+  Bacteria_params$sigmaI1 = 0
   
   cols_to_noise <- c(	
     "betaC","as","time_until_recovery_without_ATB_s","dps",

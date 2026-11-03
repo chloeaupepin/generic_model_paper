@@ -263,8 +263,8 @@ SCISsrV.model_3 <- function(t, pop, param) {
     dCsnv <- Bs*Snv - 1/dps*Csnv - lambdaA*Csnv  -as*Csnv + etas*Isnv - sigmaC1*Csnv*Br
     dCsrnv <- sigmaC1*Csnv*Br - 1/dps*Csrnv - as*Csrnv - sigmaC2*Csrnv + etas*Isrnv
     dCrnv <- Br*Snv - 1/dpr*Crnv +  sigmaC2*Csrnv - ar*Crnv + etar*Irnv
-    dIsnv <- as*Csnv - etas*Isnv - lambdaA_I*Isnv - gammaA_s*Isnv 
-    dIsrnv <- as*Csrnv - etas*Isrnv  - sigmaI2*Isrnv
+    dIsnv <- as*Csnv - etas*Isnv - lambdaA_I*Isnv - gammaA_s*Isnv - sigmaI1*Isnv*Br
+    dIsrnv <- as*Csrnv - etas*Isrnv  - sigmaI2*Isrnv + sigmaI1*Isnv*Br
     dIrnv <- ar*Crnv - etar*Irnv -gammaA_r*Irnv + sigmaI2*Isrnv
     
     # Equations of vaccinated compartments
@@ -272,8 +272,8 @@ SCISsrV.model_3 <- function(t, pop, param) {
     dCsv <- Bsv*Sv - 1/dps*1/(1-vfds)*Csv - lambdaA*Csv - as*(1-vfis)*Csv + etas*1/(1-vfrs)*Isv - sigmaC1*Csv*Brv
     dCsrv <- sigmaC1*Csv*Brv - 1/dps*1/(1-vfds)*Csrv - as*(1-vfis)*Csrv - sigmaC2*Csrv + etas*1/(1-vfrs)*Isrv
     dCrv <- Brv*Sv  - 1/dpr*1/(1-vfdr)*Crv- ar*(1-vfir)*Crv + etar*1/(1-vfrr)*Irv + sigmaC2*Csrv
-    dIsv <- as*(1-vfis)*Csv - etas*1/(1-vfrs)*Isv   - lambdaA_I*Isv - gammaA_s*Isv 
-    dIsrv <- as*(1-vfis)*Csrv - etas*1/(1-vfrs)*Isrv  - sigmaI2*Isrv
+    dIsv <- as*(1-vfis)*Csv - etas*1/(1-vfrs)*Isv   - lambdaA_I*Isv - gammaA_s*Isv - sigmaI1*Isv*Brv
+    dIsrv <- as*(1-vfis)*Csrv - etas*1/(1-vfrs)*Isrv  - sigmaI2*Isrv + sigmaI1*Isv*Brv
     dIrv <- ar*(1-vfir)*Crv - etar*1/(1-vfrr)*Irv - gammaA_r*Irv + sigmaI2*Isrv
     
     ## Cumulative incidence counters
