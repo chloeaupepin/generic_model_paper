@@ -438,13 +438,13 @@ load(here::here("files", "S_aureus", "results_to_plot_Csr_Crs_nequal500.RData"))
 results_to_plot_Saureus_sup <- results_to_plot
 
 load(here::here("files", "E_coli", "results_to_plot_Csr_Crs_nequal1_5.RData"))
-load(here::here("files", "E_coli", "results_to_plot_Csr_Crs_nequal500.RData"))
+load(here::here("files", "E_coli", "results_to_plot_Csr_Crs_nequal500_red.RData"))
 results_to_plot_Ecoli_sup <- results_to_plot
 
 load(here::here("files", "S_aureus", "results_to_plot_antibiotic_Csr_Crs_nequal500.RData"))
 results_to_plot_antibiotic_Saureus_sup <- results_to_plot_antibiotic
 
-load(here::here("files", "E_coli", "results_to_plot_antibiotic_Csr_Crs_nequal500.RData"))
+load(here::here("files", "E_coli", "results_to_plot_antibiotic_Csr_Crs_nequal500_red.RData"))
 results_to_plot_antibiotic_Ecoli_sup <- results_to_plot_antibiotic
 
 

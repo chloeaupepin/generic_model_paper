@@ -259,9 +259,9 @@ out <- ode(
         inccumIsnv=0, inccumIsrnv=0, inccumIrnv=0, inccumIrsnv=0, inccumIsv=0,inccumIsrv=0, inccumIrv=0,inccumIrsv=0,
         inccumSelectionOfResistantForNonVaccinated=0,inccumSelectionOfResistantForVaccinated=0),
   times = seq(from=0,to=1000000,by=100),
-  func = SCISsrV.model_5,
+  func = SCISsrV.model_4,
   parms = c(betaC = Bacteria_params$betaC,#0.0152625495139866,
-            f = 1,#Bacteria_params$f, #0.94,#0.915346433742047,
+            f = Bacteria_params$f, #0.94,#0.915346433742047,
             as = Bacteria_params$as,#3.46118721459732e-06,
             ar = Bacteria_params$ar, #3.46118721459732e-06,
             betaI = 0, 
@@ -304,7 +304,7 @@ eq_results_to_plot <- eq_results%>%
             .groups = "drop")
 
 out %>%
-  mutate(Csnv = Csnv + Csrnv, Isnv = Isnv + Isrnv)%>%
+  mutate(Csnv = Csnv + Csrnv,Crnv = Crnv + Crsnv, Isnv = Isnv + Isrnv, Irnv = Irnv + Irsnv)%>%
   select(time, Snv, Csnv, Crnv, Isnv, Irnv)%>%
   pivot_longer(cols = -time, names_to = "name",values_to = "value")%>%
   mutate(name = factor(name, levels = c("Snv","Csnv","Crnv","Isnv","Irnv")))%>%
@@ -318,4 +318,102 @@ out %>%
   ylim(0,NA)
 
 ggsave("eq_E_coli.png", width = 12, height = 3)
+
+#### S. aureus avec 500 bactéries ####
+## Choose bacteria 
+# Comment or uncomment 4 line codes below and rerun everything for each bacteria 
+# S_aureus
+bacteria = "S_aureus"
+folder_name = "S_aureus"
+file_name  = "S_aureus_params_eu_with_J01CR.csv"
+transmission_by_infected = FALSE
+
+load(here::here("files","S_aureus","equilibrium_results.RData"))
+
+eq_results_to_plot <- eq_results%>%
+  select(eq_Snv, eq_Csnv, eq_Crnv, eq_Isnv, eq_Irnv)%>%
+  rename(Snv = eq_Snv,Csnv = eq_Csnv, Crnv = eq_Crnv,Isnv = eq_Isnv, Irnv = eq_Irnv )%>%
+  pivot_longer(cols = everything(), names_to = "name",values_to = "value")%>%
+  mutate(name = factor(name, levels = c("Snv","Csnv","Crnv","Isnv","Irnv")))%>%
+  group_by(name)%>%
+  summarise(median = median(value),
+            q025 = quantile(value, 0.025),
+            q975 = quantile(value, 0.975),
+            .groups = "drop")
+
+load(here::here("files","S_aureus","equilibrium_results_Csr_Crs_nequal500.RData"))
+
+eq_results_to_plot_sup <- eq_results%>%
+  mutate(eq_Csnv = eq_Csnv + eq_Csrnv, eq_Crnv = eq_Crnv + eq_Crsnv, eq_Isnv = eq_Isnv + eq_Isrnv, eq_Irnv = eq_Irnv + eq_Irsnv)%>%
+  select(eq_Snv, eq_Csnv, eq_Crnv, eq_Isnv, eq_Irnv)%>%
+  rename(Snv = eq_Snv,Csnv = eq_Csnv, Crnv = eq_Crnv,Isnv = eq_Isnv, Irnv = eq_Irnv )%>%
+  pivot_longer(cols = everything(), names_to = "name",values_to = "value")%>%
+  mutate(name = factor(name, levels = c("Snv","Csnv","Crnv","Isnv","Irnv")))%>%
+  group_by(name)%>%
+  summarise(median = median(value),
+            q025 = quantile(value, 0.025),
+            q975 = quantile(value, 0.975),
+            .groups = "drop")
+
+eq_results_to_plot %>% 
+  mutate(model = "M1") %>%
+  bind_rows(eq_results_to_plot_sup %>% mutate(model = "M2")) %>%
+  ggplot()+
+  geom_point(mapping = aes(x = model,y = median, color = name,shape = model ) )+
+  geom_errorbar(mapping = aes(x = model,ymin = q025,ymax =q975,  color = name))+
+  facet_wrap(~name, scales = "free_y", nrow = 1)+
+  labs(x = "Model", y = "Number")+
+  theme_bw()+
+  ylim(0,NA) 
+
+ggsave(here::here("figures","extra_500","eq_S_aureus.png"), width = 12, height = 3)
+
+#### E. coli avec 500 bactéries ####
+## Choose bacteria 
+# Comment or uncomment 4 line codes below and rerun everything for each bacteria 
+# S_aureus
+bacteria = "E_coli"
+folder_name = "E_coli"
+file_name = "E_coli_params.csv"
+transmission_by_infected = TRUE # if transmission is allowed, it equals transmission by colonized individuals
+
+load(here::here("files","E_coli","equilibrium_results.RData"))
+
+eq_results_to_plot <- eq_results%>%
+  select(eq_Snv, eq_Csnv, eq_Crnv, eq_Isnv, eq_Irnv)%>%
+  rename(Snv = eq_Snv,Csnv = eq_Csnv, Crnv = eq_Crnv,Isnv = eq_Isnv, Irnv = eq_Irnv )%>%
+  pivot_longer(cols = everything(), names_to = "name",values_to = "value")%>%
+  mutate(name = factor(name, levels = c("Snv","Csnv","Crnv","Isnv","Irnv")))%>%
+  group_by(name)%>%
+  summarise(median = median(value),
+            q025 = quantile(value, 0.025),
+            q975 = quantile(value, 0.975),
+            .groups = "drop")
+
+load(here::here("files","E_coli","equilibrium_results_Csr_Crs_nequal500_red.RData"))
+
+eq_results_to_plot_sup <- eq_results%>%
+  mutate(eq_Csnv = eq_Csnv + eq_Csrnv, eq_Crnv = eq_Crnv + eq_Crsnv, eq_Isnv = eq_Isnv + eq_Isrnv, eq_Irnv = eq_Irnv + eq_Irsnv)%>%
+  select(eq_Snv, eq_Csnv,eq_Crnv, eq_Isnv,eq_Irnv)%>%
+  rename(Snv = eq_Snv,Csnv = eq_Csnv, Crnv = eq_Crnv,Isnv = eq_Isnv, Irnv = eq_Irnv )%>%
+  pivot_longer(cols = everything(), names_to = "name",values_to = "value")%>%
+  mutate(name = factor(name, levels = c("Snv","Csnv","Crnv","Isnv","Irnv")))%>%
+  group_by(name)%>%
+  summarise(median = median(value),
+            q025 = quantile(value, 0.025),
+            q975 = quantile(value, 0.975),
+            .groups = "drop")
+
+eq_results_to_plot %>% 
+  mutate(model = "M1") %>%
+  bind_rows(eq_results_to_plot_sup %>% mutate(model = "M2")) %>%
+  ggplot()+
+  geom_point(mapping = aes(x = model,y = median, color = name,shape = model ) )+
+  geom_errorbar(mapping = aes(x = model,ymin = q025,ymax =q975,  color = name))+
+  facet_wrap(~name, scales = "free_y", nrow = 1)+
+  labs(x = "Model", y = "Number")+
+  theme_bw()+
+  ylim(0,NA) 
+
+ggsave(here::here("figures","extra_500","eq_E_coli.png"), width = 12, height = 3)
 
