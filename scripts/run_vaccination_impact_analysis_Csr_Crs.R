@@ -12,7 +12,7 @@ plan(multisession, workers = n_cores)
 
 set.seed(123)  # global seed for reproducibility
 
-
+model = SCISsrV.model_4
 
 #### Helpers ####
 
@@ -30,28 +30,6 @@ create_folder <- function(path){
   if(!dir.exists(path)){
     dir.create(path)
   }
-}
-
-
-#### Compute antibiotic associated flux ####
-
-compute_antibiotic_associated_flux <- function(data, with_specific_flux=T){
-  if(with_specific_flux){
-    data <- data %>%
-      mutate(gammaA_s = prob_specific_exposure * 1/time_until_decolo_by_specific_ATB*(1-prob_minority_strain_when_infected),
-             psiA = prob_specific_exposure * 1/time_until_decolo_by_specific_ATB*prob_minority_strain_when_infected,
-             gammaA_r = prob_specific_exposure_r * 1/time_until_decolo_by_specific_ATB_r,
-             )
-  }
-  data %>%
-    mutate(lambdaA = prob_bystander_exposure * 1/time_until_decolo_by_bystander_ATB*(1-prob_minority_strain_when_colonised),
-           phiA = prob_bystander_exposure * 1/time_until_decolo_by_bystander_ATB*prob_minority_strain_when_colonised,
-           
-           lambdaA_I = (1-prob_specific_exposure) * prob_bystander_exposure * 1/time_until_decolo_by_bystander_ATB*(1-prob_minority_strain_when_infected),
-           phiA_I = (1-prob_specific_exposure) * prob_bystander_exposure * 1/time_until_decolo_by_bystander_ATB*prob_minority_strain_when_infected,
-           
-           etas = (1-prob_specific_exposure) *(1-prob_bystander_exposure)* 1/time_until_recovery_without_ATB_s,
-           etar = (1-prob_specific_exposure_r) * 1/time_until_recovery_without_ATB_r)
 }
 
 #### Fix resistant parameters equal to sensitive ####
@@ -95,139 +73,18 @@ set_resistant_and_sensitive_param_equal <- function(data, res_param_names){
 }
 
 
-
-#### Analytical conditions for coexistence ####
-
-compute_analytical_conditions <- function(data){
-  data <- compute_antibiotic_associated_flux(data, is.null(data$gammaA_s))
-  
-  
-  data %>%
-    mutate(coexistence_condition = f <= (1/dpr + ar - etar * ar / (etar + gammaA_r)) /(1/dps + lambdaA + as - etas * as / (etas + lambdaA_I + gammaA_s + psiA + phiA_I)+phiA)*(betaC + betaI*as/(etas + lambdaA_I + gammaA_s + psiA + phiA_I))/(betaC + betaI*ar/(etar + gammaA_r))) %>%
-    mutate(non_disparition_condition = betaC + betaI*as/(etas + lambdaA_I + gammaA_s + psiA + phiA_I) >= 1/dps + lambdaA + as - etas * as / (etas + lambdaA_I + gammaA_s + psiA + phiA_I)+phiA)
-}
-
-filter_coexistence_condition <- function(data){
-  compute_analytical_conditions(data) %>%
-    filter(coexistence_condition & non_disparition_condition)
-}
-
-
-#### Compute equilibrium ####
-compute_equilibrium <- function(data,population_size = 100000){
-  data <- compute_antibiotic_associated_flux(data, is.null(data$gammaA_s))
-  
-  
-  data %>%
-    mutate(
-      N = population_size,
-      His = etas + lambdaA_I +  gammaA_s+ psiA + phiA_I,
-      eq_Snv = N/(betaC + betaI*as/His)*(1/dps + lambdaA + as - etas*as/His + phiA),
-      E1 = f*eq_Snv/N*(betaC + betaI*ar/(etar+gammaA_r))-1/dpr - ar + etar*ar/(etar+gammaA_r),
-      E2 = (betaI*f*eq_Snv/N +etar)*(psiA + phiA_I)/(etar+gammaA_r)*as/His +phiA,
-      E = E1/E2,
-      G = 1+ ar/(etar+gammaA_r)-E*(1+as/His*(1+(psiA + phiA_I)/(etar+gammaA_r))),
-      eq_Crnv = (N-eq_Snv)/G,
-      eq_Csnv = -E*eq_Crnv,
-      eq_Isnv = as/His*eq_Csnv,
-      eq_Irnv = ar/(etar+gammaA_r)*eq_Crnv + (psiA + phiA_I)/(etar+gammaA_r)*eq_Isnv
-    )
-}
-
-check_eq_stability <- function(...){
-  
-  param <- list(...)
-  
-  with(param, {
-    
-    J = matrix(c(-(betaC*eq_Csnv + betaI*eq_Isnv)/N - f*(betaC*eq_Crnv + betaI*eq_Irnv)/N,
-                 -betaC*eq_Snv/N + 1/dps +lambdaA,
-                 -f*betaC*eq_Snv/N + 1/dpr,
-                 -betaI*eq_Snv/N + lambdaA_I + gammaA_s,
-                 -f*betaI*eq_Snv/N + gammaA_r,
-                 
-                 (betaC*eq_Csnv + betaI*eq_Isnv)/N,
-                 betaC*eq_Snv/N - 1/dps - lambdaA - as - phiA,
-                 0,
-                 betaI*eq_Snv/N + etas,
-                 0,
-                 
-                 f*(betaC*eq_Crnv + betaI*eq_Irnv)/N,
-                 phiA,
-                 f*betaC*eq_Snv/N - 1/dpr - ar,
-                 0,
-                 f*betaI*eq_Snv/N + etar,
-                 
-                 0,
-                 as,
-                 0,
-                 -etas - lambdaA_I - gammaA_s - psiA - phiA_I,
-                 0,
-                 
-                 0,
-                 0,
-                 ar,
-                 psiA + phiA_I,
-                 -etar - gammaA_r
-                 ), nrow=5, byrow = TRUE)
-    
-    
-    J = matrix(c(betaC*eq_Snv/N - (betaC*eq_Csnv + betaI*eq_Isnv)/N - 1/dps - lambdaA - as - phiA,
-                 - (betaC*eq_Csnv + betaI*eq_Isnv)/N,
-                 betaI*eq_Snv/N + etas- (betaC*eq_Csnv + betaI*eq_Isnv)/N,
-                 - (betaC*eq_Csnv + betaI*eq_Isnv)/N,
-                 
-                 
-                 phiA - f*(betaC*eq_Crnv + betaI*eq_Irnv)/N,
-                 f*betaC*eq_Snv/N - f*(betaC*eq_Crnv + betaI*eq_Irnv)/N - 1/dpr - ar,
-                 - f*(betaC*eq_Crnv + betaI*eq_Irnv)/N,
-                 f*betaI*eq_Snv/N - f*(betaC*eq_Crnv + betaI*eq_Irnv)/N + etar,
-                 
-                 
-                 as,
-                 0,
-                 -etas - lambdaA_I - gammaA_s - psiA - phiA_I,
-                 0,
-                 
-                 
-                 0,
-                 ar,
-                 psiA + phiA_I,
-                 -etar - gammaA_r
-    ), nrow=4, byrow = TRUE)
-    
-    eig = eigen(J)$values
-    eig_neg = all(Re(eig) < 0)
-    # print(eig)
-    # print(eig_neg)
-    
-    #return(tibble("eig_neg"=eig_neg))
-    #return(tibble("J" = as_tibble(J), "eig"= as_tibble(eig)) )
-    return(tibble("eig_max"=max(eig)))
-  })
-}
-
-
 #### Simulations ####
 
-solve_model_equations <- function(y0, times, params){
-  ode(
-    y = y0,
-    times = times,
-    func = SCISsrV.model,
-    parms = params
-  ) %>% as.data.frame()
-}
-
 add_zero_init_cumulative_incidences <- function(init){
-  c(init, c(inccumIsnv=0,inccumIsrnv=0, inccumIrnv=0, inccumIsv=0,inccumIsrv=0, inccumIrv=0, inccumSelectionOfResistantForNonVaccinated=0, inccumSelectionOfResistantForVaccinated=0))
+  c(init, c(inccumIsnv=0,inccumIsrnv=0, inccumIrnv=0,inccumIrsnv=0, inccumIsv=0,inccumIsrv=0, inccumIrv=0,inccumIrsv=0, 
+            inccumSelectionOfResistantForNonVaccinated=0, inccumSelectionOfResistantForVaccinated=0))
 }
 
 arbitrary_initial_state <- function(){
-  add_zero_init_cumulative_incidences(c(Snv = 80000,Csnv = 10000*0.9,Csrnv = 10000*0.1,Crnv = 10000,
-                                        Sv = 0,Csv = 0,Csrv =0,Crv = 0,
-                                        Isnv = 0,Isrnv = 0,Irnv = 0,
-                                        Isv = 0,Isrv = 0,Irv = 0))
+  add_zero_init_cumulative_incidences(c(Snv = 80000,Csnv = 10000*0.9,Csrnv = 10000*0.1,Crnv = 10000*0.9,Crsnv = 10000*0.1,
+                                        Sv = 0,Csv = 0,Csrv =0,Crv = 0,Crsv = 0,
+                                        Isnv = 0,Isrnv = 0,Irnv = 0,Irsnv = 0,
+                                        Isv = 0,Isrv = 0,Irv = 0,Irsv = 0))
 }
 
 vaccine_params_zero <- function() {
@@ -242,13 +99,13 @@ simulate_eq_without_vaccine <- function(params) {
   out <- ode(
     y = arbitrary_initial_state(),
     times = seq(from=0,to=1000000,by=100),
-    func = SCISsrV.model_3,
+    func = model,
     parms = c(params, vaccine_params_zero())  
   ) %>% as.data.frame()
   
   out %>%
     slice_tail(n=1) %>% 
-    select(Snv, Csnv,Csrnv, Crnv, Isnv,Isrnv, Irnv)
+    select(Snv, Csnv,Csrnv, Crnv,Crsnv, Isnv,Isrnv, Irnv, Irsnv)
 }
 
 # Function to run model one year without vaccine
@@ -257,18 +114,18 @@ simulate_1y_without_vaccine <- function(params) {
   
   out <- ode(
     y = add_zero_init_cumulative_incidences(
-      c(Snv = params$eq_Snv,Csnv = params$eq_Csnv,Csrnv = params$eq_Csrnv,Crnv = params$eq_Crnv,
-          Sv = 0,Csv = 0, Csrv = 0, Crv =0, 
-          Isnv = params$eq_Isnv ,Isrnv = params$eq_Isrnv ,Irnv = params$eq_Irnv , Isv = 0,Isrv = 0, Irv =0)),
+      c(Snv = params$eq_Snv,Csnv = params$eq_Csnv,Csrnv = params$eq_Csrnv,Crnv = params$eq_Crnv,Crsnv = params$eq_Crsnv,
+        Sv = 0,Csv = 0, Csrv = 0, Crv =0, Crsv =0, 
+        Isnv = params$eq_Isnv ,Isrnv = params$eq_Isrnv ,Irnv = params$eq_Irnv ,Irsnv = params$eq_Irsnv , Isv = 0,Isrv = 0, Irv =0, Irsv =0)),
     times = seq(from=0,to=370,by=10),
-    func = SCISsrV.model_3,
+    func = model,
     parms = c(params, vaccine_params_zero())  
   ) %>% as.data.frame()
   
   out %>%
     slice_tail(n=1) %>% 
-    select(Snv, Csnv, Csrnv, Crnv, Isnv,Isrnv, Irnv,
-           inccumIsnv,inccumIsrnv, inccumIrnv, inccumIsv,inccumIsrv, inccumIrv,
+    select(Snv, Csnv, Csrnv, Crnv,Crsnv, Isnv,Isrnv, Irnv, Irsnv,
+           inccumIsnv,inccumIsrnv, inccumIrnv,inccumIrsnv, inccumIsv,inccumIsrv, inccumIrv,inccumIrsv,
            inccumSelectionOfResistantForNonVaccinated,inccumSelectionOfResistantForVaccinated)
 }
 
@@ -277,19 +134,20 @@ simulate_1y_without_vaccine <- function(params) {
 simulate_1y_with_vaccine <- function(params) {
   out <- ode(
     y = add_zero_init_cumulative_incidences(
-      c(Snv = params$eq_Snv * (1-params$Vperc),Csnv = params$eq_Csnv * (1-params$Vperc),Csrnv = params$eq_Csrnv * (1-params$Vperc),Crnv = params$eq_Crnv * (1-params$Vperc),
-          Sv = params$eq_Snv * (params$Vperc),Csv = params$eq_Csnv * (params$Vperc),Csrv = params$eq_Csrnv * (params$Vperc), Crv =params$eq_Crnv * (params$Vperc), 
-          Isnv = params$eq_Isnv * (1-params$Vperc),Isrnv = params$eq_Isrnv * (1-params$Vperc),Irnv = params$eq_Irnv * (1-params$Vperc), Isv = params$eq_Isnv * (params$Vperc),Isrv = params$eq_Isrnv * (params$Vperc), Irv =params$eq_Irnv * (params$Vperc)
-          )),
+      c(Snv = params$eq_Snv * (1-params$Vperc),Csnv = params$eq_Csnv * (1-params$Vperc),Csrnv = params$eq_Csrnv * (1-params$Vperc),Crnv = params$eq_Crnv * (1-params$Vperc),Crsnv = params$eq_Crsnv * (1-params$Vperc),
+        Sv = params$eq_Snv * (params$Vperc),Csv = params$eq_Csnv * (params$Vperc),Csrv = params$eq_Csrnv * (params$Vperc), Crv =params$eq_Crnv * (params$Vperc), Crsv =params$eq_Crsnv * (params$Vperc), 
+        Isnv = params$eq_Isnv * (1-params$Vperc),Isrnv = params$eq_Isrnv * (1-params$Vperc),Irnv = params$eq_Irnv * (1-params$Vperc),Irsnv = params$eq_Irnv * (1-params$Vperc),
+        Isv = params$eq_Isnv * (params$Vperc),Isrv = params$eq_Isrnv * (params$Vperc), Irv =params$eq_Irnv * (params$Vperc), Irsv =params$eq_Irsnv * (params$Vperc)
+      )),
     times = seq(from=0,to=370,by=10),
-    func = SCISsrV.model_3,
+    func = model,
     parms = c(params)  
   ) %>% as.data.frame()
   
   out %>%
     slice_tail(n=1) %>% 
-    select(Snv, Csnv,Csrnv, Crnv, Isnv,Isrnv, Irnv, Sv, Csv,Csrv, Crv, Isv,Isrv, Irv,
-           inccumIsnv, inccumIsrnv, inccumIrnv, inccumIsv,inccumIsrv, inccumIrv,
+    select(Snv, Csnv,Csrnv, Crnv,Crsnv, Isnv,Isrnv, Irnv,Irsnv, Sv, Csv,Csrv, Crv,Crsv, Isv,Isrv, Irv,Irsv,
+           inccumIsnv, inccumIsrnv, inccumIrnv,inccumIrsnv, inccumIsv,inccumIsrv, inccumIrv,inccumIrsv,
            inccumSelectionOfResistantForNonVaccinated,inccumSelectionOfResistantForVaccinated)
 }
 
@@ -366,21 +224,17 @@ prc_red <- function(ref, new) {
 compute_outputs <- function(sim, population_size = 100000, factor = 100000){
   # Add cumulative incidence of selection to cumulative incidence of resistant infections
   results <- sim %>%
-    mutate(res_1y_wov_inccumIrnv_sel = res_1y_wov_inccumIrnv + res_1y_wov_inccumSelectionOfResistantForNonVaccinated,
-           res_1y_wv_inccumIrnv_sel = res_1y_wv_inccumIrnv + res_1y_wv_inccumSelectionOfResistantForNonVaccinated,
-           res_1y_wv_inccumIrv_sel = res_1y_wv_inccumIrv + res_1y_wv_inccumSelectionOfResistantForVaccinated)
-    
+    mutate(res_1y_wov_inccumIrnv_sel = res_1y_wov_inccumIrnv +res_1y_wov_inccumIrsnv + res_1y_wov_inccumSelectionOfResistantForNonVaccinated,
+           res_1y_wv_inccumIrnv_sel = res_1y_wv_inccumIrnv +res_1y_wv_inccumIrsnv + res_1y_wv_inccumSelectionOfResistantForNonVaccinated,
+           res_1y_wv_inccumIrv_sel = res_1y_wv_inccumIrv + res_1y_wv_inccumIrsv + res_1y_wv_inccumSelectionOfResistantForVaccinated)
+  
   
   # Add cumulative incidence of total infections
   results <- results %>%
     mutate(res_1y_wov_inccumI = res_1y_wov_inccumIrnv_sel+res_1y_wov_inccumIsnv+res_1y_wov_inccumIsrnv,
            res_1y_wv_inccumI_non_vaccinated = res_1y_wv_inccumIrnv_sel + res_1y_wv_inccumIsnv+ res_1y_wv_inccumIsrnv,
            res_1y_wv_inccumI_vaccinated = res_1y_wv_inccumIrv_sel + res_1y_wv_inccumIsv+ res_1y_wv_inccumIsrv,
-           res_1y_wv_inccumI = res_1y_wv_inccumI_non_vaccinated + res_1y_wv_inccumI_vaccinated)%>%
-    mutate(res_1y_wov_inccumI_old = res_1y_wov_inccumIrnv+res_1y_wov_inccumIsnv+res_1y_wov_inccumIsrnv,
-           res_1y_wv_inccumI_old_non_vaccinated = res_1y_wv_inccumIrnv + res_1y_wv_inccumIsnv+ res_1y_wv_inccumIsrnv,
-           res_1y_wv_inccumI_old_vaccinated = res_1y_wv_inccumIrv + res_1y_wv_inccumIsv+ res_1y_wv_inccumIsrv,
-           res_1y_wv_inccumI_old = res_1y_wv_inccumI_old_non_vaccinated + res_1y_wv_inccumI_old_vaccinated)
+           res_1y_wv_inccumI = res_1y_wv_inccumI_non_vaccinated + res_1y_wv_inccumI_vaccinated)
   
   # Compute reduction change in cumulative incidences
   results<- results %>%
@@ -393,7 +247,7 @@ compute_outputs <- function(sim, population_size = 100000, factor = 100000){
            prc_red_inccumI = prc_red(res_1y_wov_inccumI, res_1y_wv_inccumI),
            prc_red_inccumI_non_vaccinated = prc_red(res_1y_wov_inccumI*(1-Vperc), res_1y_wv_inccumI_non_vaccinated),
            prc_red_inccumI_vaccinated = prc_red(res_1y_wov_inccumI*Vperc, res_1y_wv_inccumI_vaccinated)
-           )
+    )
   
   # Compute proportion of resistant infections among infections in cumulative incidences
   results <- results %>%
@@ -401,27 +255,21 @@ compute_outputs <- function(sim, population_size = 100000, factor = 100000){
            res_1y_wv_prop_inccumIr_sel = (res_1y_wv_inccumIrnv_sel + res_1y_wv_inccumIrv_sel)/res_1y_wv_inccumI,
            res_1y_wv_prop_inccumIr_sel_non_vaccinated = (res_1y_wv_inccumIrnv_sel)/res_1y_wv_inccumI_non_vaccinated,
            res_1y_wv_prop_inccumIr_sel_vaccinated = (res_1y_wv_inccumIrv_sel)/res_1y_wv_inccumI_vaccinated
-    )%>%
-    mutate(res_1y_wov_prop_inccumIr = (res_1y_wov_inccumIrnv)/(res_1y_wov_inccumIrnv+res_1y_wov_inccumIsnv),
-           res_1y_wv_prop_inccumIr = (res_1y_wv_inccumIrnv + res_1y_wv_inccumIrv)/(res_1y_wv_inccumIrnv + res_1y_wv_inccumIsnv + res_1y_wv_inccumIrv + res_1y_wv_inccumIsv),
-           res_1y_wv_prop_inccumIr_non_vaccinated = (res_1y_wv_inccumIrnv)/( res_1y_wv_inccumIrnv + res_1y_wv_inccumIsnv),
-           res_1y_wv_prop_inccumIr_vaccinated = (res_1y_wv_inccumIrv)/(res_1y_wv_inccumIrv + res_1y_wv_inccumIsv)
     )
-  
   
   # Compute proportion of resistant colonisation among colonisation in prevalences at the end of the year
   results <- results %>%
-    mutate(res_1y_wv_prevC =( res_1y_wv_Crnv + res_1y_wv_Csnv +res_1y_wv_Csrnv + res_1y_wv_Crv  + res_1y_wv_Csv+ res_1y_wv_Csrv)/population_size) %>%
-    mutate(res_1y_wov_prop_prevCIr = (res_1y_wov_Crnv+res_1y_wov_Irnv)/(res_1y_wov_Crnv + res_1y_wov_Irnv + res_1y_wov_Csnv + res_1y_wov_Isnv + res_1y_wov_Csrnv + res_1y_wov_Isrnv),
-           res_1y_wv_prop_prevCIr = (res_1y_wv_Crnv+res_1y_wv_Irnv + res_1y_wv_Crv+res_1y_wv_Irv)/(res_1y_wv_Crnv + res_1y_wv_Irnv + res_1y_wv_Csnv + res_1y_wv_Isnv + res_1y_wv_Csrnv + res_1y_wv_Isrnv+ res_1y_wv_Crv + res_1y_wv_Irv + res_1y_wv_Csv + res_1y_wv_Isv + res_1y_wv_Csrv + res_1y_wv_Isrv),
-           res_1y_wv_prop_prevCIr_non_vaccinated = (res_1y_wv_Crnv+res_1y_wv_Irnv)/(res_1y_wv_Crnv + res_1y_wv_Irnv + res_1y_wv_Csnv + res_1y_wv_Isnv+ res_1y_wv_Csrnv + res_1y_wv_Isrnv),
-           res_1y_wv_prop_prevCIr_vaccinated = (res_1y_wv_Crv+res_1y_wv_Irv)/(res_1y_wv_Crv + res_1y_wv_Irv + res_1y_wv_Csv + res_1y_wv_Isv  + res_1y_wv_Csrv + res_1y_wv_Isrv),
+    mutate(res_1y_wv_prevC =( res_1y_wv_Crnv +res_1y_wv_Crsnv + res_1y_wv_Csnv +res_1y_wv_Csrnv + res_1y_wv_Crv  + res_1y_wv_Crsv  + res_1y_wv_Csv+ res_1y_wv_Csrv)/population_size) %>%
+    mutate(res_1y_wov_prop_prevCIr = (res_1y_wov_Crnv+res_1y_wov_Irnv + res_1y_wov_Crsnv+res_1y_wov_Irsnv)/(res_1y_wov_Crnv + res_1y_wov_Irnv +res_1y_wov_Crsnv + res_1y_wov_Irsnv + res_1y_wov_Csnv + res_1y_wov_Isnv + res_1y_wov_Csrnv + res_1y_wov_Isrnv),
+           res_1y_wv_prop_prevCIr = (res_1y_wv_Crnv+res_1y_wv_Irnv +res_1y_wv_Crsnv+res_1y_wv_Irsnv + res_1y_wv_Crv+res_1y_wv_Irv+ res_1y_wv_Crsv+res_1y_wv_Irsv)/(res_1y_wv_Crnv + res_1y_wv_Irnv +res_1y_wv_Crsnv + res_1y_wv_Irsnv + res_1y_wv_Csnv + res_1y_wv_Isnv + res_1y_wv_Csrnv + res_1y_wv_Isrnv+ res_1y_wv_Crv + res_1y_wv_Irv +res_1y_wv_Crsv + res_1y_wv_Irsv + res_1y_wv_Csv + res_1y_wv_Isv + res_1y_wv_Csrv + res_1y_wv_Isrv),
+           res_1y_wv_prop_prevCIr_non_vaccinated = (res_1y_wv_Crnv+res_1y_wv_Irnv + res_1y_wv_Crsnv+res_1y_wv_Irsnv)/(res_1y_wv_Crnv + res_1y_wv_Irnv +res_1y_wv_Crsnv + res_1y_wv_Irsnv + res_1y_wv_Csnv + res_1y_wv_Isnv+ res_1y_wv_Csrnv + res_1y_wv_Isrnv),
+           res_1y_wv_prop_prevCIr_vaccinated = (res_1y_wv_Crv+res_1y_wv_Irv + res_1y_wv_Crsv+res_1y_wv_Irsv)/(res_1y_wv_Crv + res_1y_wv_Irv +res_1y_wv_Crsv + res_1y_wv_Irsv + res_1y_wv_Csv + res_1y_wv_Isv  + res_1y_wv_Csrv + res_1y_wv_Isrv),
            
-           res_1y_wov_prop_prevCr = (res_1y_wov_Crnv)/(res_1y_wov_Crnv + res_1y_wov_Csnv + res_1y_wov_Csrnv),
-           res_1y_wv_prop_prevCr = (res_1y_wv_Crnv + res_1y_wv_Crv)/(res_1y_wv_Crnv + res_1y_wv_Csnv + res_1y_wv_Csrnv + res_1y_wv_Crv  + res_1y_wv_Csv  + res_1y_wv_Csrv ),
-           res_1y_wv_prop_prevCr_non_vaccinated = (res_1y_wv_Crnv)/(res_1y_wv_Crnv + res_1y_wv_Csnv+ res_1y_wv_Csrnv ),
-           res_1y_wv_prop_prevCr_vaccinated = (res_1y_wv_Crv)/(res_1y_wv_Crv + res_1y_wv_Csv  + res_1y_wv_Csrv )
-           )
+           res_1y_wov_prop_prevCr = (res_1y_wov_Crnv+res_1y_wov_Crsnv)/(res_1y_wov_Crnv+res_1y_wov_Crsnv + res_1y_wov_Csnv + res_1y_wov_Csrnv),
+           res_1y_wv_prop_prevCr = (res_1y_wv_Crnv + res_1y_wv_Crv+ res_1y_wv_Crsnv + res_1y_wv_Crsv)/(res_1y_wv_Crnv +res_1y_wv_Crsnv + res_1y_wv_Csnv + res_1y_wv_Csrnv + res_1y_wv_Crv  + res_1y_wv_Crsv  + res_1y_wv_Csv  + res_1y_wv_Csrv ),
+           res_1y_wv_prop_prevCr_non_vaccinated = (res_1y_wv_Crnv +res_1y_wv_Crsnv)/(res_1y_wv_Crnv +res_1y_wv_Crsnv + res_1y_wv_Csnv+ res_1y_wv_Csrnv ),
+           res_1y_wv_prop_prevCr_vaccinated = (res_1y_wv_Crv+res_1y_wv_Crsv)/(res_1y_wv_Crv +res_1y_wv_Crsv + res_1y_wv_Csv  + res_1y_wv_Csrv )
+    )
   
   # Compute reduction change in proportions
   results<- results %>%
@@ -433,19 +281,16 @@ compute_outputs <- function(sim, population_size = 100000, factor = 100000){
            prc_red_prop_prevCr_vaccinated = prc_red(res_1y_wov_prop_prevCr,res_1y_wv_prop_prevCr_vaccinated ))%>%
     mutate(prc_red_prop_inccumIr_sel = prc_red(res_1y_wov_prop_inccumIr_sel,res_1y_wv_prop_inccumIr_sel ),
            prc_red_prop_inccumIr_sel_non_vaccinated = prc_red(res_1y_wov_prop_inccumIr_sel,res_1y_wv_prop_inccumIr_sel_non_vaccinated ),
-           prc_red_prop_inccumIr_sel_vaccinated = prc_red(res_1y_wov_prop_inccumIr_sel,res_1y_wv_prop_inccumIr_sel_vaccinated ))%>%
-    mutate(prc_red_prop_inccumIr = prc_red(res_1y_wov_prop_inccumIr,res_1y_wv_prop_inccumIr ),
-           prc_red_prop_inccumIr_non_vaccinated = prc_red(res_1y_wov_prop_inccumIr,res_1y_wv_prop_inccumIr_non_vaccinated ),
-           prc_red_prop_inccumIr_vaccinated = prc_red(res_1y_wov_prop_inccumIr,res_1y_wv_prop_inccumIr_vaccinated ))
+           prc_red_prop_inccumIr_sel_vaccinated = prc_red(res_1y_wov_prop_inccumIr_sel,res_1y_wv_prop_inccumIr_sel_vaccinated ))
   
   # Compute reduction change in prevalences
   results <- results %>%
-    mutate(prc_red_prevCr = prc_red(res_1y_wov_Crnv, res_1y_wv_Crnv + res_1y_wv_Crv),
-           prc_red_prevCr_non_vaccinated = prc_red(res_1y_wov_Crnv*(1-Vperc), res_1y_wv_Crnv),
-           prc_red_prevCr_vaccinated = prc_red(res_1y_wov_Crnv*Vperc, res_1y_wv_Crv))%>%
-    mutate(prc_red_prevC = prc_red(res_1y_wov_Crnv+res_1y_wov_Csnv+res_1y_wov_Csrnv,res_1y_wv_Crnv + res_1y_wv_Crv + res_1y_wv_Csnv + res_1y_wv_Csv+ res_1y_wv_Csrnv + res_1y_wv_Csrv),
-           prc_red_prevC_non_vaccinated = prc_red((res_1y_wov_Crnv+res_1y_wov_Csnv+res_1y_wov_Csrnv)*(1-Vperc),res_1y_wv_Crnv +res_1y_wv_Csnv+res_1y_wv_Csrnv ),
-           prc_red_prevC_vaccinated = prc_red((res_1y_wov_Crnv+res_1y_wov_Csnv+res_1y_wov_Csrnv)*Vperc, res_1y_wv_Crv + res_1y_wv_Csv+ res_1y_wv_Csrv))
+    mutate(prc_red_prevCr = prc_red(res_1y_wov_Crnv+res_1y_wov_Crsnv, res_1y_wv_Crnv + res_1y_wv_Crv + res_1y_wv_Crsnv + res_1y_wv_Crsv),
+           prc_red_prevCr_non_vaccinated = prc_red((res_1y_wov_Crnv+res_1y_wov_Crsnv)*(1-Vperc), res_1y_wv_Crnv+res_1y_wv_Crsnv),
+           prc_red_prevCr_vaccinated = prc_red((res_1y_wov_Crnv + res_1y_wov_Crsnv)*Vperc, res_1y_wv_Crv+res_1y_wv_Crsv))%>%
+    mutate(prc_red_prevC = prc_red(res_1y_wov_Crnv+res_1y_wov_Crsnv+res_1y_wov_Csnv+res_1y_wov_Csrnv,res_1y_wv_Crnv +res_1y_wv_Crsnv + res_1y_wv_Crv +res_1y_wv_Crsv + res_1y_wv_Csnv + res_1y_wv_Csv+ res_1y_wv_Csrnv + res_1y_wv_Csrv),
+           prc_red_prevC_non_vaccinated = prc_red((res_1y_wov_Crnv+res_1y_wov_Crsnv+res_1y_wov_Csnv+res_1y_wov_Csrnv)*(1-Vperc),res_1y_wv_Crnv +res_1y_wv_Crsnv +res_1y_wv_Csnv+res_1y_wv_Csrnv ),
+           prc_red_prevC_vaccinated = prc_red((res_1y_wov_Crnv+res_1y_wov_Crsnv+res_1y_wov_Csnv+res_1y_wov_Csrnv)*Vperc, res_1y_wv_Crv +res_1y_wv_Crsv + res_1y_wv_Csv+ res_1y_wv_Csrv))
   
   
   # Compute averted infections 
@@ -498,7 +343,7 @@ file_name = "E_coli_params.csv"
 transmission_by_infected = TRUE # if transmission is allowed, it equals transmission by colonized individuals
 
 ## Choose number of bacteria to generate
-n <- 1
+n <- 500
 
 
 #### Define bacteria ####
@@ -507,9 +352,14 @@ Bacteria_params = read.csv(here::here("files",file_name))
 # cols_to_noise include bacteria parameters and antibiotic parameters
 # the relative fitness f isn't varied due to too much sensitivity of resistant proportion
 if(bacteria == "S_aureus"){
-  Bacteria_params$f = 0.94
+  # Bacteria_params$f = 0.94
+  Bacteria_params$f = 1
   Bacteria_params$sigmaC1 = 1
   Bacteria_params$sigmaI1 = 0
+  Bacteria_params$sigmaC1r = 1
+  Bacteria_params$sigmaI1r = 0
+  Bacteria_params$b = 0.00215
+  Bacteria_params$b0 = 4*Bacteria_params$b
   
   cols_to_noise <- c(	
     "betaC","as","time_until_recovery_without_ATB_s","dps",
@@ -523,9 +373,13 @@ if(bacteria == "S_aureus"){
     "time_until_decolo_by_specific_ATB_r","f"
   )
 } else {
-  
+  # Bacteria_params$f = 1
   Bacteria_params$sigmaC1 = 1.1e-1
   Bacteria_params$sigmaI1 = 1.1e-1
+  Bacteria_params$sigmaC1r = 1.1e-1
+  Bacteria_params$sigmaI1r = 1.1e-1
+  Bacteria_params$b = 0.00056
+  Bacteria_params$b0 = 4*Bacteria_params$b
   
   cols_to_noise <- c(	
     "betaC","as","time_until_recovery_without_ATB_s","dps",
@@ -577,14 +431,14 @@ eq_results <- df_bacteria %>%
 eq_results_all <- eq_results
 
 eq_results <- eq_results_all %>%
-  mutate(prop_res = eq_Crnv/(eq_Csnv + eq_Csrnv + eq_Crnv)) 
+  mutate(prop_res = (eq_Crnv+eq_Crsnv)/(eq_Csnv + eq_Csrnv + eq_Crnv+ eq_Crsnv)) 
 
 if(bacteria =="S. aureus"){
   eq_results <- eq_results %>%
   filter(prop_res > 0.08)
 }
 
-save(eq_results, file = here::here("files",folder_name,"equilibrium_results_Csr_nequal1.RData"))
+save(eq_results, file = here::here("files",folder_name,"equilibrium_results_Csr_Crs_nequal500.RData"))
 
 
 #### Simulation de un an sans vaccin et un an avec vaccin ####
@@ -662,5 +516,79 @@ results_to_plot <- results_with_outputs %>%
   ) %>%
   mutate(population = factor(population, levels = c("Total population", "Vaccinated", "Non-vaccinated")))
 
-save(results_to_plot, file = here::here("files",folder_name,"results_to_plot_Csr_nequal1.RData"))
+save(results_to_plot, file = here::here("files",folder_name,"results_to_plot_Csr_Crs_nequal500.RData"))
+
+#### Run antibiotic impact ####
+#### Load previous analysis equilibrium ####
+# cat("Loading equilibrium results...")
+# load(here::here("files",folder_name,"equilibrium_results_Csr_Crs_nequal1_5.RData"))
+# cat("done\n")
+#### Simulate different antibiotic scenarios ####
+# Simulate 1 year without vaccine for each parameter set at equilibrium
+# cat("Simulating 1 year without change in antibiotic...")
+# results_1y_wov <- eq_results %>%
+#   apply_function_on_df(simulate_1y_without_vaccine, "res_1y_wov") %>%
+#   unnest_wider(res_1y_wov, names_sep = "_")
+# cat("done\n")
+# Choose antibiotic scenario
+antibiotic_scenarios_df <- tibble(prob_bystander_exposure_multiplier = c(0.9, 0.7, 0.5, 0.3,0.1)) %>%
+  mutate(scenario_id = row_number())
+
+cat("Simulating 1 year with changes in antibiotic...")
+
+# Add antibiotic parameters to each parameter set
+df_for_antibiotic_simulations <- results_1y_wov %>%
+  slice(rep(1:n(), each = nrow(antibiotic_scenarios_df))) %>%
+  mutate(scenario_id = rep(1:nrow(antibiotic_scenarios_df), times = nrow(results_1y_wov))) %>%
+  left_join(antibiotic_scenarios_df, by = "scenario_id")%>%
+  mutate(prob_bystander_exposure_old = prob_bystander_exposure, .before = prob_bystander_exposure) %>%
+  mutate(
+    prob_bystander_exposure = prob_bystander_exposure * prob_bystander_exposure_multiplier
+  ) %>%
+  select(-prob_bystander_exposure_multiplier)
+
+# Simulate one year with vaccine for each parameter set
+results <- df_for_antibiotic_simulations %>%
+  apply_function_on_df(simulate_1y_without_vaccine, "res_1y_wov_antibiotic") %>%
+  unnest_wider(res_1y_wov_antibiotic, names_sep = "_")
+
+
+#### Results manipulation ####
+# Compute resistance change
+results_with_outputs_antibiotic <- results %>%
+  mutate(res_1y_wov_inccumIrnv_sel = res_1y_wov_inccumIrnv + res_1y_wov_inccumSelectionOfResistantForNonVaccinated,
+         res_1y_wov_antibiotic_inccumIrnv_sel = res_1y_wov_antibiotic_inccumIrnv + res_1y_wov_antibiotic_inccumSelectionOfResistantForNonVaccinated) %>%
+  
+  mutate(res_1y_wov_inccumI = res_1y_wov_inccumIrnv_sel+res_1y_wov_inccumIsnv,
+         res_1y_wov_antibiotic_inccumI = res_1y_wov_antibiotic_inccumIrnv_sel+res_1y_wov_antibiotic_inccumIsnv) %>%
+  
+  mutate(res_1y_wov_prop_prevCr = (res_1y_wov_Crnv)/(res_1y_wov_Crnv + res_1y_wov_Csnv),
+         res_1y_wov_antibiotic_prop_prevCr = (res_1y_wov_antibiotic_Crnv)/(res_1y_wov_antibiotic_Crnv + res_1y_wov_antibiotic_Csnv)) %>%
+  
+  mutate(res_1y_wov_prop_inccumIr = (res_1y_wov_inccumIrnv)/(res_1y_wov_inccumIrnv + res_1y_wov_inccumIsnv),
+         res_1y_wov_antibiotic_prop_inccumIr = (res_1y_wov_antibiotic_inccumIrnv)/(res_1y_wov_antibiotic_inccumIrnv + res_1y_wov_antibiotic_inccumIsnv)) %>%
+  
+  mutate(prc_red_inccumI = prc_red(res_1y_wov_inccumI,res_1y_wov_antibiotic_inccumI),
+         prc_red_inccumIr = prc_red(res_1y_wov_inccumIrnv_sel,res_1y_wov_antibiotic_inccumIrnv_sel),
+         prc_red_inccumIs = prc_red(res_1y_wov_inccumIsnv,res_1y_wov_antibiotic_inccumIsnv),
+         prc_red_prop_inccumIr = prc_red(res_1y_wov_prop_inccumIr, res_1y_wov_antibiotic_prop_inccumIr),
+         prc_red_prevC = prc_red(res_1y_wov_Crnv + res_1y_wov_Csnv, res_1y_wov_antibiotic_Crnv + res_1y_wov_antibiotic_Csnv), 
+         prc_red_prevCs = prc_red(res_1y_wov_Csnv, res_1y_wov_antibiotic_Csnv),
+         prc_red_prevCr = prc_red(res_1y_wov_Crnv, res_1y_wov_antibiotic_Crnv ),
+         prc_red_prop_prevCr = prc_red(res_1y_wov_prop_prevCr, res_1y_wov_antibiotic_prop_prevCr ))
+
+save(results_with_outputs_antibiotic, file = here::here("files",folder_name,"results_with_outputs_antibiotic_Csr_Crs_nequal500.RData"))
+
+# Compute statistics
+results_to_plot_antibiotic <- results_with_outputs_antibiotic %>%
+  pivot_longer(cols = all_of(starts_with("prc_red")), names_to = "metric_name", values_to = "metric_value")%>%
+  group_by(scenario_id, metric_name) %>%
+  summarise(median = median(metric_value),
+            q025 = quantile(metric_value, 0.025),
+            q975 = quantile(metric_value, 0.975),
+            .groups = "drop")
+
+
+save(results_to_plot_antibiotic, file = here::here("files",folder_name,"results_to_plot_antibiotic_Csr_Crs_nequal500.RData"))
+cat("done and saved")
 

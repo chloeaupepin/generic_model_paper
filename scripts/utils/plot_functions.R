@@ -170,7 +170,7 @@ plot_vaccine_metric_sup <- function(data,
                                 ylim_values = NULL,
                                 hrefs,
                                 vrefs,
-                                with_ribbons = TRUE){
+                                with_ribbons = FALSE){
   
   data_to_plot <- data %>%
     filter(metric_name %in% metric_name_to_plot, 
