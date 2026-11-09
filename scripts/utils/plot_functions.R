@@ -189,7 +189,11 @@ plot_vaccine_metric_sup <- function(data,
   
   p <- data_combined %>%
     ggplot(aes(x = Vperc*100)) +
-    {if (with_ribbons) geom_ribbon(aes(ymin = q025, ymax = q975,
+    geom_ribbon(aes(ymin = q025, ymax = q975,
+                                       fill = varying_param,
+                                       group = varying_param),
+                                   alpha = 0.2) +
+    {if (with_ribbons) geom_ribbon(aes(ymin = q025.sup, ymax = q975.sup,
                                        fill = varying_param,
                                        group = varying_param),
                                    alpha = 0.2)} +
@@ -504,7 +508,8 @@ plot_antibiotic_metric_bacteria_sup <- function(data,data_sup,
                                                  chosen_shapes,
                                                 chosen_palette,
                                                  facet_cols = NULL,
-                                                 chosen_output_labeller = output_labeller){
+                                                 chosen_output_labeller = output_labeller,
+                                                with_ribbons = FALSE){
   
   data_to_plot <- data %>%
     mutate(Bacteria = "1") %>%
@@ -526,6 +531,8 @@ plot_antibiotic_metric_bacteria_sup <- function(data,data_sup,
     geom_hline(yintercept = 0, linetype="dashed", color = "black")+
     geom_ribbon(aes(ymin = q025, ymax = q975),color = chosen_palette[2], fill = chosen_palette[2],
                 alpha = 0.2) +
+    {if(with_ribbons) geom_ribbon(aes(ymin = q025.sup, ymax = q975.sup),color = chosen_palette[2], fill = chosen_palette[2],
+                alpha = 0.2)}+
     geom_line(aes(y = Value, linetype = Name), color = chosen_palette[2]) +
     geom_point(aes(y = Value,shape = Name),color = chosen_palette[2], fill = chosen_palette[2], size = 2)+
     {if (length(metric_name_to_plot)>1) facet_wrap(~ metric_name, ncol = facet_cols, 

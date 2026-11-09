@@ -352,11 +352,11 @@ Bacteria_params = read.csv(here::here("files",file_name))
 # cols_to_noise include bacteria parameters and antibiotic parameters
 # the relative fitness f isn't varied due to too much sensitivity of resistant proportion
 if(bacteria == "S_aureus"){
-  # Bacteria_params$f = 0.94
-  Bacteria_params$f = 1
-  Bacteria_params$sigmaC1 = 1
+  # Bacteria_params$f = 0.93#0.94
+  # Bacteria_params$f = 1
+  Bacteria_params$sigmaC1 = 3 #1
   Bacteria_params$sigmaI1 = 0
-  Bacteria_params$sigmaC1r = 1
+  Bacteria_params$sigmaC1r = 3 #1
   Bacteria_params$sigmaI1r = 0
   Bacteria_params$b = 0.00215
   Bacteria_params$b0 = 4*Bacteria_params$b
@@ -370,7 +370,7 @@ if(bacteria == "S_aureus"){
     "time_until_decolo_by_specific_ATB",
     "prob_minority_strain_when_infected",
     "prob_specific_exposure_r",
-    "time_until_decolo_by_specific_ATB_r","f"
+    "time_until_decolo_by_specific_ATB_r"
   )
 } else {
   # Bacteria_params$f = 1
@@ -395,7 +395,7 @@ if(bacteria == "S_aureus"){
   )
 }
 
-df_bacteria <- add_variability(Bacteria_params, cols_to_noise, n ,0.05) 
+df_bacteria <- add_variability(Bacteria_params, cols_to_noise, n ,0.1) 
 
 df_bacteria <- set_resistant_and_sensitive_param_equal(df_bacteria, c("dpr", "ar", "time_until_recovery_without_ATB_r"))
 
@@ -433,9 +433,9 @@ eq_results_all <- eq_results
 eq_results <- eq_results_all %>%
   mutate(prop_res = (eq_Crnv+eq_Crsnv)/(eq_Csnv + eq_Csrnv + eq_Crnv+ eq_Crsnv)) 
 
-if(bacteria =="S. aureus"){
+if(bacteria =="S_aureus"){
   eq_results <- eq_results %>%
-  filter(prop_res > 0.08)
+  filter(prop_res > 0.05 & prop_res < 0.15)
 }
 
 save(eq_results, file = here::here("files",folder_name,"equilibrium_results_Csr_Crs_nequal500.RData"))

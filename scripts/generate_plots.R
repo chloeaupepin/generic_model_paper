@@ -434,14 +434,14 @@ ggsave(paste0("figures/figure7.png"), width = 12, height = 7)
 # ggsave(paste0("figures/figure7_Csr_nequal1.png"), width = 12, height = 7)
 
 #### Supplementary analysis : model with a new compartment ####
-load(here::here("files", "S_aureus", "results_to_plot_Csr_Crs_nequal1_5.RData"))
+load(here::here("files", "S_aureus", "results_to_plot_Csr_Crs_nequal500.RData"))
 results_to_plot_Saureus_sup <- results_to_plot
 
 load(here::here("files", "E_coli", "results_to_plot_Csr_Crs_nequal1_5.RData"))
 load(here::here("files", "E_coli", "results_to_plot_Csr_Crs_nequal500.RData"))
 results_to_plot_Ecoli_sup <- results_to_plot
 
-load(here::here("files", "S_aureus", "results_to_plot_antibiotic_Csr_Crs_nequal1_5.RData"))
+load(here::here("files", "S_aureus", "results_to_plot_antibiotic_Csr_Crs_nequal500.RData"))
 results_to_plot_antibiotic_Saureus_sup <- results_to_plot_antibiotic
 
 load(here::here("files", "E_coli", "results_to_plot_antibiotic_Csr_Crs_nequal500.RData"))
@@ -451,6 +451,7 @@ results_to_plot_antibiotic_Ecoli_sup <- results_to_plot_antibiotic
 chosen_palette = colors_and_shapes[["S_aureus"]]$palette
 chosen_shape = colors_and_shapes[["S_aureus"]]$shape
 folder_name = "extra_500" # "extra"
+with_ribbons_choice = TRUE
 
 plot_vaccine_metric_sup(data = results_to_plot_Saureus,
                         data_sup = results_to_plot_Saureus_sup,
@@ -463,7 +464,8 @@ plot_vaccine_metric_sup(data = results_to_plot_Saureus,
                     chosen_palette = chosen_palette,
                     hrefs = c(0, -50),
                     vrefs = c(30),
-                    ylim_values = c(-100, 1))
+                    ylim_values = c(-100, 1),
+                    with_ribbons = with_ribbons_choice)
 ggsave(here::here("figures",folder_name,"figure4_S_aureus.png"), width = 12, height = 7)
 
 plot_vaccine_metric_sup(data = results_to_plot_Saureus,
@@ -476,7 +478,8 @@ plot_vaccine_metric_sup(data = results_to_plot_Saureus,
                     chosen_palette = chosen_palette,
                     hrefs = c(0, -50),
                     vrefs = c(30),
-                    ylim_values = c(-100, 1))
+                    ylim_values = c(-100, 1),
+                    with_ribbons = with_ribbons_choice)
 ggsave(here::here("figures",folder_name,"figureS4_S_aureus.png"), width = 12, height = 7)
 
 plot_vaccine_metric_sup(data = results_to_plot_Saureus,
@@ -488,7 +491,8 @@ plot_vaccine_metric_sup(data = results_to_plot_Saureus,
                     chosen_shape = chosen_shape,
                     chosen_palette = chosen_palette,
                     hrefs = c(0, -50),
-                    vrefs = c(30))
+                    vrefs = c(30),
+                    with_ribbons = with_ribbons_choice)
 ggsave(here::here("figures",folder_name,"figureS5_S_aureus.png"), width = 12, height = 7)
 
 plot_vaccine_metric_sup(data = results_to_plot_Saureus,
@@ -500,7 +504,8 @@ plot_vaccine_metric_sup(data = results_to_plot_Saureus,
                     chosen_shape = chosen_shape,
                     chosen_palette = chosen_palette,
                     hrefs = c(0),
-                    vrefs = c(30))
+                    vrefs = c(30),
+                    with_ribbons = with_ribbons_choice)
 ggsave(here::here("figures",folder_name,"figure6_S_aureus.png"), width = 12, height = 7)
 
 plot_vaccine_metric_sup(data = results_to_plot_Saureus,
@@ -510,7 +515,8 @@ plot_vaccine_metric_sup(data = results_to_plot_Saureus,
                     chosen_shape = chosen_shape,
                     chosen_palette = chosen_palette,
                     hrefs = c(0),
-                    vrefs = c(30))
+                    vrefs = c(30),,
+                    with_ribbons = with_ribbons_choice)
 ggsave(here::here("figures",folder_name,"figure5_S_aureus.png"), width = 12, height = 5)
 
 plot_antibiotic_metric_bacteria_sup(data = results_to_plot_antibiotic_Saureus,
@@ -519,7 +525,8 @@ plot_antibiotic_metric_bacteria_sup(data = results_to_plot_antibiotic_Saureus,
                                                              "prc_red_prevC", "prc_red_prevCr", "prc_red_prevCs", "prc_red_prop_prevCr"),
                                      chosen_shapes = shapes,
                                     chosen_palette = chosen_palette,
-                                     facet_cols = 4)
+                                     facet_cols = 4,
+                                    with_ribbons = with_ribbons_choice)
 
 ggsave(here::here("figures",folder_name,"figure7_S_aureus.png"), width = 12, height = 7)
 
@@ -540,7 +547,8 @@ plot_vaccine_metric_sup(data = results_to_plot_Ecoli,
                         chosen_palette = chosen_palette,
                         hrefs = c(0, -50),
                         vrefs = c(30),
-                        ylim_values = c(-100, 1))
+                        ylim_values = c(-100, 1),
+                        with_ribbons = TRUE)
 ggsave(here::here("figures",folder_name,"figure4_E_coli.png"), width = 12, height = 7)
 
 plot_vaccine_metric_sup(data = results_to_plot_Ecoli,
@@ -553,7 +561,8 @@ plot_vaccine_metric_sup(data = results_to_plot_Ecoli,
                         chosen_palette = chosen_palette,
                         hrefs = c(0, -50),
                         vrefs = c(30),
-                        ylim_values = c(-100, 1))
+                        ylim_values = c(-100, 1),
+                        with_ribbons = TRUE)
 ggsave(here::here("figures",folder_name,"figureS4_E_coli.png"), width = 12, height = 7)
 
 plot_vaccine_metric_sup(data = results_to_plot_Ecoli,
@@ -565,7 +574,8 @@ plot_vaccine_metric_sup(data = results_to_plot_Ecoli,
                         chosen_shape = chosen_shape,
                         chosen_palette = chosen_palette,
                         hrefs = c(0, -50),
-                        vrefs = c(30))
+                        vrefs = c(30),,
+                        with_ribbons = TRUE)
 ggsave(here::here("figures",folder_name,"figureS5_E_coli.png"), width = 12, height = 7)
 
 plot_vaccine_metric_sup(data = results_to_plot_Ecoli,
@@ -577,7 +587,8 @@ plot_vaccine_metric_sup(data = results_to_plot_Ecoli,
                         chosen_shape = chosen_shape,
                         chosen_palette = chosen_palette,
                         hrefs = c(0),
-                        vrefs = c(30))
+                        vrefs = c(30),
+                        with_ribbons = TRUE)
 ggsave(here::here("figures",folder_name,"figure6_E_coli.png"), width = 12, height = 7)
 
 plot_vaccine_metric_sup(data = results_to_plot_Ecoli,
@@ -587,7 +598,8 @@ plot_vaccine_metric_sup(data = results_to_plot_Ecoli,
                         chosen_shape = chosen_shape,
                         chosen_palette = chosen_palette,
                         hrefs = c(0),
-                        vrefs = c(30))
+                        vrefs = c(30),
+                        with_ribbons = TRUE)
 ggsave(here::here("figures",folder_name,"figure5_E_coli.png"), width = 12, height = 5)
 
 plot_antibiotic_metric_bacteria_sup(data = results_to_plot_antibiotic_Ecoli,
@@ -596,7 +608,8 @@ plot_antibiotic_metric_bacteria_sup(data = results_to_plot_antibiotic_Ecoli,
                                                             "prc_red_prevC", "prc_red_prevCr", "prc_red_prevCs", "prc_red_prop_prevCr"),
                                     chosen_shapes = shapes,
                                     chosen_palette = chosen_palette,
-                                    facet_cols = 4)
+                                    facet_cols = 4,
+                                    with_ribbons = TRUE)
 
 ggsave(here::here("figures",folder_name,"figure7_E_coli.png"), width = 12, height = 7)
 
