@@ -12,7 +12,29 @@ plan(multisession, workers = n_cores)
 
 set.seed(123)  # global seed for reproducibility
 
+#### Define settings ####
+## Choose model
 model = SCISsrV.model_5
+
+## Population size
+population_size = 100000
+
+## Choose bacteria 
+# Comment or uncomment 4 line codes below and rerun everything for each bacteria 
+# S_aureus
+bacteria = "S_aureus"
+folder_name = "S_aureus"
+file_name  = "S_aureus_params_eu_with_J01CR.csv"
+transmission_by_infected = FALSE
+
+# E_coli
+bacteria = "E_coli"
+folder_name = "E_coli"
+file_name = "E_coli_params.csv"
+transmission_by_infected = TRUE # if transmission is allowed, it equals transmission by colonized individuals
+
+## Choose number of bacteria to generate
+n <- 500
 
 #### Helpers ####
 
@@ -323,44 +345,63 @@ compute_statistics <- function(results, chosen_cols){
 }
 
 
-#### Define settings ####
-
-## Population size
-population_size = 100000
-
-## Choose bacteria 
-# Comment or uncomment 4 line codes below and rerun everything for each bacteria 
-# S_aureus
-bacteria = "S_aureus"
-folder_name = "S_aureus"
-file_name  = "S_aureus_params_eu_with_J01CR.csv"
-transmission_by_infected = FALSE
-
-# E_coli
-bacteria = "E_coli"
-folder_name = "E_coli"
-file_name = "E_coli_params.csv"
-transmission_by_infected = TRUE # if transmission is allowed, it equals transmission by colonized individuals
-
-## Choose number of bacteria to generate
-n <- 500
-
-
 #### Define bacteria ####
 Bacteria_params = read.csv(here::here("files",file_name)) 
 
-# cols_to_noise include bacteria parameters and antibiotic parameters
-# the relative fitness f isn't varied due to too much sensitivity of resistant proportion
-if(bacteria == "S_aureus"){
-  # Bacteria_params$f = 0.93#0.94
-  # Bacteria_params$f = 1
-  Bacteria_params$sigmaC1 = 3 #1
+# Modify bacteria params according to chosen model for each bacteria and define file names 
+if(bacteria=="S_aureus" & model == SCISsrV.model_4){
+  Bacteria_params$sigmaC1 = 3
   Bacteria_params$sigmaI1 = 0
-  Bacteria_params$sigmaC1r = 3 #1
+  Bacteria_params$sigmaC1r = 3
+  Bacteria_params$sigmaI1r = 0
+
+  eq_results_name = "equilibrium_results_Csr_Crs_nequal500.RData"
+  results_to_plot_name = "results_to_plot_Csr_Crs_nequal500.RData"
+  results_to_plot_antibiotic_name = "results_to_plot_antibiotic_Csr_Crs_nequal500.RData"
+  
+}else if(bacteria=="S_aureus" & model == SCISsrV.model_5){
+  Bacteria_params$f = 1
+  Bacteria_params$sigmaC1 = 1
+  Bacteria_params$sigmaI1 = 0
+  Bacteria_params$sigmaC1r = 1
   Bacteria_params$sigmaI1r = 0
   Bacteria_params$b = 0.00215
   Bacteria_params$b0 = 4*Bacteria_params$b
   
+  eq_results_name = "equilibrium_results_Csr_Crs_nequal1_5.RData"
+  results_to_plot_name = "results_to_plot_Csr_Crs_nequal1_5.RData"
+  results_to_plot_antibiotic_name = "results_to_plot_antibiotic_Csr_Crs_nequal1_5.RData"
+  
+  
+}else if(bacteria=="E_coli" & model == SCISsrV.model_4){
+  Bacteria_params$sigmaC1 = 1.1e-1
+  Bacteria_params$sigmaI1 = 1.1e-1
+  Bacteria_params$sigmaC1r = 1.1e-1
+  Bacteria_params$sigmaI1r = 1.1e-1
+  
+  eq_results_name = "equilibrium_results_Csr_Crs_nequal500_red.RData"
+  results_to_plot_name = "results_to_plot_Csr_Crs_nequal500_red.RData"
+  results_to_plot_antibiotic_name = "results_to_plot_antibiotic_Csr_Crs_nequal500_red.RData"
+  
+  
+}else if(bacteria=="E_coli" & model == SCISsrV.model_5){
+  Bacteria_params$f = 1
+  Bacteria_params$sigmaC1 = 1.1e-1
+  Bacteria_params$sigmaI1 = 1.1e-1
+  Bacteria_params$sigmaC1r = 1.1e-1
+  Bacteria_params$sigmaI1r = 1.1e-1
+  Bacteria_params$b = 0.00056
+  Bacteria_params$b0 = 4*Bacteria_params$b
+  
+  eq_results_name = "equilibrium_results_Csr_Crs_nequal500_red_5.RData"
+  results_to_plot_name = "results_to_plot_Csr_Crs_nequal500_red_5.RData"
+  results_to_plot_antibiotic_name = "results_to_plot_antibiotic_Csr_Crs_nequal500_red_5.RData"
+  
+}
+
+# cols_to_noise include bacteria parameters and antibiotic parameters
+# the relative fitness f isn't varied due to too much sensitivity of resistant proportion
+if(bacteria == "S_aureus"){
   cols_to_noise <- c(	
     "betaC","as","time_until_recovery_without_ATB_s","dps",
     "prob_bystander_exposure",
@@ -373,13 +414,6 @@ if(bacteria == "S_aureus"){
     "time_until_decolo_by_specific_ATB_r"
   )
 } else {
-  Bacteria_params$f = 1
-  Bacteria_params$sigmaC1 = 1.1e-1
-  Bacteria_params$sigmaI1 = 1.1e-1
-  Bacteria_params$sigmaC1r = 1.1e-1
-  Bacteria_params$sigmaI1r = 1.1e-1
-  Bacteria_params$b = 0.00056
-  Bacteria_params$b0 = 4*Bacteria_params$b
   
   cols_to_noise <- c(	
     "betaC","as","time_until_recovery_without_ATB_s","dps",
@@ -418,8 +452,11 @@ df_bacteria <- df_bacteria %>%
   )
 
 
-#Keep only first bacteria
-df_bacteria <- df_bacteria %>% filter(bacteria_id == 0)
+#Keep only first bacteria for S. aureus and model with growth competition
+if(bacteria=="S_aureus" & model == SCISsrV.model_5){
+  df_bacteria <- df_bacteria %>% filter(bacteria_id == 0)
+}
+
 
 #### Run analysis equilibrium ####
 
@@ -433,6 +470,7 @@ eq_results_all <- eq_results
 eq_results <- eq_results_all %>%
   mutate(prop_res = (eq_Crnv+eq_Crsnv)/(eq_Csnv + eq_Csrnv + eq_Crnv+ eq_Crsnv)) 
 
+# Filter simulations that respect the proportion of resistance
 if(bacteria =="S_aureus"){
   eq_results <- eq_results %>%
   filter(prop_res > 0.05 & prop_res < 0.15)
@@ -442,7 +480,7 @@ if(bacteria =="E_coli"){
     filter(prop_res > 0.06*1/2 & prop_res < 0.06*3/2)
 }
 
-save(eq_results, file = here::here("files",folder_name,"equilibrium_results_Csr_Crs_nequal500_red_5.RData"))
+save(eq_results, file = here::here("files",folder_name,eq_results_name))
 
 
 #### Simulation de un an sans vaccin et un an avec vaccin ####
@@ -520,7 +558,7 @@ results_to_plot <- results_with_outputs %>%
   ) %>%
   mutate(population = factor(population, levels = c("Total population", "Vaccinated", "Non-vaccinated")))
 
-save(results_to_plot, file = here::here("files",folder_name,"results_to_plot_Csr_Crs_nequal500_red_5.RData"))
+save(results_to_plot, file = here::here("files",folder_name,results_to_plot_name))
 
 #### Run antibiotic impact ####
 #### Load previous analysis equilibrium ####
@@ -581,8 +619,6 @@ results_with_outputs_antibiotic <- results %>%
          prc_red_prevCr = prc_red(res_1y_wov_Crnv, res_1y_wov_antibiotic_Crnv ),
          prc_red_prop_prevCr = prc_red(res_1y_wov_prop_prevCr, res_1y_wov_antibiotic_prop_prevCr ))
 
-save(results_with_outputs_antibiotic, file = here::here("files",folder_name,"results_with_outputs_antibiotic_Csr_Crs_nequal500_red_5.RData"))
-
 # Compute statistics
 results_to_plot_antibiotic <- results_with_outputs_antibiotic %>%
   pivot_longer(cols = all_of(starts_with("prc_red")), names_to = "metric_name", values_to = "metric_value")%>%
@@ -593,6 +629,6 @@ results_to_plot_antibiotic <- results_with_outputs_antibiotic %>%
             .groups = "drop")
 
 
-save(results_to_plot_antibiotic, file = here::here("files",folder_name,"results_to_plot_antibiotic_Csr_Crs_nequal500_red_5.RData"))
+save(results_to_plot_antibiotic, file = here::here("files",folder_name,results_to_plot_antibiotic))
 cat("done and saved")
 

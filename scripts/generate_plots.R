@@ -434,25 +434,50 @@ ggsave(paste0("figures/figure7.png"), width = 12, height = 7)
 # ggsave(paste0("figures/figure7_Csr_nequal1.png"), width = 12, height = 7)
 
 #### Supplementary analysis : model with a new compartment ####
-load(here::here("files", "S_aureus", "results_to_plot_Csr_Crs_nequal500.RData"))
+
+folder_name = "supplementary"
+
+# For treatment competition model 
+# load(here::here("files", "S_aureus", "results_to_plot_Csr_Crs_nequal500.RData"))
+# results_to_plot_Saureus_sup <- results_to_plot
+# 
+# load(here::here("files", "E_coli", "results_to_plot_Csr_Crs_nequal500_red.RData"))
+# results_to_plot_Ecoli_sup <- results_to_plot
+# 
+# load(here::here("files", "S_aureus", "results_to_plot_antibiotic_Csr_Crs_nequal500.RData"))
+# results_to_plot_antibiotic_Saureus_sup <- results_to_plot_antibiotic
+# 
+# load(here::here("files", "E_coli", "results_to_plot_antibiotic_Csr_Crs_nequal500_red.RData"))
+# results_to_plot_antibiotic_Ecoli_sup <- results_to_plot_antibiotic
+# 
+# chosen_model_name = "Model with treatment competition"
+# with_ribbons_choice_S_aureus = TRUE
+# with_ribbons_choice_E_coli = TRUE
+# file_prefix = "treatment_"
+
+# For growth competition model
+load(here::here("files", "S_aureus", "results_to_plot_Csr_Crs_nequal1_5.RData"))
 results_to_plot_Saureus_sup <- results_to_plot
 
-load(here::here("files", "E_coli", "results_to_plot_Csr_Crs_nequal1_5.RData"))
 load(here::here("files", "E_coli", "results_to_plot_Csr_Crs_nequal500_red_5.RData"))
 results_to_plot_Ecoli_sup <- results_to_plot
 
-load(here::here("files", "S_aureus", "results_to_plot_antibiotic_Csr_Crs_nequal500.RData"))
+load(here::here("files", "S_aureus", "results_to_plot_antibiotic_Csr_Crs_nequal1_5.RData"))
 results_to_plot_antibiotic_Saureus_sup <- results_to_plot_antibiotic
 
 load(here::here("files", "E_coli", "results_to_plot_antibiotic_Csr_Crs_nequal500_red_5.RData"))
 results_to_plot_antibiotic_Ecoli_sup <- results_to_plot_antibiotic
 
 
+chosen_model_name = "Model with growth competition"
+with_ribbons_choice_S_aureus = FALSE
+with_ribbons_choice_E_coli = TRUE
+file_prefix = "growth_"
+
+
 chosen_palette = colors_and_shapes[["S_aureus"]]$palette
 chosen_shape = colors_and_shapes[["S_aureus"]]$shape
-folder_name = "extra_500_5" # "extra"
-chosen_model_name = "Model with growth competition"
-with_ribbons_choice = TRUE
+
 
 plot_vaccine_metric_sup(data = results_to_plot_Saureus,
                         data_sup = results_to_plot_Saureus_sup,
@@ -466,9 +491,9 @@ plot_vaccine_metric_sup(data = results_to_plot_Saureus,
                     hrefs = c(0, -50),
                     vrefs = c(30),
                     ylim_values = c(-100, 1),
-                    with_ribbons = with_ribbons_choice,
+                    with_ribbons = with_ribbons_choice_S_aureus,
                     model_name = chosen_model_name)
-ggsave(here::here("figures",folder_name,"figure4_S_aureus.png"), width = 12, height = 7)
+ggsave(here::here("figures",folder_name,paste0(file_prefix,"figure4_S_aureus.png")), width = 12, height = 7)
 
 plot_vaccine_metric_sup(data = results_to_plot_Saureus,
                         data_sup = results_to_plot_Saureus_sup,
@@ -481,9 +506,9 @@ plot_vaccine_metric_sup(data = results_to_plot_Saureus,
                     hrefs = c(0, -50),
                     vrefs = c(30),
                     ylim_values = c(-100, 1),
-                    with_ribbons = with_ribbons_choice,
+                    with_ribbons = with_ribbons_choice_S_aureus,
                     model_name = chosen_model_name)
-ggsave(here::here("figures",folder_name,"figureS4_S_aureus.png"), width = 12, height = 7)
+ggsave(here::here("figures",folder_name,paste0(file_prefix,"figureS4_S_aureus.png")), width = 12, height = 7)
 
 plot_vaccine_metric_sup(data = results_to_plot_Saureus,
                         data_sup = results_to_plot_Saureus_sup,
@@ -495,9 +520,9 @@ plot_vaccine_metric_sup(data = results_to_plot_Saureus,
                     chosen_palette = chosen_palette,
                     hrefs = c(0, -50),
                     vrefs = c(30),
-                    with_ribbons = with_ribbons_choice,
+                    with_ribbons = with_ribbons_choice_S_aureus,
                     model_name = chosen_model_name)
-ggsave(here::here("figures",folder_name,"figureS5_S_aureus.png"), width = 12, height = 7)
+ggsave(here::here("figures",folder_name,paste0(file_prefix,"figureS5_S_aureus.png")), width = 12, height = 7)
 
 plot_vaccine_metric_sup(data = results_to_plot_Saureus,
                         data_sup = results_to_plot_Saureus_sup,
@@ -509,9 +534,9 @@ plot_vaccine_metric_sup(data = results_to_plot_Saureus,
                     chosen_palette = chosen_palette,
                     hrefs = c(0),
                     vrefs = c(30),
-                    with_ribbons = with_ribbons_choice,
+                    with_ribbons = with_ribbons_choice_S_aureus,
                     model_name = chosen_model_name)
-ggsave(here::here("figures",folder_name,"figure6_S_aureus.png"), width = 12, height = 7)
+ggsave(here::here("figures",folder_name,paste0(file_prefix,"figure6_S_aureus.png")), width = 12, height = 7)
 
 plot_vaccine_metric_sup(data = results_to_plot_Saureus,
                         data_sup = results_to_plot_Saureus_sup,
@@ -521,9 +546,9 @@ plot_vaccine_metric_sup(data = results_to_plot_Saureus,
                     chosen_palette = chosen_palette,
                     hrefs = c(0),
                     vrefs = c(30),,
-                    with_ribbons = with_ribbons_choice,
+                    with_ribbons = with_ribbons_choice_S_aureus,
                     model_name = chosen_model_name)
-ggsave(here::here("figures",folder_name,"figure5_S_aureus.png"), width = 12, height = 5)
+ggsave(here::here("figures",folder_name,paste0(file_prefix,"figure5_S_aureus.png")), width = 12, height = 5)
 
 plot_antibiotic_metric_bacteria_sup(data = results_to_plot_antibiotic_Saureus,
                                      data_sup = results_to_plot_antibiotic_Saureus_sup,
@@ -532,10 +557,10 @@ plot_antibiotic_metric_bacteria_sup(data = results_to_plot_antibiotic_Saureus,
                                      chosen_shapes = shapes,
                                     chosen_palette = chosen_palette,
                                      facet_cols = 4,
-                                    with_ribbons = with_ribbons_choice,
+                                    with_ribbons = with_ribbons_choice_S_aureus,
                                     model_name = chosen_model_name)
 
-ggsave(here::here("figures",folder_name,"figure7_S_aureus.png"), width = 12, height = 7)
+ggsave(here::here("figures",folder_name,paste0(file_prefix,"figure7_S_aureus.png")), width = 12, height = 7)
 
 
 
@@ -555,9 +580,9 @@ plot_vaccine_metric_sup(data = results_to_plot_Ecoli,
                         hrefs = c(0, -50),
                         vrefs = c(30),
                         ylim_values = c(-100, 1),
-                        with_ribbons = TRUE,
+                        with_ribbons = with_ribbons_choice_E_coli,
                         model_name = chosen_model_name)
-ggsave(here::here("figures",folder_name,"figure4_E_coli.png"), width = 12, height = 7)
+ggsave(here::here("figures",folder_name,paste0(file_prefix,"figure4_E_coli.png")), width = 12, height = 7)
 
 plot_vaccine_metric_sup(data = results_to_plot_Ecoli,
                         data_sup = results_to_plot_Ecoli_sup,
@@ -570,9 +595,9 @@ plot_vaccine_metric_sup(data = results_to_plot_Ecoli,
                         hrefs = c(0, -50),
                         vrefs = c(30),
                         ylim_values = c(-100, 1),
-                        with_ribbons = TRUE,
+                        with_ribbons = with_ribbons_choice_E_coli,
                         model_name = chosen_model_name)
-ggsave(here::here("figures",folder_name,"figureS4_E_coli.png"), width = 12, height = 7)
+ggsave(here::here("figures",folder_name,paste0(file_prefix,"figureS4_E_coli.png")), width = 12, height = 7)
 
 plot_vaccine_metric_sup(data = results_to_plot_Ecoli,
                         data_sup = results_to_plot_Ecoli_sup,
@@ -584,9 +609,9 @@ plot_vaccine_metric_sup(data = results_to_plot_Ecoli,
                         chosen_palette = chosen_palette,
                         hrefs = c(0, -50),
                         vrefs = c(30),,
-                        with_ribbons = TRUE,
+                        with_ribbons = with_ribbons_choice_E_coli,
                         model_name = chosen_model_name)
-ggsave(here::here("figures",folder_name,"figureS5_E_coli.png"), width = 12, height = 7)
+ggsave(here::here("figures",folder_name,paste0(file_prefix,"figureS5_E_coli.png")), width = 12, height = 7)
 
 plot_vaccine_metric_sup(data = results_to_plot_Ecoli,
                         data_sup = results_to_plot_Ecoli_sup,
@@ -598,9 +623,9 @@ plot_vaccine_metric_sup(data = results_to_plot_Ecoli,
                         chosen_palette = chosen_palette,
                         hrefs = c(0),
                         vrefs = c(30),
-                        with_ribbons = TRUE,
+                        with_ribbons = with_ribbons_choice_E_coli,
                         model_name = chosen_model_name)
-ggsave(here::here("figures",folder_name,"figure6_E_coli.png"), width = 12, height = 7)
+ggsave(here::here("figures",folder_name,paste0(file_prefix,"figure6_E_coli.png")), width = 12, height = 7)
 
 plot_vaccine_metric_sup(data = results_to_plot_Ecoli,
                         data_sup = results_to_plot_Ecoli_sup,
@@ -610,9 +635,9 @@ plot_vaccine_metric_sup(data = results_to_plot_Ecoli,
                         chosen_palette = chosen_palette,
                         hrefs = c(0),
                         vrefs = c(30),
-                        with_ribbons = TRUE,
+                        with_ribbons = with_ribbons_choice_E_coli,
                         model_name = chosen_model_name)
-ggsave(here::here("figures",folder_name,"figure5_E_coli.png"), width = 12, height = 5)
+ggsave(here::here("figures",folder_name,paste0(file_prefix,"figure5_E_coli.png")), width = 12, height = 5)
 
 plot_antibiotic_metric_bacteria_sup(data = results_to_plot_antibiotic_Ecoli,
                                     data_sup = results_to_plot_antibiotic_Ecoli_sup,
@@ -621,8 +646,8 @@ plot_antibiotic_metric_bacteria_sup(data = results_to_plot_antibiotic_Ecoli,
                                     chosen_shapes = shapes,
                                     chosen_palette = chosen_palette,
                                     facet_cols = 4,
-                                    with_ribbons = TRUE,
+                                    with_ribbons = with_ribbons_choice_E_coli,
                                     model_name = chosen_model_name)
 
-ggsave(here::here("figures",folder_name,"figure7_E_coli.png"), width = 12, height = 7)
+ggsave(here::here("figures",folder_name,paste0(file_prefix,"figure7_E_coli.png")), width = 12, height = 7)
 
