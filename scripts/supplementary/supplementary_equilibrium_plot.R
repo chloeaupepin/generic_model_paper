@@ -237,7 +237,7 @@ out %>%
   theme_bw()+theme(legend.position = "none")+
   ylim(0,NA)
 
-ggsave("eq_S_aureus.png", width = 12, height = 3 )
+ggsave(here::here("figures","extra_5","eq_S_aureus.png"), width = 12, height = 3)
 
 #### E. coli ####
 # E_coli
@@ -259,9 +259,9 @@ out <- ode(
         inccumIsnv=0, inccumIsrnv=0, inccumIrnv=0, inccumIrsnv=0, inccumIsv=0,inccumIsrv=0, inccumIrv=0,inccumIrsv=0,
         inccumSelectionOfResistantForNonVaccinated=0,inccumSelectionOfResistantForVaccinated=0),
   times = seq(from=0,to=1000000,by=100),
-  func = SCISsrV.model_4,
+  func = SCISsrV.model_5,
   parms = c(betaC = Bacteria_params$betaC,#0.0152625495139866,
-            f = Bacteria_params$f, #0.94,#0.915346433742047,
+            f = 1, #Bacteria_params$f, #0.94,#0.915346433742047,
             as = Bacteria_params$as,#3.46118721459732e-06,
             ar = Bacteria_params$ar, #3.46118721459732e-06,
             betaI = 0, 
@@ -277,10 +277,10 @@ out <- ode(
             # prob_minority_strain_when_infected = 0.1,
             prob_specific_exposure_r = Bacteria_params$prob_specific_exposure_r,
             time_until_decolo_by_specific_ATB_r = Bacteria_params$time_until_decolo_by_specific_ATB_r,
-            sigmaC1 = 1e-1, 
-            sigmaI1 = 1e-1,
-            sigmaC1r = 1e-1, 
-            sigmaI1r = 1e-1,
+            sigmaC1 = 1.1e-1, 
+            sigmaI1 = 1.1e-1,
+            sigmaC1r = 1.1e-1, 
+            sigmaI1r = 1.1e-1,
             b = 0.00055,
             b0 = 4*0.00055,
             gammaA_s = Bacteria_params$gammaA_s,
@@ -317,7 +317,7 @@ out %>%
   theme_bw()+theme(legend.position = "none")+
   ylim(0,NA)
 
-ggsave("eq_E_coli.png", width = 12, height = 3)
+ggsave(here::here("figures","extra_5","eq_E_coli.png"), width = 12, height = 3)
 
 #### S. aureus avec 500 bactéries ####
 ## Choose bacteria 

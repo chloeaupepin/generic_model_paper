@@ -12,7 +12,7 @@ plan(multisession, workers = n_cores)
 
 set.seed(123)  # global seed for reproducibility
 
-model = SCISsrV.model_4
+model = SCISsrV.model_5
 
 #### Helpers ####
 
@@ -373,13 +373,13 @@ if(bacteria == "S_aureus"){
     "time_until_decolo_by_specific_ATB_r"
   )
 } else {
-  # Bacteria_params$f = 1
+  Bacteria_params$f = 1
   Bacteria_params$sigmaC1 = 1.1e-1
   Bacteria_params$sigmaI1 = 1.1e-1
   Bacteria_params$sigmaC1r = 1.1e-1
   Bacteria_params$sigmaI1r = 1.1e-1
-  # Bacteria_params$b = 0.00056
-  # Bacteria_params$b0 = 4*Bacteria_params$b
+  Bacteria_params$b = 0.00056
+  Bacteria_params$b0 = 4*Bacteria_params$b
   
   cols_to_noise <- c(	
     "betaC","as","time_until_recovery_without_ATB_s","dps",
@@ -442,7 +442,7 @@ if(bacteria =="E_coli"){
     filter(prop_res > 0.06*1/2 & prop_res < 0.06*3/2)
 }
 
-save(eq_results, file = here::here("files",folder_name,"equilibrium_results_Csr_Crs_nequal500_red.RData"))
+save(eq_results, file = here::here("files",folder_name,"equilibrium_results_Csr_Crs_nequal500_red_5.RData"))
 
 
 #### Simulation de un an sans vaccin et un an avec vaccin ####
@@ -520,7 +520,7 @@ results_to_plot <- results_with_outputs %>%
   ) %>%
   mutate(population = factor(population, levels = c("Total population", "Vaccinated", "Non-vaccinated")))
 
-save(results_to_plot, file = here::here("files",folder_name,"results_to_plot_Csr_Crs_nequal500_red.RData"))
+save(results_to_plot, file = here::here("files",folder_name,"results_to_plot_Csr_Crs_nequal500_red_5.RData"))
 
 #### Run antibiotic impact ####
 #### Load previous analysis equilibrium ####
@@ -581,7 +581,7 @@ results_with_outputs_antibiotic <- results %>%
          prc_red_prevCr = prc_red(res_1y_wov_Crnv, res_1y_wov_antibiotic_Crnv ),
          prc_red_prop_prevCr = prc_red(res_1y_wov_prop_prevCr, res_1y_wov_antibiotic_prop_prevCr ))
 
-save(results_with_outputs_antibiotic, file = here::here("files",folder_name,"results_with_outputs_antibiotic_Csr_Crs_nequal500_red.RData"))
+save(results_with_outputs_antibiotic, file = here::here("files",folder_name,"results_with_outputs_antibiotic_Csr_Crs_nequal500_red_5.RData"))
 
 # Compute statistics
 results_to_plot_antibiotic <- results_with_outputs_antibiotic %>%
@@ -593,6 +593,6 @@ results_to_plot_antibiotic <- results_with_outputs_antibiotic %>%
             .groups = "drop")
 
 
-save(results_to_plot_antibiotic, file = here::here("files",folder_name,"results_to_plot_antibiotic_Csr_Crs_nequal500_red.RData"))
+save(results_to_plot_antibiotic, file = here::here("files",folder_name,"results_to_plot_antibiotic_Csr_Crs_nequal500_red_5.RData"))
 cat("done and saved")
 

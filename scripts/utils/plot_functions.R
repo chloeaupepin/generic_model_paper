@@ -170,7 +170,8 @@ plot_vaccine_metric_sup <- function(data,
                                 ylim_values = NULL,
                                 hrefs,
                                 vrefs,
-                                with_ribbons = FALSE){
+                                with_ribbons = FALSE,
+                                model_name = "Model with extra compartments"){
   
   data_to_plot <- data %>%
     filter(metric_name %in% metric_name_to_plot, 
@@ -206,8 +207,8 @@ plot_vaccine_metric_sup <- function(data,
                    labeller = labeller(name_renamed = as_labeller(chosen_vaccine_labeller, default = label_parsed))) 
       else facet_nested(~ name_renamed, labeller = labeller(name_renamed = as_labeller(chosen_vaccine_labeller, default = label_parsed)))}+
     scale_x_continuous(breaks = c(10, 30, 50, 70, 90))+
-    scale_shape_manual(values = c(chosen_shape, 24),labels = c("Our model","Model with extra compartments"))+
-    scale_linetype_manual(values = c("dashed","solid"),labels = c("Our model","Model with extra compartments"))+
+    scale_shape_manual(values = c(chosen_shape, 24),labels = c("Our model",model_name))+
+    scale_linetype_manual(values = c("dashed","solid"),labels = c("Our model",model_name))+
     scale_color_manual(values = chosen_palette)+
     scale_fill_manual(values = chosen_palette)+
     labs(x = "Vaccine coverage (%)",
@@ -509,7 +510,8 @@ plot_antibiotic_metric_bacteria_sup <- function(data,data_sup,
                                                 chosen_palette,
                                                  facet_cols = NULL,
                                                  chosen_output_labeller = output_labeller,
-                                                with_ribbons = FALSE){
+                                                with_ribbons = FALSE,
+                                                model_name = "Model with extra compartments"){
   
   data_to_plot <- data %>%
     mutate(Bacteria = "1") %>%
@@ -538,8 +540,8 @@ plot_antibiotic_metric_bacteria_sup <- function(data,data_sup,
     {if (length(metric_name_to_plot)>1) facet_wrap(~ metric_name, ncol = facet_cols, 
                                                    labeller = as_labeller(chosen_output_labeller)) else NULL}+
     scale_x_continuous(breaks = c(10, 30, 50, 70, 90))+
-    scale_shape_manual(values = c(chosen_shape, 24),labels = c("Our model","Model with extra compartments"))+
-    scale_linetype_manual(values = c("dashed","solid"),labels = c("Our model","Model with extra compartments"))+
+    scale_shape_manual(values = c(chosen_shape, 24),labels = c("Our model",model_name))+
+    scale_linetype_manual(values = c("dashed","solid"),labels = c("Our model",model_name))+
     labs(
       x = "Reduction percentage of bystander antibiotic exposure (%)",
       y = "Relative change due to\nbystander antibiotic reduction (%)",
