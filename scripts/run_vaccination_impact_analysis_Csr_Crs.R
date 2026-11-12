@@ -7,14 +7,14 @@ library(stringr)
 
 source(here::here("scripts", "model.R"))
 
-n_cores = parallel::detectCores() - 3
+n_cores = parallel::detectCores() - 2
 plan(multisession, workers = n_cores)
 
 set.seed(123)  # global seed for reproducibility
 
 #### Define settings ####
 ## Choose model
-model = SCISsrV.model_5
+model_name =   "growth_competition" #  "treatment_competition" #
 
 ## Population size
 population_size = 100000
@@ -349,7 +349,9 @@ compute_statistics <- function(results, chosen_cols){
 Bacteria_params = read.csv(here::here("files",file_name)) 
 
 # Modify bacteria params according to chosen model for each bacteria and define file names 
-if(bacteria=="S_aureus" & model == SCISsrV.model_4){
+if(bacteria=="S_aureus" & model_name == "treatment_competition"){
+  model = SCISsrV.model_4
+  
   Bacteria_params$sigmaC1 = 3
   Bacteria_params$sigmaI1 = 0
   Bacteria_params$sigmaC1r = 3
@@ -359,7 +361,9 @@ if(bacteria=="S_aureus" & model == SCISsrV.model_4){
   results_to_plot_name = "results_to_plot_Csr_Crs_nequal500.RData"
   results_to_plot_antibiotic_name = "results_to_plot_antibiotic_Csr_Crs_nequal500.RData"
   
-}else if(bacteria=="S_aureus" & model == SCISsrV.model_5){
+}else if(bacteria=="S_aureus" & model_name == "growth_competition"){
+  model = SCISsrV.model_5
+  
   Bacteria_params$f = 1
   Bacteria_params$sigmaC1 = 1
   Bacteria_params$sigmaI1 = 0
@@ -373,7 +377,9 @@ if(bacteria=="S_aureus" & model == SCISsrV.model_4){
   results_to_plot_antibiotic_name = "results_to_plot_antibiotic_Csr_Crs_nequal1_5.RData"
   
   
-}else if(bacteria=="E_coli" & model == SCISsrV.model_4){
+}else if(bacteria=="E_coli" & model_name == "treatment_competition"){
+  model = SCISsrV.model_4
+  
   Bacteria_params$sigmaC1 = 1.1e-1
   Bacteria_params$sigmaI1 = 1.1e-1
   Bacteria_params$sigmaC1r = 1.1e-1
@@ -384,7 +390,9 @@ if(bacteria=="S_aureus" & model == SCISsrV.model_4){
   results_to_plot_antibiotic_name = "results_to_plot_antibiotic_Csr_Crs_nequal500_red.RData"
   
   
-}else if(bacteria=="E_coli" & model == SCISsrV.model_5){
+}else if(bacteria=="E_coli" & model_name == "growth_competition"){
+  model = SCISsrV.model_5
+  
   Bacteria_params$f = 1
   Bacteria_params$sigmaC1 = 1.1e-1
   Bacteria_params$sigmaI1 = 1.1e-1
@@ -453,7 +461,7 @@ df_bacteria <- df_bacteria %>%
 
 
 #Keep only first bacteria for S. aureus and model with growth competition
-if(bacteria=="S_aureus" & model == SCISsrV.model_5){
+if(bacteria=="S_aureus" & model_name == "growth_competition"){
   df_bacteria <- df_bacteria %>% filter(bacteria_id == 0)
 }
 
@@ -598,25 +606,27 @@ results <- df_for_antibiotic_simulations %>%
 #### Results manipulation ####
 # Compute resistance change
 results_with_outputs_antibiotic <- results %>%
-  mutate(res_1y_wov_inccumIrnv_sel = res_1y_wov_inccumIrnv + res_1y_wov_inccumSelectionOfResistantForNonVaccinated,
-         res_1y_wov_antibiotic_inccumIrnv_sel = res_1y_wov_antibiotic_inccumIrnv + res_1y_wov_antibiotic_inccumSelectionOfResistantForNonVaccinated) %>%
+  mutate(res_1y_wov_inccumIrnv_sel = res_1y_wov_inccumIrnv + res_1y_wov_inccumIrsnv + res_1y_wov_inccumSelectionOfResistantForNonVaccinated,
+         res_1y_wov_antibiotic_inccumIrnv_sel = res_1y_wov_antibiotic_inccumIrnv +res_1y_wov_antibiotic_inccumIrsnv + res_1y_wov_antibiotic_inccumSelectionOfResistantForNonVaccinated) %>%
   
-  mutate(res_1y_wov_inccumI = res_1y_wov_inccumIrnv_sel+res_1y_wov_inccumIsnv,
-         res_1y_wov_antibiotic_inccumI = res_1y_wov_antibiotic_inccumIrnv_sel+res_1y_wov_antibiotic_inccumIsnv) %>%
+  mutate(res_1y_wov_inccumI = res_1y_wov_inccumIrnv_sel+res_1y_wov_inccumIsnv+res_1y_wov_inccumIsrnv,
+         res_1y_wov_antibiotic_inccumI = res_1y_wov_antibiotic_inccumIrnv_sel+res_1y_wov_antibiotic_inccumIsnv+res_1y_wov_antibiotic_inccumIsrnv) %>%
   
-  mutate(res_1y_wov_prop_prevCr = (res_1y_wov_Crnv)/(res_1y_wov_Crnv + res_1y_wov_Csnv),
-         res_1y_wov_antibiotic_prop_prevCr = (res_1y_wov_antibiotic_Crnv)/(res_1y_wov_antibiotic_Crnv + res_1y_wov_antibiotic_Csnv)) %>%
+  mutate(res_1y_wov_prop_prevCr = (res_1y_wov_Crnv + res_1y_wov_Crsnv)/(res_1y_wov_Crnv + res_1y_wov_Csnv + res_1y_wov_Crsnv + res_1y_wov_Csrnv),
+         res_1y_wov_antibiotic_prop_prevCr = (res_1y_wov_antibiotic_Crnv + res_1y_wov_antibiotic_Crsnv)/(res_1y_wov_antibiotic_Crnv + res_1y_wov_antibiotic_Csnv + res_1y_wov_antibiotic_Crsnv + res_1y_wov_antibiotic_Csrnv)) %>%
   
-  mutate(res_1y_wov_prop_inccumIr = (res_1y_wov_inccumIrnv)/(res_1y_wov_inccumIrnv + res_1y_wov_inccumIsnv),
-         res_1y_wov_antibiotic_prop_inccumIr = (res_1y_wov_antibiotic_inccumIrnv)/(res_1y_wov_antibiotic_inccumIrnv + res_1y_wov_antibiotic_inccumIsnv)) %>%
+  # mutate(res_1y_wov_prop_inccumIr = (res_1y_wov_inccumIrnv + res_1y_wov_inccumIrsnv)/(res_1y_wov_inccumIrnv + res_1y_wov_inccumIsnv + res_1y_wov_inccumIrsnv + res_1y_wov_inccumIsrnv),
+  #        res_1y_wov_antibiotic_prop_inccumIr = (res_1y_wov_antibiotic_inccumIrnv + res_1y_wov_antibiotic_inccumIrsnv)/(res_1y_wov_antibiotic_inccumIrnv + res_1y_wov_antibiotic_inccumIsnv + res_1y_wov_antibiotic_inccumIrsnv + res_1y_wov_antibiotic_inccumIsrnv)) %>%
+  mutate(res_1y_wov_prop_inccumIr = res_1y_wov_inccumIrnv_sel/res_1y_wov_inccumI,
+         res_1y_wov_antibiotic_prop_inccumIr = res_1y_wov_antibiotic_inccumIrnv_sel/res_1y_wov_antibiotic_inccumI) %>%
   
   mutate(prc_red_inccumI = prc_red(res_1y_wov_inccumI,res_1y_wov_antibiotic_inccumI),
          prc_red_inccumIr = prc_red(res_1y_wov_inccumIrnv_sel,res_1y_wov_antibiotic_inccumIrnv_sel),
-         prc_red_inccumIs = prc_red(res_1y_wov_inccumIsnv,res_1y_wov_antibiotic_inccumIsnv),
+         prc_red_inccumIs = prc_red(res_1y_wov_inccumIsnv + res_1y_wov_inccumIsrnv ,res_1y_wov_antibiotic_inccumIsnv + res_1y_wov_antibiotic_inccumIsrnv),
          prc_red_prop_inccumIr = prc_red(res_1y_wov_prop_inccumIr, res_1y_wov_antibiotic_prop_inccumIr),
-         prc_red_prevC = prc_red(res_1y_wov_Crnv + res_1y_wov_Csnv, res_1y_wov_antibiotic_Crnv + res_1y_wov_antibiotic_Csnv), 
-         prc_red_prevCs = prc_red(res_1y_wov_Csnv, res_1y_wov_antibiotic_Csnv),
-         prc_red_prevCr = prc_red(res_1y_wov_Crnv, res_1y_wov_antibiotic_Crnv ),
+         prc_red_prevC = prc_red(res_1y_wov_Crnv + res_1y_wov_Crsnv + res_1y_wov_Csnv + res_1y_wov_Csrnv, res_1y_wov_antibiotic_Crnv + res_1y_wov_antibiotic_Csnv + res_1y_wov_antibiotic_Crsnv + res_1y_wov_antibiotic_Csrnv), 
+         prc_red_prevCs = prc_red(res_1y_wov_Csnv+res_1y_wov_Csrnv, res_1y_wov_antibiotic_Csnv+res_1y_wov_antibiotic_Csrnv),
+         prc_red_prevCr = prc_red(res_1y_wov_Crnv+res_1y_wov_Crsnv, res_1y_wov_antibiotic_Crnv+res_1y_wov_antibiotic_Crsnv ),
          prc_red_prop_prevCr = prc_red(res_1y_wov_prop_prevCr, res_1y_wov_antibiotic_prop_prevCr ))
 
 # Compute statistics
@@ -629,6 +639,6 @@ results_to_plot_antibiotic <- results_with_outputs_antibiotic %>%
             .groups = "drop")
 
 
-save(results_to_plot_antibiotic, file = here::here("files",folder_name,results_to_plot_antibiotic))
+save(results_to_plot_antibiotic, file = here::here("files",folder_name,results_to_plot_antibiotic_name))
 cat("done and saved")
 
